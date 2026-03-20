@@ -146,6 +146,40 @@ async def get_hr_metrics(current_user=Depends(RoleChecker([RoleEnum.HR]))):
         top_skills_missing=["React Native", "Kubernetes", "GraphQL"]
     )
 
+
+@app.get("/hr/analytics-extended", tags=["HR Analytics"])
+async def get_extended_analytics(current_user=Depends(RoleChecker([RoleEnum.HR]))):
+    """
+    Advanced HR Analytics — distribution and performance data for charts.
+    """
+    return {
+        "skill_gap_distribution": [
+            {"name": "Known", "value": 45, "color": "#00f3ff"},
+            {"name": "Partial", "value": 30, "color": "#bc13fe"},
+            {"name": "Missing", "value": 25, "color": "#ff00e5"}
+        ],
+        "readiness_trend": [
+            {"month": "Jan", "score": 65},
+            {"month": "Feb", "score": 68},
+            {"month": "Mar", "score": 75},
+            {"month": "Apr", "score": 82},
+            {"month": "May", "score": 78},
+            {"month": "Jun", "score": 85}
+        ],
+        "role_performance": [
+            {"role": "Frontend", "readiness": 82, "candidates": 15},
+            {"role": "Backend", "readiness": 74, "candidates": 12},
+            {"role": "Fullstack", "readiness": 79, "candidates": 8},
+            {"role": "DevOps", "readiness": 68, "candidates": 7}
+        ],
+        "time_saved_by_role": [
+            {"role": "Frontend", "saved": 450},
+            {"role": "Backend", "saved": 380},
+            {"role": "Fullstack", "saved": 290},
+            {"role": "DevOps", "saved": 120}
+        ]
+    }
+
 # Initialize services
 skill_extractor = SkillExtractor()
 gap_analyzer = SkillGapAnalyzer()

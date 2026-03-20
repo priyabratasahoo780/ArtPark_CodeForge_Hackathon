@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FiUsers, FiBarChart2, FiClock, FiCheckCircle, FiAlertTriangle, FiPlus, FiTrash2, FiSearch } from 'react-icons/fi'
+import AnalyticsPanel from './AnalyticsPanel'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -12,6 +9,7 @@ const HRDashboard = ({ auth }) => {
   const [analysisResults, setAnalysisResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showAnalytics, setShowAnalytics] = useState(false)
 
   useEffect(() => {
     fetchMetrics()
@@ -83,13 +81,44 @@ const HRDashboard = ({ auth }) => {
           </h2>
           <p className="text-sm text-gray-400 mt-1">Multi-candidate analysis & recruitment metrics</p>
         </div>
-        <div className="text-right">
+        <div className="text-right flex flex-col items-end gap-3">
+          <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+            <button 
+              onClick={() => setShowAnalytics(false)}
+              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!showAnalytics ? 'bg-[#bc13fe] text-white shadow-lg shadow-[#bc13fe]/20' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              Pipeline
+            </button>
+            <button 
+              onClick={() => setShowAnalytics(true)}
+              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showAnalytics ? 'bg-[#ff00e5] text-white shadow-lg shadow-[#ff00e5]/20' : 'text-gray-500 hover:text-gray-300'}`}
+            >
+              Analytics
+            </button>
+          </div>
           <p className="text-[10px] font-black uppercase text-[#bc13fe] tracking-tighter glow-text-purple">Security Level: HR Admin</p>
-          <p className="text-xs text-gray-500 font-mono">CODEFORGE_OS_v4.2</p>
         </div>
       </div>
 
-      {/* Metrics Row */}
+      <AnimatePresence mode="wait">
+        {showAnalytics ? (
+          <motion.div
+            key="analytics"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <AnalyticsPanel auth={auth} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="pipeline"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-8"
+          >
+            {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: 'Total Candidates', value: metrics?.total_candidates || '0', icon: <FiUsers />, color: '#00f3ff' },
@@ -248,6 +277,9 @@ const HRDashboard = ({ auth }) => {
           )}
         </div>
       </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
