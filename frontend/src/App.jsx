@@ -13,6 +13,7 @@ import TimeSavedAnalytics from './components/TimeSavedAnalytics'
 import CandidateBenchmark from './components/CandidateBenchmark'
 import ResumeFeedback from './components/ResumeFeedback'
 import Login from './components/Login'
+import ProtectedRoute from './components/ProtectedRoute'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -220,17 +221,19 @@ function App() {
               {/* Dynamic Content */}
               <AnimatePresence mode="wait">
                 {activeTab === 'benchmark' && (
-                  <motion.div 
-                    key="benchmark"
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                    className="card"
-                  >
-                    <h2 className="text-2xl font-black text-white mb-2 uppercase italic tracking-wider">
-                      🏆 Candidate <span className="text-[#00f3ff]">Benchmark</span>
-                    </h2>
-                    <p className="text-sm text-gray-400 mb-8 border-l-2 border-[#00f3ff] pl-4">Multi-candidate ranking & comparison</p>
-                    <CandidateBenchmark />
-                  </motion.div>
+                  <ProtectedRoute allowedRoles={['HR']} auth={auth}>
+                    <motion.div 
+                      key="benchmark"
+                      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                      className="card"
+                    >
+                      <h2 className="text-2xl font-black text-white mb-2 uppercase italic tracking-wider">
+                        🏆 Candidate <span className="text-[#00f3ff]">Benchmark</span>
+                      </h2>
+                      <p className="text-sm text-gray-400 mb-8 border-l-2 border-[#00f3ff] pl-4">Multi-candidate ranking & comparison</p>
+                      <CandidateBenchmark />
+                    </motion.div>
+                  </ProtectedRoute>
                 )}
 
                 {(activeTab === 'upload' || (!analysisResults && activeTab !== 'benchmark')) && (

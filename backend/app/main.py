@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
@@ -16,6 +16,8 @@ from app.services.resume_benchmarker import ResumeBenchmarker
 from app.services.feedback_generator import ResumeFeedbackGenerator
 from app.services.domain_classifier import DomainClassifier
 from app.routes import auth
+from app.services.auth_service import auth_service, RoleChecker
+from app.models.user import RoleEnum
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +41,16 @@ app.add_middleware(
 
 # Include Auth Router
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+
+# Protected HR Route Example
+@app.get("/hr/stats")
+async def get_hr_stats(current_user=Depends(RoleChecker([RoleEnum.HR]))):
+    return {
+        "message": "Welcome HR Manager",
+        "total_onboarded": 125,
+        "avg_readiness": 82.5,
+        "active_paths": 42
+    }
 
 # Initialize services
 skill_extractor = SkillExtractor()

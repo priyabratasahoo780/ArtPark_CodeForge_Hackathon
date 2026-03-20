@@ -4,15 +4,17 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict
 from passlib.context import CryptContext
 import jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer
 
-from app.models.user import UserCreate, UserInDB
+from app.models.user import UserCreate, UserInDB, RoleEnum
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "super_secret_key_change_me_in_production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login/token")
 
 # Use a local JSON file in datasets to mock a database for incremental implementation
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "datasets", "users.json")
@@ -80,5 +82,36 @@ class AuthService:
         self._save_users(users)
         
         return db_user
+
+    async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> UserInDB:
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            email: str = payload.get("sub")
+            if email is None:
+                raise credentials_exception
+        except jwt.PyJWTError:
+            raise credentials_exception
+            
+        user = self.get_user_by_email(email)
+        if user is None:
+            raise credentials_exception
+        return user
+
+class RoleChecker:
+    def __init__(self, allowed_roles: list[RoleEnum]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, user: UserInDB = Depends(auth_service.get_current_user)):
+        if user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operation not permitted"
+            )
+        return user
 
 auth_service = AuthService()
