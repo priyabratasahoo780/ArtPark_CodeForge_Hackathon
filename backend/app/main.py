@@ -664,7 +664,7 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
 
         # Step 4b: Generate resume feedback
         logger.info("Generating actionable resume feedback...")
-        resume_feedback = feedback_generator.generate_feedback(resume_skills_full, effective_required_skills, gap_analysis)
+        resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
 
         # Step 4c: Career Path Predictions
         logger.info("Predicting future career paths...")
