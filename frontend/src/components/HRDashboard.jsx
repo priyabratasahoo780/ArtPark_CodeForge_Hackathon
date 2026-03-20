@@ -1,3 +1,7 @@
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiUsers, FiBarChart2, FiClock, FiCheckCircle, FiPlus, FiTrash2, FiSearch } from 'react-icons/fi'
 import AnalyticsPanel from './AnalyticsPanel'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -10,9 +14,19 @@ const HRDashboard = ({ auth }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showAnalytics, setShowAnalytics] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(new Date())
 
   useEffect(() => {
     fetchMetrics()
+    
+    // Live Polling every 30 seconds
+    const interval = setInterval(() => {
+      setIsSyncing(true)
+      fetchMetrics()
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const fetchMetrics = async () => {
@@ -21,8 +35,11 @@ const HRDashboard = ({ auth }) => {
         headers: { 'Authorization': `Bearer ${auth.token}` }
       })
       setMetrics(resp.data)
+      setLastUpdated(new Date())
     } catch (err) {
       console.error('Error fetching metrics:', err)
+    } finally {
+      setIsSyncing(false)
     }
   }
 
@@ -81,7 +98,13 @@ const HRDashboard = ({ auth }) => {
           </h2>
           <p className="text-sm text-gray-400 mt-1">Multi-candidate analysis & recruitment metrics</p>
         </div>
-        <div className="text-right flex flex-col items-end gap-3">
+        <div className="text-right flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+            <FiClock className={`text-[10px] ${isSyncing ? 'text-[#bc13fe] animate-spin' : 'text-gray-500'}`} />
+            <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-none">
+              Live Sync: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          </div>
           <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
             <button 
               onClick={() => setShowAnalytics(false)}

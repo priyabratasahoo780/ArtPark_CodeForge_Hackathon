@@ -105,3 +105,21 @@ body {
 .loading {
   @apply animate-pulse bg-slate-800;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Global Typography Boost */
+body {
+  font-size: 15px; /* Bumped from default */
+}
+
+.glass-card {
+  @apply bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-3xl p-6 transition-all;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}

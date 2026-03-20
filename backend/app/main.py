@@ -249,6 +249,7 @@ class OnboardingResponse(BaseModel):
     learning_path: Dict
     reasoning_trace: Dict
     resume_feedback: List[Dict]
+    efficiency_metrics: Optional[Dict] = None
 
 
 class ProgressUpdateRequest(BaseModel):
@@ -613,6 +614,13 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         logger.info("Generating actionable resume feedback...")
         resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
 
+        # Step 4c: Calculate efficiency metrics (Feature 7)
+        logger.info("Calculating time saved analytics...")
+        efficiency_metrics = time_analytics.calculate(
+            gap_analysis=gap_analysis,
+            learning_path=learning_path
+        )
+
         # Step 5: Generate reasoning trace
         logger.info("Classifying domain and building reasoning trace...")
         domain_result = domain_classifier.classify_domain(request.resume_text + " " + request.job_description_text)
@@ -670,7 +678,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             gap_analysis=gap_analysis,
             learning_path=learning_path,
             reasoning_trace=reasoning_trace,
-            resume_feedback=resume_feedback
+            resume_feedback=resume_feedback,
+            efficiency_metrics=efficiency_metrics
         )
     except HTTPException:
         raise

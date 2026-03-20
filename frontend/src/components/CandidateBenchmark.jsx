@@ -14,7 +14,7 @@ const TIER_CONFIG = {
 
 const EMPTY_CANDIDATE = { name: '', resumeText: '' }
 
-export default function CandidateBenchmark() {
+export default function CandidateBenchmark({ auth }) {
   const [jdText, setJdText] = useState('')
   const [candidates, setCandidates] = useState([
     { ...EMPTY_CANDIDATE, name: 'Candidate Alpha' },
@@ -23,6 +23,7 @@ export default function CandidateBenchmark() {
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [isSyncing, setIsSyncing] = useState(false)
 
   const addCandidate = () => {
     if (candidates.length >= 10) return
@@ -39,14 +40,30 @@ export default function CandidateBenchmark() {
       const resp = await axios.post(`${API_BASE_URL}/benchmark/candidates`, {
         job_description_text: jdText,
         candidates: valid.map(c => ({ name: c.name || 'Unknown Unit', resume_text: c.resumeText })),
+      }, {
+        headers: { Authorization: `Bearer ${auth?.token}` }
       })
       setResults(resp.data)
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'Benchmarking sequence failed')
     } finally {
       setLoading(false)
+      setIsSyncing(false)
     }
   }
+
+  // Live Auto-Benchmark
+  React.useEffect(() => {
+    const valid = candidates.filter(c => c.resumeText.trim().length >= 10)
+    if (!jdText.trim() || valid.length < 2) return
+
+    setIsSyncing(true)
+    const timer = setTimeout(() => {
+      handleBenchmark()
+    }, 2500) // Slightly longer debounce for heavy benchmarking
+
+    return () => clearTimeout(timer)
+  }, [jdText, candidates])
 
   return (
     <div className="space-y-10">
@@ -73,8 +90,8 @@ export default function CandidateBenchmark() {
             disabled={loading}
             className="w-full py-4 bg-gradient-to-r from-[#00f3ff] to-[#00a8ff] text-[#0a0a0c] font-black rounded-2xl uppercase tracking-[0.2em] text-xs shadow-lg disabled:opacity-30 transition-all flex items-center justify-center gap-2"
           >
-            {loading ? <FiZap className="animate-spin" /> : <FiAward />}
-            {loading ? 'Processing...' : 'Execute Benchmark'}
+            {loading || isSyncing ? <FiZap className="animate-spin" /> : <FiAward />}
+            {loading || isSyncing ? 'Synchronizing Profiles...' : 'Execute Benchmark'}
           </motion.button>
         </motion.div>
 

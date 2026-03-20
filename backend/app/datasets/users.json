@@ -1,0 +1,17 @@
+{
+  "hr@codeforge.ai": {
+    "email": "hr@codeforge.ai",
+    "role": "HR",
+    "hashed_password": "$pbkdf2-sha256$29000$dY7RGiOkFGKslZIyZowxhg$GcE51uYE6Q2lVr1FGEXf0nr4jFuDXAGilfP6KMr8XYM"
+  },
+  "priyabrata.sahoo.cg@gmail.com": {
+    "email": "priyabrata.sahoo.cg@gmail.com",
+    "role": "USER",
+    "hashed_password": "$pbkdf2-sha256$29000$wVirVcq5txZCKOX8n7O29g$YD.sS.Y6.eZN.VvL8znGe/v3pTUWLWI6FWdHpDp8YRw"
+  },
+  "xyz@gmail.com": {
+    "email": "xyz@gmail.com",
+    "role": "HR",
+    "hashed_password": "$pbkdf2-sha256$29000$1No759w7p/SekzImJGRMSQ$6BQgmG5wvtbQJbOiWtUvnOgX3UW80aqOacK9X6FQ9sE"
+  }
+}
