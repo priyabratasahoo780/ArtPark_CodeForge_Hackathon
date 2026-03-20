@@ -10,6 +10,23 @@
   --dark-surface: #121216;
   --glass-surface: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
+  
+  /* Role-based overrides will happen here */
+  --primary-glow: var(--neon-purple);
+  --secondary-glow: var(--neon-cyan);
+  --accent-color: var(--neon-pink);
+}
+
+.role-hr {
+  --primary-glow: #3b82f6;
+  --secondary-glow: #60a5fa;
+  --accent-color: #93c5fd;
+}
+
+.role-user {
+  --primary-glow: #bc13fe;
+  --secondary-glow: #00f3ff;
+  --accent-color: #ff00e5;
 }
 
 /* Custom styles */
@@ -31,10 +48,22 @@ body {
 
 .glass-card {
   @apply bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 transition-all;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .card {
-  @apply glass-card hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.05)];
+  @apply glass-card hover:bg-[rgba(255,255,255,0.05)];
+  border-left: 2px solid transparent;
+}
+
+.role-hr .card:hover {
+  border-left-color: var(--secondary-glow);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.role-user .card:hover {
+  border-left-color: var(--primary-glow);
+  box-shadow: 0 0 20px rgba(188, 19, 254, 0.15);
 }
 
 .skill-badge {

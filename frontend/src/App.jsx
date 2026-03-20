@@ -134,7 +134,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative">
+    <div className={`min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative ${auth.role === 'HR' ? 'role-hr' : 'role-user'}`}>
       {/* Background Decorative Blurs */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#bc13fe]/10 blur-[120px] rounded-full animate-pulse"></div>

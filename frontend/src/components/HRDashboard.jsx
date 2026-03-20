@@ -121,16 +121,17 @@ const HRDashboard = ({ auth }) => {
             {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: 'Total Candidates', value: metrics?.total_candidates || '0', icon: <FiUsers />, color: '#00f3ff' },
-          { label: 'Avg Readiness', value: `${metrics?.avg_readiness_score || '0'}%`, icon: <FiBarChart2 />, color: '#bc13fe' },
-          { label: 'Time Saved (hrs)', value: metrics?.total_time_saved_hours || '0', icon: <FiClock />, color: '#00f3ff' },
-          { label: 'Active Pipelines', value: '12', icon: <FiCheckCircle />, color: '#ff00e5' },
+          { label: 'Total Candidates', value: metrics?.total_candidates || '0', icon: <FiUsers />, color: 'var(--secondary-glow)' },
+          { label: 'Avg Readiness', value: `${metrics?.avg_readiness_score || '0'}%`, icon: <FiBarChart2 />, color: 'var(--primary-glow)' },
+          { label: 'Time Saved (hrs)', value: metrics?.total_time_saved_hours || '0', icon: <FiClock />, color: 'var(--secondary-glow)' },
+          { label: 'Active Pipelines', value: '12', icon: <FiCheckCircle />, color: 'var(--accent-color)' },
         ].map((stat, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+            whileHover={{ y: -5, transition: { duration: 0.2 } }}
             className="glass-card p-6 border-l-4"
             style={{ borderColor: stat.color }}
           >

@@ -106,38 +106,40 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6 border-l-4 border-[#00f3ff]">
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Target Readiness</p>
-          <div className="flex items-end gap-2">
-            <span className="text-3xl font-black text-white">{analysisResults.gap_analysis.statistics.readiness_score}%</span>
-            <span className="text-xs font-bold text-[#00f3ff] mb-1">↑ Optimized</span>
-          </div>
-          <div className="w-full bg-white/5 h-1.5 rounded-full mt-4 overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${analysisResults.gap_analysis.statistics.readiness_score}%` }}
-              className="h-full bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]"
-            />
-          </div>
-        </div>
-
-        <div className="glass-card p-6 border-l-4 border-[#bc13fe]">
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Skills to Master</p>
-          <div className="flex items-end gap-2">
-            <span className="text-3xl font-black text-white">{analysisResults.learning_path.modules.length}</span>
-            <span className="text-xs font-bold text-[#bc13fe] mb-1">Modules Left</span>
-          </div>
-          <p className="text-[10px] text-gray-400 mt-4 font-mono">Estimated time: {analysisResults.learning_path.total_duration_hours} hours</p>
-        </div>
-
-        <div className="glass-card p-6 border-l-4 border-[#ff00e5]">
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Knowledge Density</p>
-          <div className="flex items-end gap-2">
-            <span className="text-3xl font-black text-white">{analysisResults.gap_analysis.statistics.known_count}</span>
-            <span className="text-xs font-bold text-[#ff00e5] mb-1">Known Skills</span>
-          </div>
-          <p className="text-[10px] text-gray-400 mt-4 font-mono">Out of {analysisResults.gap_analysis.statistics.total_required_skills} requirements</p>
-        </div>
+        {[
+          { label: 'Target Readiness', value: `${analysisResults.gap_analysis.statistics.readiness_score}%`, sub: '↑ Optimized', color: 'var(--secondary-glow)', delay: 0 },
+          { label: 'Skills to Master', value: analysisResults.learning_path.modules.length, sub: 'Modules Left', color: 'var(--primary-glow)', delay: 0.1 },
+          { label: 'Knowledge Density', value: analysisResults.gap_analysis.statistics.known_count, sub: `Out of ${analysisResults.gap_analysis.statistics.total_required_skills} requirements`, color: 'var(--accent-color)', delay: 0.2 },
+        ].map((stat, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: stat.delay, duration: 0.5 }}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+            className="glass-card p-6 border-l-4"
+            style={{ 
+              borderColor: stat.color,
+              boxShadow: `0 0 15px ${stat.color}10`
+            }}
+          >
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+            <div className="flex items-end gap-2">
+              <span className="text-3xl font-black text-white">{stat.value}</span>
+              <span className="text-xs font-bold mb-1" style={{ color: stat.color }}>{stat.sub}</span>
+            </div>
+            {stat.label === 'Target Readiness' && (
+              <div className="w-full bg-white/5 h-1.5 rounded-full mt-4 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${analysisResults.gap_analysis.statistics.readiness_score}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="h-full bg-gradient-to-r from-[var(--secondary-glow)] to-[var(--primary-glow)] shadow-[0_0_10px_var(--secondary-glow)]"
+                />
+              </div>
+            )}
+          </motion.div>
+        ))}
       </div>
 
       {/* Main Roadmap & Progress */}
