@@ -4,6 +4,8 @@ from typing import List, Dict, Set
 from pathlib import Path
 import logging
 
+from app.services.confidence_scorer import ConfidenceScorer
+
 logger = logging.getLogger(__name__)
 
 class SkillExtractor:
@@ -14,16 +16,18 @@ class SkillExtractor:
     def __init__(self, taxonomy_path: str = None):
         """Initialize skill extractor with taxonomy."""
         if taxonomy_path is None:
-            # Default to local taxonomy
             current_dir = Path(__file__).parent.parent / "datasets" / "skills_taxonomy.json"
         else:
             current_dir = Path(taxonomy_path)
-            
+
         with open(current_dir, 'r') as f:
             self.taxonomy = json.load(f)
-        
+
         # Build skill index for faster lookup
         self.all_skills = self._build_skill_index()
+
+        # Confidence scorer (rule-based, explainable)
+        self.confidence_scorer = ConfidenceScorer()
         
     def _build_skill_index(self) -> Dict[str, Dict]:
         """Build a flat index of all skills for quick lookup."""
@@ -38,18 +42,26 @@ class SkillExtractor:
                 }
         return skills
     
-    def extract_skills_from_text(self, text: str) -> List[Dict]:
+    def extract_skills_from_text(self, text: str, resume_text: str = None) -> List[Dict]:
         """
         Extract skills from text (resume or job description).
-        Returns list of detected skills with metadata.
+
+        Args:
+            text:        The text to scan for skills (can be same as resume_text).
+            resume_text: Full resume text for confidence scoring context.
+                         If None, uses `text` as context.
+
+        Returns:
+            List of detected skills with metadata and confidence scores.
         """
         if not text:
             return []
-            
+
+        score_context = resume_text if resume_text is not None else text
         text_lower = text.lower()
         extracted = []
         seen = set()
-        
+
         # Direct skill matching
         for skill_lower, skill_data in self.all_skills.items():
             if self._skill_appears_in_text(text_lower, skill_lower, skill_data['name']):
@@ -57,15 +69,18 @@ class SkillExtractor:
                     extracted.append({
                         'name': skill_data['name'],
                         'category': skill_data['category'],
-                        'confidence': 0.95,  # Exact match has high confidence
-                        'prerequisites': skill_data['prerequisites']
+                        'prerequisites': skill_data['prerequisites'],
+                        '_match_type': 'exact',  # sentinel for scorer
                     })
                     seen.add(skill_lower)
-        
+
         # Fuzzy matching for partial matches
         fuzzy_matches = self._fuzzy_skill_matching(text_lower, seen)
         extracted.extend(fuzzy_matches)
-        
+
+        # Apply confidence scoring to all extracted skills
+        self.confidence_scorer.score_batch(extracted, score_context)
+
         return extracted
     
     def _skill_appears_in_text(self, text: str, skill_lower: str, skill_name: str) -> bool:
@@ -77,35 +92,34 @@ class SkillExtractor:
     def _fuzzy_skill_matching(self, text: str, seen: Set) -> List[Dict]:
         """
         Perform fuzzy matching for related skills or acronyms.
+        Marks matches with '_match_type': 'fuzzy' for the scorer.
         """
         fuzzy_matches = []
-        
-        # Common acronyms and abbreviations
+
         acronyms = {
             'ml': 'Machine Learning',
-            'ai': 'Machine Learning',  # Related to AI
-            'nlp': 'Deep Learning',  # NLP uses deep learning
+            'ai': 'Machine Learning',
+            'nlp': 'Deep Learning',
             'oop': 'Programming Languages',
             'rest': 'Backend Knowledge',
             'http': 'Backend Knowledge',
         }
-        
+
         for acronym, category in acronyms.items():
             if acronym in text and acronym not in seen:
                 pattern = r'\b' + acronym + r'\b'
                 if re.search(pattern, text, re.IGNORECASE):
-                    # Try to find exact skill match for category
                     for skill_lower, skill_data in self.all_skills.items():
                         if category.lower() in skill_data['category'].lower():
                             fuzzy_matches.append({
                                 'name': skill_data['name'],
                                 'category': skill_data['category'],
-                                'confidence': 0.70,  # Fuzzy match has lower confidence
-                                'prerequisites': skill_data['prerequisites']
+                                'prerequisites': skill_data['prerequisites'],
+                                '_match_type': 'fuzzy',  # sentinel for scorer
                             })
                             break
                     seen.add(acronym)
-        
+
         return fuzzy_matches
     
     def infer_skill_level(self, text: str, skill_name: str) -> str:
@@ -139,13 +153,15 @@ class SkillExtractor:
     def extract_from_resume(self, resume_text: str) -> Dict:
         """
         Extract comprehensive information from resume.
+        Skills are returned with confidence scores and explainability signals.
         """
-        skills = self.extract_skills_from_text(resume_text)
-        
+        # Pass resume_text as scoring context so confidence uses full resume
+        skills = self.extract_skills_from_text(resume_text, resume_text=resume_text)
+
         # Add experience levels
         for skill in skills:
             skill['level'] = self.infer_skill_level(resume_text, skill['name'])
-        
+
         return {
             'skills': skills,
             'total_skills_count': len(skills),
