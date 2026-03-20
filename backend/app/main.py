@@ -251,7 +251,7 @@ class BenchmarkRequest(BaseModel):
 # ==================== Endpoints ====================
 
 @app.post("/benchmark/candidates", tags=["Benchmarking"])
-async def benchmark_candidates(request: BenchmarkRequest):
+async def benchmark_candidates(request: BenchmarkRequest, current_user=Depends(RoleChecker([RoleEnum.HR]))):
     """
     Multi-Resume Benchmarking — rank candidates against a job description.
 
@@ -298,7 +298,7 @@ async def benchmark_candidates(request: BenchmarkRequest):
 
 
 @app.post("/analytics/time-saved", tags=["Analytics"])
-async def get_time_saved_analytics(request: TimeSavedRequest):
+async def get_time_saved_analytics(request: TimeSavedRequest, current_user=Depends(RoleChecker([RoleEnum.HR, RoleEnum.USER]))):
     """
     Time Saved Analytics — compare traditional vs adaptive learning time.
 
@@ -324,7 +324,7 @@ async def get_time_saved_analytics(request: TimeSavedRequest):
 
 
 @app.post("/explain/voice", tags=["Voice Explanation"])
-async def explain_voice(request: VoiceExplainRequest):
+async def explain_voice(request: VoiceExplainRequest, current_user=Depends(RoleChecker([RoleEnum.HR, RoleEnum.USER]))):
     """
     Convert analysis reasoning trace to speech (TTS).
 
@@ -354,7 +354,7 @@ async def explain_voice(request: VoiceExplainRequest):
 
 
 @app.post("/explain/skill", tags=["Voice Explanation"])
-async def explain_skill_voice(request: VoiceExplainSkillRequest):
+async def explain_skill_voice(request: VoiceExplainSkillRequest, current_user=Depends(RoleChecker([RoleEnum.HR, RoleEnum.USER]))):
     """
     Generate a short voice explanation for a single skill's confidence score.
 
@@ -518,7 +518,7 @@ async def generate_learning_path(request: OnboardingRequest):
 
 
 @app.post("/onboarding/complete", response_model=OnboardingResponse, tags=["Onboarding"])
-async def complete_onboarding_analysis(request: OnboardingRequest):
+async def complete_onboarding_analysis(request: OnboardingRequest, current_user=Depends(RoleChecker([RoleEnum.HR, RoleEnum.USER]))):
     """
     Complete onboarding analysis - one-stop endpoint.
     Combines skills extraction, gap analysis, and learning path generation.
@@ -700,7 +700,7 @@ async def get_resume_feedback(request: OnboardingRequest):
 
 
 @app.post("/update-progress", tags=["Adaptive Re-evaluation"])
-async def update_progress(request: ProgressUpdateRequest):
+async def update_progress(request: ProgressUpdateRequest, current_user=Depends(RoleChecker([RoleEnum.USER, RoleEnum.HR]))):
     """
     Adaptive Re-evaluation Loop — recalculate the full roadmap after user progress.
 

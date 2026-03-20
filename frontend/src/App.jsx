@@ -201,9 +201,11 @@ function App() {
                 className="flex gap-2 flex-wrap bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 backdrop-blur-sm self-start inline-flex"
               >
                 {[
-                  ...(auth.role === 'HR' ? [{ id: 'hr_dashboard', label: 'HR Dashboard', icon: <FiAward /> }] : []),
+                  ...(auth.role === 'HR' ? [
+                    { id: 'hr_dashboard', label: 'HR Dashboard', icon: <FiAward /> },
+                    { id: 'benchmark', label: 'Candidate Rank', icon: <FiAward /> }
+                  ] : []),
                   ...(auth.role === 'USER' && analysisResults ? [{ id: 'user_dashboard', label: 'My Roadmap', icon: <FiAward /> }] : []),
-                  { id: 'benchmark', label: 'Candidate Rank', icon: <FiAward /> },
                   ...(analysisResults ? [
                     { id: 'upload', label: 'Input', icon: <FiUpload /> },
                     { id: 'results', label: 'Overview', icon: <FiZap /> },
