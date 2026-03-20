@@ -75,6 +75,13 @@ class OnboardingResponse(BaseModel):
     reasoning_trace: Dict
 
 
+class ProgressUpdateRequest(BaseModel):
+    resume_text: str
+    job_description_text: str
+    completed_skills: List[str]  # Skill names the user has now completed
+    session_id: Optional[str] = None  # Optional session tracking
+
+
 # ==================== Endpoints ====================
 
 @app.get("/health", tags=["Health"])
@@ -363,6 +370,152 @@ async def get_skill_explanation(skill_name: str, request: OnboardingRequest):
     except Exception as e:
         logger.error(f"Error getting skill explanation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.post("/update-progress", tags=["Adaptive Re-evaluation"])
+async def update_progress(request: ProgressUpdateRequest):
+    """
+    Adaptive Re-evaluation Loop — recalculate the full roadmap after user progress.
+
+    How it works:
+    1. Merge `completed_skills` into the resume skill pool (marked as fully known)
+    2. Re-run role matching against the JD
+    3. Re-run skill gap analysis (completed skills now appear as 'known')
+    4. Re-generate the learning path (completed skills removed from roadmap)
+    5. Return an updated analysis with progress stats
+
+    Input:
+        resume_text:         Original resume text
+        job_description_text: Original job description
+        completed_skills:    List of skill names the user has just mastered
+        session_id:          Optional tracking ID
+
+    Output:
+        Updated gap analysis, updated learning path, progress summary
+    """
+    try:
+        if not request.resume_text or len(request.resume_text.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Resume text too short")
+        if not request.job_description_text or len(request.job_description_text.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Job description text too short")
+        if not isinstance(request.completed_skills, list):
+            raise HTTPException(status_code=400, detail="completed_skills must be a list")
+
+        completed_lower = {s.lower() for s in request.completed_skills}
+        logger.info(
+            f"Re-evaluating progress: {len(request.completed_skills)} skills completed "
+            f"({', '.join(request.completed_skills[:5])}{'...' if len(request.completed_skills) > 5 else ''})"
+        )
+
+        # Step 1: Extract original resume skills
+        resume_result = skill_extractor.extract_from_resume(request.resume_text)
+        original_skills = resume_result['skills']
+
+        # Step 2: Merge completed skills into resume pool as fully known, Advanced level
+        existing_names_lower = {s['name'].lower() for s in original_skills}
+        injected = []
+        for skill_name in request.completed_skills:
+            if skill_name.lower() not in existing_names_lower:
+                injected.append({
+                    'name': skill_name,
+                    'category': 'Completed',
+                    'level': 'Advanced',
+                    'required_level': 'Advanced',
+                    'confidence': 1.0,
+                    'confidence_signals': ['Marked as completed by user'],
+                    'prerequisites': [],
+                    'source': 'user_progress',
+                })
+
+        augmented_resume_skills = original_skills + injected
+        # Ensure all have level
+        for skill in augmented_resume_skills:
+            skill['level'] = skill.get('level', 'Intermediate')
+
+        # Step 3: Extract JD skills + role match + hybrid merge
+        job_result = skill_extractor.extract_from_job_description(request.job_description_text)
+        role_match = role_matcher.match_role(request.job_description_text)
+        hybrid_result = role_matcher.hybrid_skill_set(
+            jd_skills=list(job_result['required_skills']),
+            jd_text=request.job_description_text,
+            match_result=role_match,
+        )
+        effective_required_skills = hybrid_result['skills']
+
+        # Step 4: Re-run gap analysis (completed skills now in resume pool → show as known)
+        updated_gap = gap_analyzer.analyze_gaps(augmented_resume_skills, effective_required_skills)
+
+        # Step 5: Re-generate learning path (completed skills skipped by DependencyResolver)
+        gaps_to_address = gap_analyzer.prioritize_skills_to_learn(updated_gap)
+        updated_path = learning_path_generator.generate_learning_path(
+            gaps_to_address, augmented_resume_skills
+        )
+
+        # Step 6: Build progress summary
+        total_required = updated_gap['statistics']['total_required_skills']
+        newly_known = updated_gap['statistics']['known_count']
+        remaining_gaps = (
+            updated_gap['statistics']['missing_count'] +
+            updated_gap['statistics']['partial_count']
+        )
+
+        # Verify which completed skills are confirmed in known list
+        confirmed_completed = [
+            s['name'] for s in updated_gap['known_skills']
+            if s['name'].lower() in completed_lower
+        ]
+        not_yet_matched = [
+            s for s in request.completed_skills
+            if s.lower() not in {c.lower() for c in confirmed_completed}
+        ]
+
+        progress_summary = {
+            'completed_skills_submitted': request.completed_skills,
+            'confirmed_as_known': confirmed_completed,
+            'not_matched_in_jd': not_yet_matched,
+            'skills_newly_injected_to_resume': [s['name'] for s in injected],
+            'total_required_skills': total_required,
+            'now_known': newly_known,
+            'remaining_gaps': remaining_gaps,
+            'new_coverage_percentage': updated_gap['statistics']['coverage_percentage'],
+            'new_readiness_score': updated_gap['statistics']['readiness_score'],
+            'remaining_modules': len(updated_path['modules']),
+            'remaining_hours': updated_path['total_duration_hours'],
+            'remaining_weeks': updated_path.get('timeline', {}).get('estimated_weeks', 'N/A'),
+            'role_track': role_match['role'],
+            'role_confidence': role_match['confidence'],
+            'session_id': request.session_id,
+            'message': (
+                f"Great progress! You've completed {len(confirmed_completed)} required skill(s). "
+                f"{remaining_gaps} gap(s) remaining. "
+                f"Updated roadmap has {len(updated_path['modules'])} module(s) left."
+            )
+        }
+
+        return {
+            'progress_summary': progress_summary,
+            'updated_gap_analysis': updated_gap,
+            'updated_learning_path': updated_path,
+            'reasoning': {
+                'approach': 'Adaptive Re-evaluation Loop',
+                'methodology': (
+                    'Completed skills merged into resume pool → '
+                    'Gap analysis re-run → '
+                    'Roadmap regenerated without mastered skills'
+                ),
+                'role_match': {
+                    'role': role_match['role'],
+                    'confidence': role_match['confidence'],
+                    'mode': hybrid_result['source'],
+                },
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating progress: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating progress: {str(e)}")
 
 
 @app.get("/roles/list", tags=["Role Tracks"])
