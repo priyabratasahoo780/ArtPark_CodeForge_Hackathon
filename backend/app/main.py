@@ -10,6 +10,7 @@ from app.services.gap_analyzer import SkillGapAnalyzer
 from app.services.learning_path_generator import LearningPathGenerator
 from app.services.dependency_resolver import DependencyResolver
 from app.services.role_matcher import RoleMatcher
+from app.services.voice_explainer import VoiceExplainer
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +38,7 @@ gap_analyzer = SkillGapAnalyzer()
 learning_path_generator = LearningPathGenerator()
 dependency_resolver = DependencyResolver()
 role_matcher = RoleMatcher()
+voice_explainer = VoiceExplainer()
 
 
 # ==================== Pydantic Models ====================
@@ -81,8 +83,71 @@ class ProgressUpdateRequest(BaseModel):
     completed_skills: List[str]  # Skill names the user has now completed
     session_id: Optional[str] = None  # Optional session tracking
 
+class VoiceExplainRequest(BaseModel):
+    reasoning_trace: Dict
+    gap_stats: Optional[Dict] = None
+    custom_text: Optional[str] = None
+    lang: Optional[str] = "en"
+
+
+class VoiceExplainSkillRequest(BaseModel):
+    skill_name: str
+    confidence: float
+    signals: Optional[List[str]] = []
+
+
 
 # ==================== Endpoints ====================
+
+@app.post("/explain/voice", tags=["Voice Explanation"])
+async def explain_voice(request: VoiceExplainRequest):
+    """
+    Convert analysis reasoning trace to speech (TTS).
+
+    Returns base64-encoded MP3 audio + plain text script.
+    Fallback: returns text only if gTTS unavailable.
+
+    Input:
+        reasoning_trace: reasoning_trace dict from /onboarding/complete
+        gap_stats:       optional gap_analysis['statistics']
+        custom_text:     optional custom text to synthesize directly
+        lang:            TTS language code (default: 'en')
+
+    Output:
+        script, audio_b64, audio_mime, tts_available
+    """
+    try:
+        explainer = VoiceExplainer(lang=request.lang or "en")
+        result = explainer.explain(
+            reasoning_trace=request.reasoning_trace,
+            gap_stats=request.gap_stats,
+            custom_text=request.custom_text,
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Voice explain error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"TTS error: {str(e)}")
+
+
+@app.post("/explain/skill", tags=["Voice Explanation"])
+async def explain_skill_voice(request: VoiceExplainSkillRequest):
+    """
+    Generate a short voice explanation for a single skill's confidence score.
+
+    Input: skill_name, confidence (0-1), signals list
+    Output: script, audio_b64, tts_available
+    """
+    try:
+        result = voice_explainer.explain_skill(
+            skill_name=request.skill_name,
+            confidence=request.confidence,
+            signals=request.signals or [],
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Skill voice explain error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"TTS error: {str(e)}")
+
 
 @app.get("/health", tags=["Health"])
 async def health_check():

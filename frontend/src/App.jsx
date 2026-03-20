@@ -7,6 +7,7 @@ import GapAnalysis from './components/GapAnalysis'
 import LearningPath from './components/LearningPath'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorAlert from './components/ErrorAlert'
+import VoiceExplain from './components/VoiceExplain'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -171,6 +172,12 @@ function App() {
 
             {activeTab === 'results' && analysisResults && reasoningTrace && (
               <div className="space-y-6">
+                {/* 🎤 Voice Explanation — Feature 6 */}
+                <VoiceExplain
+                  reasoningTrace={reasoningTrace}
+                  gapStats={gapAnalysis?.statistics}
+                />
+
                 <div className="card">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Analysis Summary</h2>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
