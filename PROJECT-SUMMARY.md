@@ -487,7 +487,7 @@ All components have been:
 
 ---
 
-**Built with ❤️ for CodeForge Hackathon 2024**
+**Built with ❤️ for CodeForge Hackathon 2026**
 
 **Status:** ✅ Production Ready | **Version:** 1.0.0
 

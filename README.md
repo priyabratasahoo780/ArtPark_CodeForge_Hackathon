@@ -24,10 +24,14 @@ A sophisticated AI-powered system that analyzes resumes and job descriptions to 
 ### 🧠 Advanced Features
 - **Dependency Graph Analysis**: Understanding skill prerequisites and learning order
 - **Personalized Roadmaps**: Customized learning modules with time estimates
-- **Resource Recommendations**: Curated learning resources for each skill
-- **Assessment Criteria**: Clear metrics to measure skill mastery
-- **Timeline Estimation**: Realistic time projections for skill acquisition
-- **Progress Tracking**: Monitor learning completion and milestones
+- **Resource Recommendations**: Curated learning resources for each skill (Feature 4)
+- **Progress Tracking**: Monitor learning completion and milestones (Feature 5)
+- **🎤 Voice Explanation**: Convert reasoning traces into speech (Feature 6)
+- **⏱️ Time Saved Analytics**: Compare traditional vs adaptive learning efficiency (Feature 7)
+- **🏆 Multi-Resume Benchmarking**: Rank multiple candidates against a single JD (Feature 8)
+- **Role-Based Learning**: Tailor path to specific developer roles (Feature 3)
+- **Confidence Scoring**: Multi-signal skill expertise measurement (Feature 2)
+- **Adaptive Re-evaluation**: Recalculate roadmap after user progress (Feature 5)
 
 ### 🎨 User Interface
 - **Modern React Frontend**: Clean, intuitive interface with Tailwind CSS
@@ -45,9 +49,14 @@ AI-Adaptive Onboarding Engine
 │
 ├── Backend (Python FastAPI)
 │   ├── Services
-│   │   ├── skill_extractor.py       # NLP-based skill extraction
-│   │   ├── gap_analyzer.py          # Skill gap analysis & scoring
-│   │   └── learning_path_generator.py # Adaptive path generation
+│   │   ├── skill_extractor.py       # NLP-based skill extraction (Feature 2)
+│   │   ├── gap_analyzer.py          # Skill gap analysis & scoring (Feature 2)
+│   │   ├── learning_path_generator.py # Adaptive path generation (Feature 1, 4)
+│   │   ├── dependency_resolver.py   # Prerequisite management (Feature 1)
+│   │   ├── role_matcher.py          # Role-based skill matching (Feature 3)
+│   │   ├── voice_explainer.py       # gTTS & Web Speech synthesis (Feature 6)
+│   │   ├── time_analytics.py        # Efficiency saved metrics (Feature 7)
+│   │   └── resume_benchmarker.py    # Multi-candidate ranking (Feature 8)
 │   ├── Datasets
 │   │   └── skills_taxonomy.json     # Skill database & prerequisites
 │   └── API Routes
@@ -60,7 +69,10 @@ AI-Adaptive Onboarding Engine
 │   │   ├── GapAnalysis              # Gap visualization
 │   │   ├── LearningPath             # Module sequencing
 │   │   ├── LoadingSpinner           # Loading state
-│   │   └── ErrorAlert               # Error handling
+│   │   ├── ErrorAlert               # Error handling
+│   │   ├── VoiceExplain             # 🎤 Speech synthesis UI (Feature 6)
+│   │   ├── TimeSavedAnalytics       # ⏱️ Stats/Savings card (Feature 7)
+│   │   └── CandidateBenchmark       # 🏆 Leaderboard UI (Feature 8)
 │   └── App.jsx                       # Main application
 │
 └── Documentation
@@ -302,17 +314,28 @@ Content-Type: application/json
 Returns: Learning path with modules and timeline
 ```
 
-#### 6. **Get Skill Explanation**
+#### 7. **Update Progress**
 ```
-POST /reasoning/trace/{skill_name}
-Content-Type: application/json
+POST /update-progress
+Accepts completed skills and returns an updated roadmap.
+```
 
-{
-  "resume_text": "...",
-  "job_description_text": "..."
-}
+#### 8. **Voice Explanation**
+```
+POST /explain/voice
+Full reasoning trace to base64 MP3 and text script.
+```
 
-Returns: Detailed reasoning trace
+#### 9. **Candidate Benchmarking**
+```
+POST /benchmark/candidates
+Rank multiple candidates (2–20) against a single job description.
+```
+
+#### 10. **Time Saved Analytics**
+```
+POST /analytics/time-saved
+Compare traditional vs adaptive learning durations.
 ```
 
 ### Documentation
@@ -614,17 +637,19 @@ For issues, questions, or suggestions:
 
 ## 🎯 Future Roadmap
 
-- [ ] Video resource generation
-- [ ] Interactive quizzes and assessments
-- [ ] Community course recommendations
+- [x] Video resource generation (via course recommendations)
+- [x] Interactive quizzes and assessments criteria (Feature 4)
+- [x] Community course recommendations dataset (Feature 4)
+- [x] Multi-candidate benchmarking (Feature 8)
+- [x] Voice explanations (Feature 6)
+- [x] Time saved analytics dashboard (Feature 7)
 - [ ] Integration with major LMS platforms
 - [ ] Mobile app (React Native)
-- [ ] Multi-language support
+- [ ] Multi-language support (TTS supports multiple langs)
 - [ ] Real-time collaboration features
-- [ ] Advanced analytics dashboard
 
 ---
 
 **Made with ❤️ for better employee onboarding**
 
-Last Updated: March 20, 2026 | Version: 1.0.0
+Last Updated: March 20, 2026 | Version: 1.1.0
