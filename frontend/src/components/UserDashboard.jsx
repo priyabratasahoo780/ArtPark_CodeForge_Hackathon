@@ -100,8 +100,20 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
           </h2>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mt-1">Adaptive Talent Architecture</p>
         </div>
-        
-        <div className="flex gap-3 items-center sm:self-center">
+        <div className="flex gap-3 items-center sm:self-center flex-wrap justify-end">
+          <button
+            onClick={() => setEngagementMetrics(prev => ({ 
+              ...prev, 
+              force_struggle: !prev.force_struggle,
+              quiz_scores: prev.force_struggle ? [75, 80] : [40, 45],
+              days_inactive: prev.force_struggle ? 0 : 4
+            }))}
+            className={`px-3 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${engagementMetrics.force_struggle ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
+            title="Toggle simulated user struggle"
+          >
+            {engagementMetrics.force_struggle ? 'Struggle On' : 'Simulate Struggle'}
+          </button>
+          
           <button
             onClick={() => setEngagementMetrics(prev => ({ ...prev, force_burnout: !prev.force_burnout }))}
             className={`px-3 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${engagementMetrics.force_burnout ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
@@ -159,6 +171,34 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
                 Roadmap nodes have been simplified to Beginner/Easy.
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {analysisResults.doubt_status?.help_triggered && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-[0_0_20px_rgba(79,70,229,0.1)]"
+          >
+            <div className="p-3 bg-indigo-500/20 rounded-xl">
+              <FiInfo className="text-2xl" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-black uppercase tracking-widest mb-1">AI Tutor Alert: Concept Blockage Detected</h3>
+              <p className="text-xs text-indigo-200/70">{analysisResults.doubt_status.suggestion || "Would you like some help with this concept?"}</p>
+              <div className="text-[10px] font-bold text-indigo-400/50 mt-1">
+                Triggered by: {analysisResults.doubt_status.reason}
+              </div>
+            </div>
+            <button
+               className="mt-2 sm:mt-0 px-4 py-2 bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 transition-colors"
+               onClick={() => alert("Initiating AI Tutor chat interface...")}
+            >
+               Get Help
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

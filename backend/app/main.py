@@ -20,6 +20,7 @@ from app.services.burnout_detector import BurnoutDetector
 from app.services.career_path_predictor import CareerPathPredictor
 from app.services.market_trend_analyzer import MarketTrendAnalyzer
 from app.services.learning_efficiency_calculator import LearningEfficiencyCalculator
+from app.services.doubt_detector import DoubtDetector
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -67,6 +68,7 @@ burnout_detector = BurnoutDetector()
 career_path_predictor = CareerPathPredictor()
 market_trend_analyzer = MarketTrendAnalyzer()
 learning_efficiency_calculator = LearningEfficiencyCalculator()
+doubt_detector = DoubtDetector()
 
 # ==================== Pydantic Models ====================
 
@@ -273,6 +275,7 @@ class OnboardingResponse(BaseModel):
     market_insights: Optional[Dict[str, List[str]]] = None
     goal: Optional[str] = None
     efficiency_score: Optional[int] = None
+    doubt_status: Optional[Dict] = None
 
 class ProgressUpdateRequest(BaseModel):
     resume_text: str
@@ -765,6 +768,10 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         logger.info("Computing learning efficiency score...")
         efficiency_result = learning_efficiency_calculator.calculate(request.engagement_metrics)
 
+        # Step 4g: Doubt Detection
+        logger.info("Running auto-doubt detection...")
+        doubt_status = doubt_detector.detect(request.engagement_metrics)
+
         return OnboardingResponse(
             skills_analysis={
                 'resume_skills': resume_skills_full,
@@ -788,7 +795,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             career_paths=career_predictions['next_roles'],
             market_insights=market_insights,
             goal=learning_path.get('goal'),
-            efficiency_score=efficiency_result['efficiency_score']
+            efficiency_score=efficiency_result['efficiency_score'],
+            doubt_status=doubt_status
         )
     except HTTPException:
         raise
@@ -978,6 +986,9 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         # Step 5d: Learning Efficiency Score
         efficiency_result = learning_efficiency_calculator.calculate(request.engagement_metrics)
 
+        # Step 5e: Doubt Detection
+        doubt_status = doubt_detector.detect(request.engagement_metrics)
+
         progress_summary = {
             'completed_skills_submitted': request.completed_skills,
             'confirmed_as_known': confirmed_completed,
@@ -1010,6 +1021,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'market_insights': market_insights,
             'goal': updated_learning_path.get('goal'),
             'efficiency_score': efficiency_result['efficiency_score'],
+            'doubt_status': doubt_status,
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
