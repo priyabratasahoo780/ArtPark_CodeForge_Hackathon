@@ -53,7 +53,8 @@ class LearningPathGenerator:
         self, 
         gaps_to_address: List[Dict], 
         resume_skills: List[Dict],
-        learning_style: str = "Visual"
+        learning_style: str = "Visual",
+        burnout_detected: bool = False
     ) -> Dict:
         """
         Generate comprehensive learning path for addressing skill gaps.
@@ -67,6 +68,7 @@ class LearningPathGenerator:
             gaps_to_address: Skills that need to be learned (from gap analysis)
             resume_skills: Current skills from resume
             learning_style: The detected user's learning style
+            burnout_detected: Whether user fatigue has been detected
 
         Returns:
             Structured learning path with modules, timeline, and dependency info
@@ -78,7 +80,7 @@ class LearningPathGenerator:
         sequence = self.dependency_resolver.resolve(gaps_to_address, known_skills)
 
         # Create learning modules
-        modules = self._create_learning_modules(sequence, known_skills)
+        modules = self._create_learning_modules(sequence, known_skills, burnout_detected=burnout_detected)
 
         # Enrich modules with real course recommendations (dataset-based, no hallucination)
         modules = self.course_recommender.enrich_modules(modules, max_per_skill=3, learning_style=learning_style)
@@ -123,7 +125,7 @@ class LearningPathGenerator:
         """Deprecated: use DependencyResolver.resolve() instead."""
         return self.dependency_resolver.resolve(skills, current_skills)
     
-    def _create_learning_modules(self, sequence: List[Dict], current_skills: Set[str]) -> List[Dict]:
+    def _create_learning_modules(self, sequence: List[Dict], current_skills: Set[str], burnout_detected: bool = False) -> List[Dict]:
         """Convert skill sequence into structured learning modules."""
         modules = []
 
@@ -131,7 +133,14 @@ class LearningPathGenerator:
             required_level = skill.get('required_level', 'Intermediate')
             category = skill.get('category', 'Other')
 
-            difficulty = self._estimate_difficulty(skill, current_skills, required_level)
+            if burnout_detected:
+                required_level = 'Beginner'
+                difficulty = 'Easy'
+                reason = "Reduced difficulty to prevent burnout. Take it easy!"
+            else:
+                difficulty = self._estimate_difficulty(skill, current_skills, required_level)
+                reason = skill.get('reason', 'Building required skill')
+
             time_estimate = self._estimate_learning_time(difficulty, category, required_level)
 
             module = {
@@ -146,7 +155,7 @@ class LearningPathGenerator:
                 'dependency_chain': skill.get('dependency_chain', []),  # from resolver
                 'is_injected_prerequisite': skill.get('is_injected_prerequisite', False),
                 'gap_score': skill.get('gap_score', 0),
-                'reason': skill.get('reason', 'Building required skill'),
+                'reason': reason,
                 'resources': self._suggest_resources(skill['name'], required_level),
                 'learning_objectives': self._generate_learning_objectives(skill),
                 'assessment_criteria': self._generate_assessment_criteria(skill),

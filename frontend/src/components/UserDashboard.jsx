@@ -13,6 +13,12 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const [completedSkillNames, setCompletedSkillNames] = useState(new Set())
   const [message, setMessage] = useState(null)
   const [interactions, setInteractions] = useState({})
+  const [engagementMetrics, setEngagementMetrics] = useState({
+    force_burnout: false,
+    recent_quiz_scores: [],
+    modules_completed_today: 0,
+    last_active_days: 0
+  })
 
   const handleResourceClick = (type) => {
     if (!type) return;
@@ -45,7 +51,8 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
         resume_text: analysisResults.skills_analysis.resume_skills.original_text || "", 
         job_description_text: analysisResults.skills_analysis.job_requirements.original_text || "",
         completed_skills: Array.from(completedSkillNames),
-        interactions: interactions
+        interactions: interactions,
+        engagement_metrics: engagementMetrics
       }
       
       const resp = await axios.post(`${API_BASE_URL}/update-progress`, payload, {
@@ -56,7 +63,8 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
         ...analysisResults,
         gap_analysis: resp.data.updated_gap_analysis,
         learning_path: resp.data.updated_learning_path,
-        learning_style: resp.data.learning_style
+        learning_style: resp.data.learning_style,
+        burnout_status: resp.data.burnout_status
       })
       
       setMessage({ type: 'success', text: resp.data.progress_summary.message })
@@ -89,16 +97,26 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mt-1">Adaptive Talent Architecture</p>
         </div>
         
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleReevaluate}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#bc13fe] to-[#8a11ea] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(188,19,254,0.2)] disabled:opacity-50 transition-all sm:self-center"
-        >
-          <FiRefreshCcw className={loading ? 'animate-spin' : ''} />
-          {loading ? 'Processing...' : 'Recalculate Roadmap'}
-        </motion.button>
+        <div className="flex gap-3 items-center sm:self-center">
+          <button
+            onClick={() => setEngagementMetrics(prev => ({ ...prev, force_burnout: !prev.force_burnout }))}
+            className={`px-3 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${engagementMetrics.force_burnout ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
+            title="Toggle simulated user fatigue"
+          >
+            {engagementMetrics.force_burnout ? 'Burnout On' : 'Simulate Burnout'}
+          </button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleReevaluate}
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#bc13fe] to-[#8a11ea] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(188,19,254,0.2)] disabled:opacity-50 transition-all"
+          >
+            <FiRefreshCcw className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Processing...' : 'Recalculate Roadmap'}
+          </motion.button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -115,6 +133,28 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
           >
             {message.type === 'success' ? <FiCheckCircle className="text-base" /> : <FiInfo className="text-base" />}
             {message.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {analysisResults.burnout_status?.burnout && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-4 rounded-2xl border border-orange-500/30 bg-orange-500/10 text-orange-400 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-[0_0_20px_rgba(255,165,0,0.1)]"
+          >
+            <div className="p-3 bg-orange-500/20 rounded-xl">
+              <FiInfo className="text-2xl" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest mb-1">Fatigue Detected</h3>
+              <p className="text-xs text-orange-200/70">{analysisResults.burnout_status.suggestion || "Take a break or switch topic"}</p>
+              <div className="text-[10px] font-bold text-orange-400/50 mt-1">
+                Roadmap nodes have been simplified to Beginner/Easy.
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

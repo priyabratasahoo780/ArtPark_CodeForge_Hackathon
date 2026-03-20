@@ -18,5 +18,10 @@
     "email": "vedantpatel@gmail.com",
     "role": "USER",
     "hashed_password": "$pbkdf2-sha256$29000$PQfA2LsXAqDUGuMcIySkNA$l5eQf047ASGZCEH.HKZOh12dxl6ryb/sPzrD5Uti/pk"
+  },
+  "vedantpatelxy12@gmail.com": {
+    "email": "vedantpatelxy12@gmail.com",
+    "role": "HR",
+    "hashed_password": "$pbkdf2-sha256$29000$aw3BmPNeqxWiVGqtFeLcmw$J8kTKsgzc0cQpGD/qzmqKosR35bg3oQ28BGCU9xlWdM"
   }
 }

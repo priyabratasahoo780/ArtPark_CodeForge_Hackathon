@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import logging
 from pathlib import Path
 
@@ -16,6 +16,7 @@ from app.services.resume_benchmarker import ResumeBenchmarker
 from app.services.feedback_generator import ResumeFeedbackGenerator
 from app.services.domain_classifier import DomainClassifier
 from app.services.learning_style_analyzer import LearningStyleAnalyzer
+from app.services.burnout_detector import BurnoutDetector
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -59,6 +60,7 @@ resume_benchmarker = ResumeBenchmarker(
 feedback_generator = ResumeFeedbackGenerator()
 domain_classifier = DomainClassifier()
 learning_style_analyzer = LearningStyleAnalyzer()
+burnout_detector = BurnoutDetector()
 
 # ==================== Pydantic Models ====================
 
@@ -233,6 +235,7 @@ class OnboardingRequest(BaseModel):
     job_description_text: str
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
+    engagement_metrics: Optional[Dict[str, Any]] = None
 
 
 class MultiOnboardingRequest(BaseModel):
@@ -257,6 +260,7 @@ class OnboardingResponse(BaseModel):
     resume_feedback: List[Dict]
     efficiency_metrics: Optional[Dict] = None
     learning_style: Optional[str] = None
+    burnout_status: Optional[Dict] = None
 
 
 class ProgressUpdateRequest(BaseModel):
@@ -266,9 +270,13 @@ class ProgressUpdateRequest(BaseModel):
     session_id: Optional[str] = None  # Optional session tracking
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
+    engagement_metrics: Optional[Dict[str, Any]] = None
 
 class LearningStyleRequest(BaseModel):
     interactions: Dict[str, int]
+
+class BurnoutRequest(BaseModel):
+    engagement_metrics: Dict[str, Any]
 
 class VoiceExplainRequest(BaseModel):
     reasoning_trace: Dict
@@ -308,6 +316,14 @@ async def analyze_learning_style(request: LearningStyleRequest):
     """
     style = learning_style_analyzer.detect_style(request.interactions)
     return {"learning_style": style}
+
+@app.post("/analyze/burnout", tags=["Analysis"])
+async def analyze_burnout(request: BurnoutRequest):
+    """
+    Detect user fatigue based on engagement metrics.
+    """
+    burnout_status = burnout_detector.detect(request.engagement_metrics)
+    return burnout_status
 
 @app.post("/benchmark/candidates", tags=["Benchmarking"])
 async def benchmark_candidates(request: BenchmarkRequest, current_user=Depends(RoleChecker([RoleEnum.HR]))):
@@ -593,12 +609,15 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         if not request.job_description_text or len(request.job_description_text.strip()) < 10:
             raise HTTPException(status_code=400, detail="Job description text too short")
 
-        # Step 0: Determine Learning Style
+        # Step 0: Determine Learning Style and Burnout
         if request.learning_style_override:
             learning_style = request.learning_style_override
         else:
             learning_style = learning_style_analyzer.detect_style(request.interactions or {})
         logger.info(f"Detected learning style: {learning_style}")
+        
+        burnout_status = burnout_detector.detect(request.engagement_metrics or {})
+        logger.info(f"Burnout detection: {burnout_status['burnout']}")
 
         # Step 1: Extract skills from resume
         logger.info("Extracting skills from resume...")
@@ -635,7 +654,12 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         # Step 4: Generate learning path
         logger.info("Generating adaptive learning path...")
         gaps_to_address = gap_analyzer.prioritize_skills_to_learn(gap_analysis)
-        learning_path = learning_path_generator.generate_learning_path(gaps_to_address, resume_skills_full, learning_style=learning_style)
+        learning_path = learning_path_generator.generate_learning_path(
+            gaps_to_address, 
+            resume_skills_full, 
+            learning_style=learning_style, 
+            burnout_detected=burnout_status['burnout']
+        )
 
         # Step 4b: Generate resume feedback
         logger.info("Generating actionable resume feedback...")
@@ -707,7 +731,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             reasoning_trace=reasoning_trace,
             resume_feedback=resume_feedback,
             efficiency_metrics=efficiency_metrics,
-            learning_style=learning_style
+            learning_style=learning_style,
+            burnout_status=burnout_status
         )
     except HTTPException:
         raise
@@ -845,13 +870,16 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         )
         effective_required_skills = hybrid_result['skills']
 
-        # Step 3b: Determine Learning Style
+        # Step 3b: Determine Learning Style and Burnout
         if request.learning_style_override:
             learning_style = request.learning_style_override
             logger.info(f"Learning style overridden to: {learning_style}")
         else:
             learning_style = learning_style_analyzer.detect_style(request.interactions or {})
             logger.info(f"Detected learning style: {learning_style}")
+            
+        burnout_status = burnout_detector.detect(request.engagement_metrics or {})
+        logger.info(f"Burnout detection: {burnout_status['burnout']}")
 
         # Step 4: Re-run gap analysis (completed skills now in resume pool → show as known)
         updated_gap_analysis = gap_analyzer.analyze_gaps(augmented_resume_skills, effective_required_skills)
@@ -863,7 +891,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         # Step 5: Re-generate learning path (completed skills skipped by DependencyResolver)
         gaps_to_address = gap_analyzer.prioritize_skills_to_learn(updated_gap_analysis)
         updated_learning_path = learning_path_generator.generate_learning_path(
-            gaps_to_address, hybrid_skills_for_path, learning_style=learning_style
+            gaps_to_address, hybrid_skills_for_path, learning_style=learning_style, burnout_detected=burnout_status['burnout']
         )
 
         # Step 6: Build progress summary
@@ -911,6 +939,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'updated_gap_analysis': updated_gap_analysis,
             'updated_learning_path': updated_learning_path,
             'learning_style': learning_style,
+            'burnout_status': burnout_status,
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
