@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  @apply bg-gradient-to-br from-slate-50 to-slate-100;
+}
+
+.btn-primary {
+  @apply px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 bg-white text-purple-600 border-2 border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-6;
+}
+
+.skill-badge {
+  @apply inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium;
+}
+
+.skill-badge.known {
+  @apply bg-green-100 text-green-700;
+}
+
+.skill-badge.partial {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.skill-badge.missing {
+  @apply bg-red-100 text-red-700;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-3;
+}
+
+.progress-fill {
+  @apply bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all;
+}
+
+.module-item {
+  @apply border-l-4 border-purple-600 pl-4 py-3 mb-4;
+}
+
+.loading {
+  @apply animate-pulse;
+}
+
+.fade-enter {
+  @apply opacity-0;
+}
+
+.fade-enter-active {
+  @apply opacity-100 transition-opacity duration-300;
+}

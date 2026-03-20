@@ -1,0 +1,288 @@
+{
+  "skills": {
+    "programming_languages": {
+      "Python": {
+        "category": "Programming Language",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Versatile programming language for backend, ML, and data science"
+      },
+      "JavaScript": {
+        "category": "Programming Language",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Frontend and backend scripting language"
+      },
+      "React": {
+        "category": "Frontend Framework",
+        "level": "intermediate",
+        "prerequisites": ["JavaScript", "HTML", "CSS"],
+        "description": "Modern JavaScript library for building UI components"
+      },
+      "TypeScript": {
+        "category": "Programming Language",
+        "level": "intermediate",
+        "prerequisites": ["JavaScript"],
+        "description": "Superset of JavaScript with static typing"
+      },
+      "Java": {
+        "category": "Programming Language",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Enterprise-grade OOP programming language"
+      },
+      "C++": {
+        "category": "Programming Language",
+        "level": "advanced",
+        "prerequisites": [],
+        "description": "High performance systems programming language"
+      },
+      "SQL": {
+        "category": "Database Language",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Language for querying relational databases"
+      }
+    },
+    "frontend": {
+      "HTML": {
+        "category": "Frontend Markup",
+        "level": "beginner",
+        "prerequisites": [],
+        "description": "Markup language for web pages"
+      },
+      "CSS": {
+        "category": "Frontend Styling",
+        "level": "beginner",
+        "prerequisites": ["HTML"],
+        "description": "Styling and layout for web pages"
+      },
+      "Vue.js": {
+        "category": "Frontend Framework",
+        "level": "intermediate",
+        "prerequisites": ["JavaScript", "HTML", "CSS"],
+        "description": "Progressive JavaScript framework for UIs"
+      },
+      "Angular": {
+        "category": "Frontend Framework",
+        "level": "advanced",
+        "prerequisites": ["TypeScript", "HTML", "CSS", "RxJS"],
+        "description": "Full-featured frontend framework by Google"
+      },
+      "Tailwind CSS": {
+        "category": "CSS Framework",
+        "level": "intermediate",
+        "prerequisites": ["CSS"],
+        "description": "Utility-first CSS framework for rapid UI development"
+      },
+      "Bootstrap": {
+        "category": "CSS Framework",
+        "level": "beginner",
+        "prerequisites": ["HTML", "CSS"],
+        "description": "CSS framework for responsive design"
+      }
+    },
+    "backend": {
+      "FastAPI": {
+        "category": "Web Framework",
+        "level": "intermediate",
+        "prerequisites": ["Python"],
+        "description": "Modern Python web framework for building APIs"
+      },
+      "Django": {
+        "category": "Web Framework",
+        "level": "intermediate",
+        "prerequisites": ["Python"],
+        "description": "Full-stack Python web framework"
+      },
+      "Node.js": {
+        "category": "Runtime",
+        "level": "intermediate",
+        "prerequisites": ["JavaScript"],
+        "description": "JavaScript runtime for backend development"
+      },
+      "Express": {
+        "category": "Web Framework",
+        "level": "intermediate",
+        "prerequisites": ["Node.js"],
+        "description": "Minimal web framework for Node.js"
+      },
+      "Spring Boot": {
+        "category": "Web Framework",
+        "level": "advanced",
+        "prerequisites": ["Java"],
+        "description": "Enterprise Java web framework"
+      }
+    },
+    "databases": {
+      "PostgreSQL": {
+        "category": "Relational Database",
+        "level": "intermediate",
+        "prerequisites": ["SQL"],
+        "description": "Advanced open-source relational database"
+      },
+      "MongoDB": {
+        "category": "NoSQL Database",
+        "level": "intermediate",
+        "prerequisites": ["JSON basics"],
+        "description": "Document-oriented NoSQL database"
+      },
+      "MySQL": {
+        "category": "Relational Database",
+        "level": "intermediate",
+        "prerequisites": ["SQL"],
+        "description": "Popular open-source relational database"
+      },
+      "Redis": {
+        "category": "In-Memory Database",
+        "level": "advanced",
+        "prerequisites": ["SQL basics"],
+        "description": "In-memory data structure store for caching"
+      }
+    },
+    "data_science": {
+      "Machine Learning": {
+        "category": "ML/AI",
+        "level": "advanced",
+        "prerequisites": ["Python", "Mathematics", "Statistics"],
+        "description": "Building predictive models from data"
+      },
+      "Deep Learning": {
+        "category": "ML/AI",
+        "level": "advanced",
+        "prerequisites": ["Machine Learning", "TensorFlow", "PyTorch"],
+        "description": "Building neural networks and advanced models"
+      },
+      "TensorFlow": {
+        "category": "ML Library",
+        "level": "advanced",
+        "prerequisites": ["Python", "Machine Learning"],
+        "description": "Google's machine learning framework"
+      },
+      "PyTorch": {
+        "category": "ML Library",
+        "level": "advanced",
+        "prerequisites": ["Python", "Machine Learning"],
+        "description": "Meta's deep learning framework"
+      },
+      "Pandas": {
+        "category": "Data Library",
+        "level": "intermediate",
+        "prerequisites": ["Python"],
+        "description": "Data manipulation and analysis library"
+      },
+      "Scikit-Learn": {
+        "category": "ML Library",
+        "level": "intermediate",
+        "prerequisites": ["Python", "Pandas"],
+        "description": "Machine learning library for data analysis"
+      },
+      "Statistics": {
+        "category": "Mathematics",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Statistical analysis and probability"
+      },
+      "Mathematics": {
+        "category": "Foundation",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Linear algebra, calculus for ML/AI"
+      }
+    },
+    "devops": {
+      "Docker": {
+        "category": "Containerization",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Containerization platform for consistent deployment"
+      },
+      "Kubernetes": {
+        "category": "Orchestration",
+        "level": "advanced",
+        "prerequisites": ["Docker"],
+        "description": "Container orchestration platform"
+      },
+      "CI/CD": {
+        "category": "DevOps",
+        "level": "intermediate",
+        "prerequisites": ["Git"],
+        "description": "Continuous integration and deployment practices"
+      },
+      "Git": {
+        "category": "Version Control",
+        "level": "beginner",
+        "prerequisites": [],
+        "description": "Distributed version control system"
+      },
+      "AWS": {
+        "category": "Cloud Platform",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Amazon Web Services cloud platform"
+      }
+    },
+    "soft_skills": {
+      "Communication": {
+        "category": "Soft Skill",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Ability to express ideas clearly"
+      },
+      "Problem Solving": {
+        "category": "Soft Skill",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Analytical and creative problem-solving abilities"
+      },
+      "Leadership": {
+        "category": "Soft Skill",
+        "level": "intermediate",
+        "prerequisites": ["Communication"],
+        "description": "Ability to guide and motivate teams"
+      },
+      "Teamwork": {
+        "category": "Soft Skill",
+        "level": "beginner",
+        "prerequisites": ["Communication"],
+        "description": "Collaboration with team members"
+      },
+      "Time Management": {
+        "category": "Soft Skill",
+        "level": "beginner",
+        "prerequisites": [],
+        "description": "Efficient organization of tasks and priorities"
+      }
+    }
+  },
+  "job_roles": {
+    "Software Engineer": {
+      "required_skills": ["Python", "JavaScript", "SQL", "Git", "Problem Solving", "Communication"],
+      "nice_to_have": ["Docker", "CI/CD"]
+    },
+    "Frontend Developer": {
+      "required_skills": ["JavaScript", "React", "HTML", "CSS", "Tailwind CSS", "Git"],
+      "nice_to_have": ["TypeScript", "Vue.js"]
+    },
+    "Backend Developer": {
+      "required_skills": ["Python", "FastAPI", "SQL", "PostgreSQL", "Git"],
+      "nice_to_have": ["Docker", "Redis"]
+    },
+    "Full Stack Developer": {
+      "required_skills": ["JavaScript", "React", "Node.js", "MongoDB", "SQL", "Git"],
+      "nice_to_have": ["Docker", "TypeScript"]
+    },
+    "Data Scientist": {
+      "required_skills": ["Python", "Pandas", "Statistics", "Machine Learning", "SQL"],
+      "nice_to_have": ["TensorFlow", "PyTorch", "Scikit-Learn"]
+    },
+    "DevOps Engineer": {
+      "required_skills": ["Docker", "Git", "AWS", "CI/CD", "Linux basics"],
+      "nice_to_have": ["Kubernetes"]
+    },
+    "ML Engineer": {
+      "required_skills": ["Python", "Machine Learning", "TensorFlow", "Mathematics", "Statistics"],
+      "nice_to_have": ["Deep Learning", "PyTorch"]
+    }
+  }
+}
