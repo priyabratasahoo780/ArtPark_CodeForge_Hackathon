@@ -52,9 +52,10 @@ class LearningPathGenerator:
     def generate_learning_path(
         self, 
         gaps_to_address: List[Dict], 
-        resume_skills: List[Dict],
         learning_style: str = "Visual",
-        burnout_detected: bool = False
+        burnout_detected: bool = False,
+        target_role: Optional[str] = None,
+        timeline_days: Optional[int] = None
     ) -> Dict:
         """
         Generate comprehensive learning path for addressing skill gaps.
@@ -83,7 +84,32 @@ class LearningPathGenerator:
         modules = self._create_learning_modules(sequence, known_skills, burnout_detected=burnout_detected)
 
         # Enrich modules with real course recommendations (dataset-based, no hallucination)
-        modules = self.course_recommender.enrich_modules(modules, max_per_skill=3, learning_style=learning_style)
+        course_coverage = self.course_recommender.recommend_batch(modules, learning_style)
+
+        # Calculate initial total duration before scaling
+        total_duration = sum(m['time_estimate_hours'] for m in modules)
+
+        # Scale time if timeline_days is provided
+        scale_factor = 1.0
+        if timeline_days and total_duration > 0:
+            target_hours = timeline_days * 2  # Assume 2 hours of learning per day as a baseline
+            scale_factor = target_hours / total_duration
+            
+            # Apply scaling
+            total_duration = 0 # Reset to recalculate after scaling
+            for module in modules:
+                # Minimum 1 hour per module
+                scaled_time = max(1, round(module['time_estimate_hours'] * scale_factor))
+                module['time_estimate_hours'] = scaled_time
+                total_duration += scaled_time
+                
+        goal_text = None
+        if target_role and timeline_days:
+            goal_text = f"Achieve the role of {target_role} in approximately {timeline_days} days"
+        elif target_role:
+            goal_text = f"Achieve the role of {target_role}"
+        else:
+            goal_text = "Address identified skill gaps"
 
         # Calculate timeline
         timeline = self._calculate_timeline(modules)
@@ -111,9 +137,10 @@ class LearningPathGenerator:
             'course_coverage': course_coverage,
             'strategies': self._generate_learning_strategies(modules),
             'milestones': self._create_milestones(modules),
+            'goal': goal_text,
             'reasoning': {
                 'approach': 'Graph-aware adaptive learning path (skill_graph.json)',
-                'optimization': 'Prerequisites auto-injected, already-known skills skipped',
+                'optimization': 'Prerequisites auto-injected, already-known skills skipped' + (' (Scaled to Timeline)' if timeline_days else ''),
                 'personalization': 'Based on your current skill level and job requirements'
             }
         }

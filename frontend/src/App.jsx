@@ -45,6 +45,8 @@ const NavTab = ({ active, onClick, icon, label }) => (
 function App() {
   const [resumeText, setResumeText] = useState('')
   const [jobDescriptionText, setJobDescriptionText] = useState('')
+  const [targetRole, setTargetRole] = useState('')
+  const [timelineDays, setTimelineDays] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   
@@ -56,6 +58,7 @@ function App() {
   const [reasoningTrace, setReasoningTrace] = useState(null)
   const [timeSavedData, setTimeSavedData] = useState(null)
   const [resumeFeedback, setResumeFeedback] = useState(null)
+  const [goalText, setGoalText] = useState(null)
   
   const [activeTab, setActiveTab] = useState('upload')
   const [auth, setAuth] = useState({
@@ -108,6 +111,8 @@ function App() {
       const response = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
         resume_text: resumeText,
         job_description_text: jobDescriptionText,
+        target_role: targetRole || undefined,
+        timeline_days: timelineDays || undefined
       }, config)
 
       const data = response.data
@@ -121,6 +126,7 @@ function App() {
       setReasoningTrace(data.reasoning_trace)
       setTimeSavedData(data.efficiency_metrics)
       setResumeFeedback(data.resume_feedback)
+      setGoalText(data.goal)
       
       setActiveTab('results')
     } catch (err) {
@@ -140,6 +146,7 @@ function App() {
     setReasoningTrace(null)
     setTimeSavedData(null)
     setResumeFeedback(null)
+    setGoalText(null)
     setError(null)
     setActiveTab('upload')
   }
@@ -289,6 +296,10 @@ function App() {
                       jobDescriptionText={jobDescriptionText}
                       onResumeChange={setResumeText}
                       onJobDescriptionChange={setJobDescriptionText}
+                      targetRole={targetRole}
+                      onTargetRoleChange={setTargetRole}
+                      timelineDays={timelineDays}
+                      onTimelineChange={setTimelineDays}
                       onAnalyze={handleAnalyze}
                       loading={loading}
                     />
@@ -362,6 +373,15 @@ function App() {
                 )}
                 {activeTab === 'path' && learningPath && (
                   <motion.div key="path" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    {goalText && (
+                      <div className="mb-6 p-4 rounded-xl border border-white/10 bg-[#34d399]/10 flex items-center gap-3">
+                        <FiTarget className="text-[#34d399] text-xl" />
+                        <div>
+                           <h3 className="text-xs font-black text-white uppercase tracking-widest">Active Smart Goal</h3>
+                           <p className="text-sm text-[#34d399] font-medium mt-1">{goalText}</p>
+                        </div>
+                      </div>
+                    )}
                     <LearningPath data={learningPath} />
                   </motion.div>
                 )}

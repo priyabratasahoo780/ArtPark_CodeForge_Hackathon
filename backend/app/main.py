@@ -240,6 +240,8 @@ class OnboardingRequest(BaseModel):
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
     engagement_metrics: Optional[Dict[str, Any]] = None
+    target_role: Optional[str] = None
+    timeline_days: Optional[int] = None
 
 
 class MultiOnboardingRequest(BaseModel):
@@ -267,6 +269,7 @@ class OnboardingResponse(BaseModel):
     burnout_status: Optional[Dict] = None
     career_paths: Optional[List[str]] = None
     market_insights: Optional[Dict[str, List[str]]] = None
+    goal: Optional[str] = None
 
 class ProgressUpdateRequest(BaseModel):
     resume_text: str
@@ -678,13 +681,15 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         )
 
         # Step 4: Generate learning path
+        # Step 3: Generate Adaptive Learning Path
         logger.info("Generating adaptive learning path...")
-        gaps_to_address = gap_analyzer.prioritize_skills_to_learn(gap_analysis)
         learning_path = learning_path_generator.generate_learning_path(
-            gaps_to_address, 
-            resume_skills_full, 
-            learning_style=learning_style, 
-            burnout_detected=burnout_status['burnout']
+            gap_analysis['missing_skills'] + gap_analysis['partial_skills'],
+            resume_skills_full,
+            learning_style=learning_style,
+            burnout_detected=burnout_status.get('burnout', False),
+            target_role=request.target_role,
+            timeline_days=request.timeline_days
         )
 
         # Step 4b: Generate resume feedback
@@ -774,7 +779,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             learning_style=learning_style,
             burnout_status=burnout_status,
             career_paths=career_predictions['next_roles'],
-            market_insights=market_insights
+            market_insights=market_insights,
+            goal=learning_path.get('goal')
         )
     except HTTPException:
         raise
@@ -991,6 +997,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'burnout_status': burnout_status,
             'career_paths': career_predictions['next_roles'],
             'market_insights': market_insights,
+            'goal': updated_learning_path.get('goal'),
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
