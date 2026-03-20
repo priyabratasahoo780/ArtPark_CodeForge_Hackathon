@@ -77,7 +77,7 @@ class DependencyResolver:
                         "required_level": meta.get("level", "Intermediate"),
                         "prerequisites": meta.get("requires", []),
                         "gap_score": 2,
-                        "reason": f"Prerequisite for learning other required skills",
+                        "reason": f"{meta.get('canonical_name', prereq_lower.title())} recommended because it is a fundamental prerequisite to master required skills",
                         "is_injected_prerequisite": True,
                     }
 

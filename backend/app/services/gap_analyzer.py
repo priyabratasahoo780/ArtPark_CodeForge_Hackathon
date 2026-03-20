@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from enum import Enum
 import logging
 
@@ -25,7 +25,7 @@ class SkillGapAnalyzer:
     def __init__(self):
         pass
     
-    def analyze_gaps(self, resume_skills: List[Dict], job_skills: List[Dict]) -> Dict:
+    def analyze_gaps(self, resume_skills: List[Dict], job_skills: List[Dict], role_name: Optional[str] = None) -> Dict:
         """
         Analyze skill gaps between resume and job requirements.
         
@@ -56,7 +56,7 @@ class SkillGapAnalyzer:
                     'resume_level': resume_skill.get('level', 'Unknown'),
                     'required_level': job_skill.get('level', 'Intermediate'),
                     'gap_score': gap_score,
-                    'reason': self._generate_gap_reason(resume_skill, job_skill, gap_score)
+                    'reason': self._generate_gap_reason(resume_skill, job_skill, gap_score, role_name)
                 }
                 
                 if gap_score <= 0:
@@ -71,7 +71,7 @@ class SkillGapAnalyzer:
                     'required_level': job_skill.get('level', 'Intermediate'),
                     'prerequisites': job_skill.get('prerequisites', []),
                     'gap_score': 3,
-                    'reason': f"Missing {job_skill['name']} skill - required by job"
+                    'reason': f"{job_skill['name']} recommended because missing and required" + (f" for {role_name} role" if role_name else "")
                 })
         
         # Sort by gap score (descending - most critical first)
@@ -115,15 +115,16 @@ class SkillGapAnalyzer:
         
         return required_rank - resume_rank
     
-    def _generate_gap_reason(self, resume_skill: Dict, job_skill: Dict, gap_score: float) -> str:
+    def _generate_gap_reason(self, resume_skill: Dict, job_skill: Dict, gap_score: float, role_name: Optional[str] = None) -> str:
         """Generate human-readable reason for gap."""
         resume_level = resume_skill.get('level', 'Beginner')
         required_level = job_skill.get('level', 'Intermediate')
+        role_context = f" for {role_name} role" if role_name else ""
         
         if gap_score <= 0:
-            return f"You have '{resume_level}' level, job requires '{required_level}'"
+            return f"Already mastered at {resume_level} level"
         else:
-            return f"Need to improve from '{resume_level}' to '{required_level}' level"
+            return f"{job_skill['name']} recommended because current level ({resume_level}) needs improvement to {required_level}{role_context}"
     
     def _calculate_readiness_score(self, known: int, partial: int, missing: int, total: int) -> float:
         """

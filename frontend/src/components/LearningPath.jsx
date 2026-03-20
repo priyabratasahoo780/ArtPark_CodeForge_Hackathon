@@ -137,6 +137,15 @@ export default function LearningPath({ data }) {
                         className="overflow-hidden"
                       >
                         <div className="mt-6 pt-6 border-t border-white/10 space-y-6">
+                          {module.reason && (
+                            <div className="bg-[#bc13fe]/10 border-l-2 border-[#bc13fe] p-3 rounded-r-lg">
+                              <h5 className="text-[10px] font-black text-[#bc13fe] uppercase tracking-widest flex items-center gap-2 mb-1.5">
+                                <FiTarget className="text-[#bc13fe]" /> AI Reasoning Trace
+                              </h5>
+                              <p className="text-xs text-gray-300 font-medium leading-relaxed italic">{module.reason}</p>
+                            </div>
+                          )}
+
                           <div>
                             <p className="text-[9px] font-black text-[#bc13fe] uppercase tracking-widest mb-2">Learning Objectives</p>
                             <ul className="space-y-2">

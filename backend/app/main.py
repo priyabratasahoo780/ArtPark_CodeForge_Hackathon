@@ -438,7 +438,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
 
         gap_analysis = gap_analyzer.analyze_gaps(
             resume_skills_full,
-            effective_required_skills
+            effective_required_skills,
+            role_match['role']
         )
 
         # Step 4: Generate learning path
