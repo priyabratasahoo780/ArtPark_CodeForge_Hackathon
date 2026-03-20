@@ -20,7 +20,8 @@ BACKEND AI & ALGORITHMS:
 - Explainability Engine: Transparent reasoning traces for every recommendation and gap analysis.
 - Priority Scoring: Ranking skills by importance and learning difficulty.
 - RESTful API: 8 specialized endpoints (using FastAPI) for modular analysis.
-- Resume Feedback Engine: Actionable suggestions, project ideas and keywords to optimize resumes. [NEW]
+- Resume Feedback Engine: Actionable suggestions, project ideas and keywords to optimize resumes.
+- Cross-Domain Adaptability: Support for non-tech roles (Marketing, Sales, HR, Finance) with automatic domain detection. [NEW]
 
 FRONTEND & USER EXPERIENCE:
 - Modern React Interface: Responsive design built with React 19 and Tailwind CSS.

@@ -14,6 +14,7 @@ from app.services.voice_explainer import VoiceExplainer
 from app.services.time_analytics import TimeAnalytics
 from app.services.resume_benchmarker import ResumeBenchmarker
 from app.services.feedback_generator import ResumeFeedbackGenerator
+from app.services.domain_classifier import DomainClassifier
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +50,7 @@ resume_benchmarker = ResumeBenchmarker(
     role_matcher=role_matcher,
 )
 feedback_generator = ResumeFeedbackGenerator()
+domain_classifier = DomainClassifier()
 
 
 # ==================== Pydantic Models ====================
@@ -82,6 +84,7 @@ class OnboardingRequest(BaseModel):
 
 class OnboardingResponse(BaseModel):
     skills_analysis: Dict
+    detected_domain: Dict
     gap_analysis: Dict
     learning_path: Dict
     reasoning_trace: Dict
@@ -448,7 +451,9 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
         resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
 
         # Step 5: Generate reasoning trace
-        logger.info("Building reasoning trace...")
+        logger.info("Classifying domain and building reasoning trace...")
+        domain_result = domain_classifier.classify_domain(request.resume_text + " " + request.job_description_text)
+        
         role_info = (
             f"Role: '{role_match['role']}' (confidence {role_match['confidence']:.2f}, {hybrid_result['source']} mode)"
         )
@@ -498,6 +503,7 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
                     'mode': hybrid_result['source'],
                 }
             },
+            detected_domain=domain_result,
             gap_analysis=gap_analysis,
             learning_path=learning_path,
             reasoning_trace=reasoning_trace,

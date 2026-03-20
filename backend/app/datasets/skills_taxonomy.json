@@ -190,6 +190,102 @@
         "description": "Linear algebra, calculus for ML/AI"
       }
     },
+    "marketing": {
+      "SEO": {
+        "category": "Marketing",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Search Engine Optimization to improve web visibility"
+      },
+      "SEM": {
+        "category": "Marketing",
+        "level": "intermediate",
+        "prerequisites": ["SEO"],
+        "description": "Search Engine Marketing using paid advertising"
+      },
+      "Content Strategy": {
+        "category": "Marketing",
+        "level": "advanced",
+        "prerequisites": ["Copywriting"],
+        "description": "Planning and managing content lifecycle"
+      },
+      "Google Analytics": {
+        "category": "Marketing Analytics",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Web analytics service to track website traffic"
+      },
+      "Social Media Management": {
+        "category": "Marketing",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Managing social media presence and engagement"
+      },
+      "Copywriting": {
+        "category": "Marketing",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Writing persuasive text for advertising"
+      }
+    },
+    "human_resources": {
+      "Recruitment": {
+        "category": "HR",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Process of finding and hiring candidates"
+      },
+      "Talent Acquisition": {
+        "category": "HR",
+        "level": "advanced",
+        "prerequisites": ["Recruitment"],
+        "description": "Strategic approach to finding and hiring specialists"
+      },
+      "Onboarding": {
+        "category": "HR",
+        "level": "beginner",
+        "prerequisites": [],
+        "description": "Integrating new employees into the organization"
+      },
+      "Payroll Management": {
+        "category": "HR",
+        "level": "intermediate",
+        "prerequisites": ["Finance basics"],
+        "description": "Managing employee compensation and taxes"
+      },
+      "HRIS": {
+        "category": "HR Tech",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Human Resources Information Systems management"
+      }
+    },
+    "sales": {
+      "Lead Generation": {
+        "category": "Sales",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Identifying and cultivating potential customers"
+      },
+      "CRM": {
+        "category": "Sales Tech",
+        "level": "intermediate",
+        "prerequisites": [],
+        "description": "Customer Relationship Management software like Salesforce"
+      },
+      "Negotiation": {
+        "category": "Sales",
+        "level": "advanced",
+        "prerequisites": ["Communication"],
+        "description": "Bargaining to reach a mutually beneficial agreement"
+      },
+      "B2B Sales": {
+        "category": "Sales",
+        "level": "advanced",
+        "prerequisites": ["Lead Generation"],
+        "description": "Business-to-business sales specialized strategies"
+      }
+    },
     "devops": {
       "Docker": {
         "category": "Containerization",
@@ -283,6 +379,18 @@
     "ML Engineer": {
       "required_skills": ["Python", "Machine Learning", "TensorFlow", "Mathematics", "Statistics"],
       "nice_to_have": ["Deep Learning", "PyTorch"]
+    },
+    "Marketing Manager": {
+      "required_skills": ["SEO", "SEM", "Content Strategy", "Google Analytics", "Communication"],
+      "nice_to_have": ["Copywriting", "Social Media Management"]
+    },
+    "HR Generalist": {
+      "required_skills": ["Recruitment", "Onboarding", "Payroll Management", "Communication", "Time Management"],
+      "nice_to_have": ["HRIS", "Talent Acquisition"]
+    },
+    "Sales Executive": {
+      "required_skills": ["Lead Generation", "CRM", "Negotiation", "Communication", "Time Management"],
+      "nice_to_have": ["B2B Sales", "Leadership"]
     }
   }
 }
