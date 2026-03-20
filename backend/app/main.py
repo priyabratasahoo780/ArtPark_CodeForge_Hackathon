@@ -42,6 +42,22 @@ app.add_middleware(
 # Include Auth Router
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
+# ==================== Initialize Services (must be before route handlers) ====================
+skill_extractor = SkillExtractor()
+gap_analyzer = SkillGapAnalyzer()
+learning_path_generator = LearningPathGenerator()
+dependency_resolver = DependencyResolver()
+role_matcher = RoleMatcher()
+voice_explainer = VoiceExplainer()
+time_analytics = TimeAnalytics()
+resume_benchmarker = ResumeBenchmarker(
+    skill_extractor=skill_extractor,
+    gap_analyzer=gap_analyzer,
+    role_matcher=role_matcher,
+)
+feedback_generator = ResumeFeedbackGenerator()
+domain_classifier = DomainClassifier()
+
 # ==================== Pydantic Models ====================
 
 class SkillInfo(BaseModel):
@@ -107,9 +123,10 @@ async def analyze_multiple_resumes(request: MultiOnboardingRequest, current_user
         # Analyze each resume
         skills = skill_extractor.extract_skills(resume_text)
         jd_skills = skill_extractor.extract_skills(request.job_description_text)
-        gaps = gap_analyzer.analyze_gaps(skills, jd_skills)
+        role_match = role_matcher.match_role(request.job_description_text)
+        gaps = gap_analyzer.analyze_gaps(skills, jd_skills, role_match.get('role', 'General'))
         path = learning_path_generator.generate_path(gaps)
-        
+
         # Calculate time saved (mock or real logic)
         ts = time_analytics.calculate_time_saved(gaps, path)
         
@@ -180,21 +197,7 @@ async def get_extended_analytics(current_user=Depends(RoleChecker([RoleEnum.HR])
         ]
     }
 
-# Initialize services
-skill_extractor = SkillExtractor()
-gap_analyzer = SkillGapAnalyzer()
-learning_path_generator = LearningPathGenerator()
-dependency_resolver = DependencyResolver()
-role_matcher = RoleMatcher()
-voice_explainer = VoiceExplainer()
-time_analytics = TimeAnalytics()
-resume_benchmarker = ResumeBenchmarker(
-    skill_extractor=skill_extractor,
-    gap_analyzer=gap_analyzer,
-    role_matcher=role_matcher,
-)
-feedback_generator = ResumeFeedbackGenerator()
-domain_classifier = DomainClassifier()
+# Services already initialized above (before route handlers)
 
 
 # ==================== Pydantic Models ====================
