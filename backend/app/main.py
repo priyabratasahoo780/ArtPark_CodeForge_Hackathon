@@ -22,6 +22,7 @@ from app.services.market_trend_analyzer import MarketTrendAnalyzer
 from app.services.learning_efficiency_calculator import LearningEfficiencyCalculator
 from app.services.doubt_detector import DoubtDetector
 from app.services.skill_decay_detector import SkillDecayDetector
+from app.services.resume_updater import ResumeUpdater
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -71,6 +72,7 @@ market_trend_analyzer = MarketTrendAnalyzer()
 learning_efficiency_calculator = LearningEfficiencyCalculator()
 doubt_detector = DoubtDetector()
 skill_decay_detector = SkillDecayDetector()
+resume_updater = ResumeUpdater()
 
 # ==================== Pydantic Models ====================
 
@@ -249,6 +251,25 @@ class ProgressUpdateRequest(BaseModel):
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
     engagement_metrics: Optional[Dict[str, Any]] = None
+
+class ProgressUpdateResponse(BaseModel):
+    updated_learning_path: Dict[str, Any]
+    progress_summary: Dict[str, Any]
+    burnout_status: bool
+    career_paths: Optional[List[str]] = None
+    market_insights: Optional[Dict[str, List[str]]] = None
+    goal: Optional[str] = None
+    efficiency_score: Optional[int] = None
+    doubt_status: Optional[Dict] = None
+    decayed_skills: Optional[List[Dict]] = None
+
+class ResumeGenerateRequest(BaseModel):
+    original_resume: str
+    completed_skills: List[str]
+    goal: Optional[str] = None
+
+class ResumeGenerateResponse(BaseModel):
+    enhanced_resume: str
 
 class LearningStyleRequest(BaseModel):
     interactions: Dict[str, int]
