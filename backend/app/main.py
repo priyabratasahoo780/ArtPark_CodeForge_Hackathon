@@ -15,6 +15,7 @@ from app.services.time_analytics import TimeAnalytics
 from app.services.resume_benchmarker import ResumeBenchmarker
 from app.services.feedback_generator import ResumeFeedbackGenerator
 from app.services.domain_classifier import DomainClassifier
+from app.routes import auth
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +36,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include Auth Router
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
 # Initialize services
 skill_extractor = SkillExtractor()
