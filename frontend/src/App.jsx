@@ -12,6 +12,7 @@ import VoiceExplain from './components/VoiceExplain'
 import TimeSavedAnalytics from './components/TimeSavedAnalytics'
 import CandidateBenchmark from './components/CandidateBenchmark'
 import ResumeFeedback from './components/ResumeFeedback'
+import Login from './components/Login'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -22,6 +23,10 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('upload')
+  const [auth, setAuth] = useState({
+    token: localStorage.getItem('token'),
+    role: localStorage.getItem('role')
+  })
   
   // Analysis results
   const [analysisResults, setAnalysisResults] = useState(null)
@@ -47,7 +52,8 @@ function App() {
         job_description_text: jobDescriptionText
       }, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
         }
       })
 
@@ -63,6 +69,10 @@ function App() {
         const tsResp = await axios.post(`${API_BASE_URL}/analytics/time-saved`, {
           gap_analysis: response.data.gap_analysis,
           learning_path: response.data.learning_path,
+        }, {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`
+          }
         })
         setTimeSavedData(tsResp.data)
       } catch (_) {}
@@ -104,6 +114,17 @@ function App() {
     link.click()
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('role')
+    setAuth({ token: null, role: null })
+    handleReset()
+  }
+
+  if (!auth.token) {
+    return <Login onLogin={setAuth} />
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative">
       {/* Background Decorative Blurs */}
@@ -142,6 +163,15 @@ function App() {
                 </button>
               </div>
             )}
+            
+            <div className="flex items-center gap-4 ml-auto lg:ml-6 pl-6 border-l border-white/10">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00f3ff] bg-[#00f3ff]/10 px-2 py-1 rounded">
+                Role: {auth.role}
+              </span>
+              <button onClick={handleLogout} className="text-xs font-bold text-gray-400 hover:text-white transition-colors">
+                Logout
+              </button>
+            </div>
           </div>
         </header>
 
