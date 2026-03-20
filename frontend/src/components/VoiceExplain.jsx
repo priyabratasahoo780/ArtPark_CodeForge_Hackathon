@@ -4,7 +4,7 @@ import { FiMic, FiSquare, FiChevronDown, FiCloud, FiActivity } from 'react-icons
 
 const API_BASE_URL = 'http://localhost:8000'
 
-export default function VoiceExplain({ reasoningTrace, gapStats }) {
+export default function VoiceExplain({ reasoningTrace, gapStats, auth }) {
   const [mode, setMode] = useState('idle') // idle | speaking | loading | playing | error
   const [script, setScript] = useState('')
   const [audioSrc, setAudioSrc] = useState(null)
@@ -16,15 +16,27 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
 
   const buildScript = useCallback(() => {
     const parts = []
-    parts.push("Here is your personalized onboarding analysis.")
-    if (gapStats) {
-      parts.push(`You currently have ${gapStats.known_count} out of ${gapStats.total_required_skills} required skills. Readiness score is ${gapStats.readiness_score} percent.`)
+    const role = auth?.role || 'USER'
+    
+    if (role === 'HR') {
+      parts.push("Here is the candidate benchmarking brief.")
+      if (gapStats) {
+        parts.push(`The candidate matches ${gapStats.known_count} out of ${gapStats.total_required_skills} core competencies, resulting in a readiness score of ${gapStats.readiness_score} percent.`)
+      }
+      const insights = reasoningTrace?.key_insights || []
+      if (insights.length > 0) parts.push("Key potential markers include " + insights.slice(0, 2).join('. '))
+    } else {
+      parts.push("Here is your personalized onboarding analysis.")
+      if (gapStats) {
+        parts.push(`You currently have ${gapStats.known_count} out of ${gapStats.total_required_skills} required skills. Readiness score is ${gapStats.readiness_score} percent.`)
+      }
+      const insights = reasoningTrace?.key_insights || []
+      if (insights.length > 0) parts.push("Key insights include " + insights.slice(0, 2).join('. '))
     }
-    const insights = reasoningTrace?.key_insights || []
-    if (insights.length > 0) parts.push("Key insights include " + insights.slice(0, 2).join('. '))
-    parts.push("Good luck with your journey!")
+    
+    parts.push("End of briefing.")
     return parts.join(' ')
-  }, [reasoningTrace, gapStats])
+  }, [reasoningTrace, gapStats, auth?.role])
 
   const speakWithBrowser = useCallback(() => {
     if (!browserTTSAvailable) return false
@@ -50,7 +62,11 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
       const res = await fetch(`${API_BASE_URL}/explain/voice`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reasoning_trace: reasoningTrace, gap_stats: gapStats }),
+        body: JSON.stringify({ 
+          reasoning_trace: reasoningTrace, 
+          gap_stats: gapStats,
+          role: auth?.role || 'USER'
+        }),
       })
       const data = await res.json()
       setScript(data.script || '')
@@ -63,7 +79,7 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
     } catch (err) {
       setError('Connection failed'); setMode('error')
     }
-  }, [reasoningTrace, gapStats])
+  }, [reasoningTrace, gapStats, auth?.role])
 
   const handleSpeak = () => {
     if (mode === 'speaking' || mode === 'playing') {

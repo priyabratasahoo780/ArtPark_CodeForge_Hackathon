@@ -52,6 +52,7 @@ class VoiceExplainer:
         reasoning_trace: Dict,
         gap_stats: Optional[Dict] = None,
         custom_text: Optional[str] = None,
+        role: str = "USER"
     ) -> Dict:
         """
         Generate a voice explanation for the analysis.
@@ -69,7 +70,7 @@ class VoiceExplainer:
                 "tts_available": bool
             }
         """
-        script = custom_text if custom_text else self._build_script(reasoning_trace, gap_stats)
+        script = custom_text if custom_text else self._build_script(reasoning_trace, gap_stats, role)
         audio_b64 = ""
         audio_mime = ""
 
@@ -111,7 +112,7 @@ class VoiceExplainer:
     # ------------------------------------------------------------------ #
 
     def _build_script(
-        self, reasoning_trace: Dict, gap_stats: Optional[Dict]
+        self, reasoning_trace: Dict, gap_stats: Optional[Dict], role: str = "USER"
     ) -> str:
         """Build a natural-sounding spoken explanation from the reasoning trace."""
         parts = []
@@ -133,24 +134,36 @@ class VoiceExplainer:
                 f"Your skill coverage is {coverage} percent and your readiness score is {readiness} out of 100."
             )
             if missing > 0 or partial > 0:
-                parts.append(
-                    f"You have {missing} missing skills and {partial} skills that need improvement."
-                )
+                if role == "HR":
+                    parts.append(
+                        f"There are {missing} critical gaps identified. "
+                        f"This candidate requires targeted training in these areas to meet benchmark standards."
+                    )
+                else:
+                    parts.append(
+                        f"You have {missing} missing skills and {partial} skills that need improvement."
+                    )
 
         # Role analysis
         role_info = reasoning_trace.get("role_analysis", {})
         if role_info:
-            role = role_info.get("matched_role", "")
+            role_name = role_info.get("matched_role", "specified")
             conf = role_info.get("confidence", 0)
             mode = role_info.get("mode", "")
             added = role_info.get("skills_added_from_role", [])
-            if role:
+            if role == "HR":
                 parts.append(
-                    f"Based on the job description, your closest role match is {role}, "
+                    f"Our neural engine matches this profile to the {role_name} track "
+                    f"with {round(conf * 100)} percent certainty. "
+                    f"We have automatically adjusted the required skill set for this role."
+                )
+            else:
+                parts.append(
+                    f"Based on the job description, your closest role match is {role_name}, "
                     f"with a confidence of {round(conf * 100)} percent. "
                     f"Mode: {mode}."
                 )
-            if added:
+            if added and role == "USER":
                 parts.append(
                     f"The following core skills were added from your role track: "
                     f"{', '.join(added[:5])}."
@@ -180,9 +193,15 @@ class VoiceExplainer:
                 parts.append(rec + ".")
 
         # Closing
-        parts.append(
-            "Your personalized learning path has been generated. "
-            "Good luck with your onboarding journey!"
-        )
+        if role == "HR":
+            parts.append(
+                "This concludes the candidate potential brief. "
+                "Detailed metrics are available in your dashboard."
+            )
+        else:
+            parts.append(
+                "Your personalized learning path has been generated. "
+                "Good luck with your onboarding journey!"
+            )
 
         return " ".join(parts)

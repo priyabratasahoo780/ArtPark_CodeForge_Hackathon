@@ -259,6 +259,7 @@ class VoiceExplainRequest(BaseModel):
     gap_stats: Optional[Dict] = None
     custom_text: Optional[str] = None
     lang: Optional[str] = "en"
+    role: Optional[str] = "USER"
 
 
 class VoiceExplainSkillRequest(BaseModel):
@@ -380,6 +381,7 @@ async def explain_voice(request: VoiceExplainRequest, current_user=Depends(RoleC
             reasoning_trace=request.reasoning_trace,
             gap_stats=request.gap_stats,
             custom_text=request.custom_text,
+            role=request.role or "USER"
         )
         return result
     except Exception as e:

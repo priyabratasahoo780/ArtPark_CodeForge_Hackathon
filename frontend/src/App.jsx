@@ -291,7 +291,7 @@ function App() {
                     className="space-y-8"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <VoiceExplain reasoningTrace={reasoningTrace} gapStats={gapAnalysis?.statistics} />
+                      <VoiceExplain reasoningTrace={reasoningTrace} gapStats={gapAnalysis?.statistics} auth={auth} />
                       {timeSavedData && <TimeSavedAnalytics data={timeSavedData} />}
                     </div>
 
