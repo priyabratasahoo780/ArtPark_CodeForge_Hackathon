@@ -10,6 +10,7 @@ import ErrorAlert from './components/ErrorAlert'
 import VoiceExplain from './components/VoiceExplain'
 import TimeSavedAnalytics from './components/TimeSavedAnalytics'
 import CandidateBenchmark from './components/CandidateBenchmark'
+import ResumeFeedback from './components/ResumeFeedback'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -28,6 +29,7 @@ function App() {
   const [learningPath, setLearningPath] = useState(null)
   const [reasoningTrace, setReasoningTrace] = useState(null)
   const [timeSavedData, setTimeSavedData] = useState(null)
+  const [resumeFeedback, setResumeFeedback] = useState(null)
 
   const handleAnalyze = async () => {
     if (!resumeText.trim() || !jobDescriptionText.trim()) {
@@ -53,6 +55,7 @@ function App() {
       setGapAnalysis(response.data.gap_analysis)
       setLearningPath(response.data.learning_path)
       setReasoningTrace(response.data.reasoning_trace)
+      setResumeFeedback(response.data.resume_feedback)
       setActiveTab('results')
 
       // Feature 7: Fetch time-saved analytics (non-blocking — won't break UX if it fails)
@@ -86,6 +89,7 @@ function App() {
     setLearningPath(null)
     setReasoningTrace(null)
     setTimeSavedData(null)
+    setResumeFeedback(null)
     setError(null)
     setActiveTab('upload')
   }
@@ -168,6 +172,7 @@ function App() {
                 { id: 'results', label: '📊 Results' },
                 { id: 'skills', label: '🎯 Skills' },
                 { id: 'gaps', label: '⚠️ Gaps' },
+                { id: 'feedback', label: '💡 Feedback' },
                 { id: 'path', label: '🛣️ Learning Path' },
               ].map(tab => (
                 <button
@@ -307,6 +312,12 @@ function App() {
             {activeTab === 'path' && learningPath && (
               <LearningPath data={learningPath} />
             )}
+
+            {activeTab === 'feedback' && resumeFeedback && (
+              <div className="card">
+                <ResumeFeedback feedback={resumeFeedback} />
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -315,7 +326,7 @@ function App() {
       <footer className="bg-black/20 border-t border-white/10 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-purple-200">
           <p>AI-Adaptive Onboarding Engine • Powered by Advanced NLP & Machine Learning</p>
-          <p className="text-sm mt-2">© 2024 CodeForge Hackathon</p>
+          <p className="text-sm mt-2">© 2026 CodeForge Hackathon</p>
         </div>
       </footer>
     </div>

@@ -1,0 +1,73 @@
+PROJECT FEATURE TRACKING: AI-ADAPTIVE ONBOARDING ENGINE
+=========================================================
+
+This document tracks the features currently implemented in the project and provides a roadmap for future enhancements.
+
+CURRENTLY IMPLEMENTED FEATURES
+------------------------------
+
+BACKEND AI & ALGORITHMS:
+- Intelligent Resume Parsing: Extract skills, experience levels, and expertise areas using NLP.
+- Job Requirement Analysis: Deep analysis of job descriptions to identify mandatory vs. "nice-to-have" skills.
+- Skill Gap Detection Engine: 
+    - Categorization: Known, Partial, and Missing skills.
+    - Confidence scoring for extraction accuracy.
+    - Readiness scoring (0-100%).
+- Adaptive Learning Path Generator:
+    - Dependency Graph Analysis: Ensures logical sequencing of learning modules.
+    - Topological Sorting: Handles prerequisite relationships.
+    - Time Estimation: Personalized learning durations based on skill level.
+- Explainability Engine: Transparent reasoning traces for every recommendation and gap analysis.
+- Priority Scoring: Ranking skills by importance and learning difficulty.
+- RESTful API: 8 specialized endpoints (using FastAPI) for modular analysis.
+- Resume Feedback Engine: Actionable suggestions, project ideas and keywords to optimize resumes. [NEW]
+
+FRONTEND & USER EXPERIENCE:
+- Modern React Interface: Responsive design built with React 19 and Tailwind CSS.
+- Dual Input System: Support for both file uploads (PDF, DOCX, TXT) and direct text pasting.
+- Interactive Visualizations:
+    - Dynamic progress bars for skill levels.
+    - Tabbed navigation for Results, Skills, Gaps, and Learning Paths.
+    - Responsive layout for mobile and desktop.
+- Real-time Feedback: Loading states and error alerts for a smooth UX.
+- Data Export: Ability to download the full analysis report as a JSON file.
+
+DEVOPS & DOCUMENTATION:
+- Containerization: Full Docker support with docker-compose for frontend and backend.
+- Comprehensive Docs: 7 detailed guides (README, SETUP, API, etc.) covering all aspects of the system.
+- Sample Data: Included datasets for immediate testing and demonstration.
+
+
+TECHNICAL STACK
+---------------
+
+FRONTEND:
+- Framework: React 19.2+ with Vite
+- Styling: Tailwind CSS 3.3+
+- Icons: React Icons
+- HTTP Client: Axios
+
+BACKEND:
+- Framework: FastAPI (Python 3.9+)
+- NLP & ML: 
+    - spaCy: Advanced Natural Language Processing.
+    - sentence-transformers: For semantic skill matching.
+    - scikit-learn: For scoring and analysis algorithms.
+- Data Engineering: pandas, numpy
+- Document Parsing: PyPDF2 (PDF support), python-multipart
+
+
+FUTURE FEATURE ROADMAP (TO BE ADDED)
+------------------------------------
+
+[ ] Video Resource Integration: Automatically fetch relevant YouTube/educational videos.
+[ ] Interactive Quizzes: Add self-assessment quizzes at the end of each learning module.
+[ ] LMS Integration: Seamless export/sync with platforms like Moodle or Canvas.
+[ ] Mobile Application: Native mobile experience using React Native.
+[ ] Multi-language Support: Interface and NLP support for global onboarding.
+[ ] Community Recommendations: Suggested courses based on what other users found helpful.
+[ ] Advanced Analytics Dashboard: High-level view for HR managers.
+[ ] Real-time Collaboration: Allow mentors and new hires to discuss the learning path.
+
+---------------------------------------------------------
+Tip: To add a new feature, simply edit this text file in Notepad.

@@ -13,6 +13,7 @@ from app.services.role_matcher import RoleMatcher
 from app.services.voice_explainer import VoiceExplainer
 from app.services.time_analytics import TimeAnalytics
 from app.services.resume_benchmarker import ResumeBenchmarker
+from app.services.feedback_generator import ResumeFeedbackGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -47,6 +48,7 @@ resume_benchmarker = ResumeBenchmarker(
     gap_analyzer=gap_analyzer,
     role_matcher=role_matcher,
 )
+feedback_generator = ResumeFeedbackGenerator()
 
 
 # ==================== Pydantic Models ====================
@@ -83,6 +85,7 @@ class OnboardingResponse(BaseModel):
     gap_analysis: Dict
     learning_path: Dict
     reasoning_trace: Dict
+    resume_feedback: List[Dict]
 
 
 class ProgressUpdateRequest(BaseModel):
@@ -440,6 +443,10 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
         gaps_to_address = gap_analyzer.prioritize_skills_to_learn(gap_analysis)
         learning_path = learning_path_generator.generate_learning_path(gaps_to_address, resume_skills_full)
 
+        # Step 4b: Generate resume feedback
+        logger.info("Generating actionable resume feedback...")
+        resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
+
         # Step 5: Generate reasoning trace
         logger.info("Building reasoning trace...")
         role_info = (
@@ -493,7 +500,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
             },
             gap_analysis=gap_analysis,
             learning_path=learning_path,
-            reasoning_trace=reasoning_trace
+            reasoning_trace=reasoning_trace,
+            resume_feedback=resume_feedback
         )
     except HTTPException:
         raise
@@ -529,6 +537,35 @@ async def get_skill_explanation(skill_name: str, request: OnboardingRequest):
         return explanation
     except Exception as e:
         logger.error(f"Error getting skill explanation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.post("/analyze/resume-feedback", tags=["Analysis"])
+async def get_resume_feedback(request: OnboardingRequest):
+    """
+    Generate actionable feedback for the resume.
+    
+    Input: Resume text and job description text
+    Output: List of actionable suggestions, projects, and keywords
+    """
+    try:
+        # Extract and analyze
+        resume_result = skill_extractor.extract_from_resume(request.resume_text)
+        job_result = skill_extractor.extract_from_job_description(request.job_description_text)
+        
+        resume_skills_full = []
+        for skill in resume_result['skills']:
+            skill['level'] = skill.get('level', 'Intermediate')
+            resume_skills_full.append(skill)
+        
+        gap_analysis = gap_analyzer.analyze_gaps(resume_skills_full, job_result['required_skills'])
+        
+        # Generate feedback
+        feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
+        
+        return {"resume_feedback": feedback}
+    except Exception as e:
+        logger.error(f"Error generating resume feedback: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 

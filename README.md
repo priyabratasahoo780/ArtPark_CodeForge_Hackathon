@@ -1,4 +1,4 @@
-# 🚀 AI-Adaptive Onboarding Engine
+# 🚀 AI-Adaptive Onboarding Engine (2026 Edition)
 
 **Personalized Learning Pathways for New Hires**
 
@@ -617,7 +617,7 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## 👥 Team
 
-Built for **CodeForge Hackathon 2024**
+Built for **CodeForge Hackathon 2026**
 
 **Contributors:**
 - System Architecture & Backend: AI System Architect
