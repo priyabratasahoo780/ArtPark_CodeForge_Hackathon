@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { FiChevronDown, FiChevronUp, FiCheckCircle, FiAlertTriangle, FiXCircle, FiActivity } from 'react-icons/fi'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function GapAnalysis({ data }) {
   const [expandedSkill, setExpandedSkill] = useState(null)
@@ -13,182 +14,190 @@ export default function GapAnalysis({ data }) {
     setExpandedSkill(expandedSkill === skillName ? null : skillName)
   }
 
-  const SkillCard = ({ skill, status, onExpand, isExpanded }) => (
-    <div className="border-l-4 border-purple-500 pl-4 py-3 mb-3 bg-white rounded-r-lg shadow-sm hover:shadow-md transition-shadow">
-      <div
-        onClick={() => onExpand(skill.name)}
-        className="cursor-pointer flex items-center justify-between"
-      >
-        <div className="flex-1">
-          <h4 className="font-bold text-gray-800">{skill.name}</h4>
-          <p className="text-sm text-gray-600">{skill.category}</p>
-          {skill.reason && (
-            <p className="text-sm text-gray-700 mt-1 italic">💡 {skill.reason}</p>
-          )}
-        </div>
-        <div className="ml-4 flex items-center gap-2">
-          {skill.gap_score && (
-            <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold">
-              Gap: {skill.gap_score}/3
-            </span>
-          )}
-          {isExpanded ? <FiChevronUp className="text-2xl" /> : <FiChevronDown className="text-2xl" />}
-        </div>
-      </div>
+  const SkillCard = ({ skill, status, i }) => {
+    const isExpanded = expandedSkill === skill.name
+    
+    const statusConfig = {
+      known: { color: '#00f3ff', bg: 'rgba(0, 243, 255, 0.05)', icon: <FiCheckCircle /> },
+      partial: { color: '#bc13fe', bg: 'rgba(188, 19, 254, 0.05)', icon: <FiAlertTriangle /> },
+      missing: { color: '#ff00e5', bg: 'rgba(255, 0, 229, 0.05)', icon: <FiXCircle /> }
+    }
 
-      {isExpanded && (
-        <div className="mt-4 pt-4 border-t-2 border-gray-200 space-y-3">
-          {skill.resume_level && (
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Your Level:</span>
-              <span className="font-bold text-blue-600">{skill.resume_level}</span>
-            </div>
-          )}
-          {skill.required_level && (
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Required Level:</span>
-              <span className="font-bold text-indigo-600">{skill.required_level}</span>
-            </div>
-          )}
-          {skill.prerequisites && skill.prerequisites.length > 0 && (
+    const config = statusConfig[status]
+
+    return (
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: i * 0.05 }}
+        className="glass-card mb-4 border-l-4 overflow-hidden group hover:bg-white/[0.05]"
+        style={{ borderLeftColor: config.color }}
+      >
+        <div
+          onClick={() => toggleExpand(skill.name)}
+          className="cursor-pointer flex items-center justify-between pointer-events-auto"
+        >
+          <div className="flex items-center gap-4">
+            <div className="text-xl" style={{ color: config.color }}>{config.icon}</div>
             <div>
-              <span className="text-sm text-gray-600">Prerequisites:</span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {skill.prerequisites.map((prereq) => (
-                  <span key={prereq} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                    {prereq}
-                  </span>
-                ))}
-              </div>
+              <h4 className="font-black text-sm uppercase tracking-wider text-white group-hover:glow-text-cyan transition-all">{skill.name}</h4>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{skill.category}</p>
             </div>
-          )}
+          </div>
+          <div className="flex items-center gap-4">
+            {skill.gap_score && (
+              <span className="text-[10px] font-black uppercase px-2 py-1 rounded border" style={{ borderColor: `${config.color}44`, color: config.color }}>
+                Gap: {skill.gap_score}/3
+              </span>
+            )}
+            <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+              <FiChevronDown className="text-gray-500" />
+            </motion.div>
+          </div>
         </div>
-      )}
-    </div>
-  )
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 pt-4 border-t border-white/10 space-y-4">
+                {skill.reason && (
+                  <div className="bg-white/[0.02] p-3 rounded-lg border border-white/5">
+                    <p className="text-xs text-gray-400 italic font-medium leading-relaxed">
+                      <span className="text-[#00f3ff] not-italic mr-1">Analysis:</span> {skill.reason}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#0a0a0c] p-3 rounded-lg border border-white/5">
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Your Proficiency</p>
+                    <p className="text-sm font-bold text-[#00f3ff]">{skill.resume_level || 'Not Found'}</p>
+                  </div>
+                  <div className="bg-[#0a0a0c] p-3 rounded-lg border border-white/5">
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Requirement</p>
+                    <p className="text-sm font-bold text-[#bc13fe]">{skill.required_level || 'Expert'}</p>
+                  </div>
+                </div>
+
+                {skill.prerequisites && skill.prerequisites.length > 0 && (
+                  <div>
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2">Prerequisites</p>
+                    <div className="flex flex-wrap gap-2">
+                      {skill.prerequisites.map((prereq) => (
+                        <span key={prereq} className="bg-white/5 border border-white/10 px-2 py-1 rounded text-[10px] font-bold text-gray-300">
+                          {prereq}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card bg-gradient-to-br from-green-50 to-green-100">
-          <div className="text-sm text-green-600 font-semibold">✅ Known Skills</div>
-          <div className="text-3xl font-bold text-green-800 mt-2">{stats.known_count || 0}</div>
-          <div className="text-xs text-green-600 mt-1">
-            {stats.total_required_skills && stats.known_count
-              ? Math.round((stats.known_count / stats.total_required_skills) * 100)
-              : 0}% covered
-          </div>
+    <div className="space-y-8">
+      {/* Dynamic Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+            Gap <span className="text-[#bc13fe]">Matrix</span>
+          </h2>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Syllabus-aligned capability analysis</p>
         </div>
-
-        <div className="card bg-gradient-to-br from-yellow-50 to-yellow-100">
-          <div className="text-sm text-yellow-600 font-semibold">⚠️ Partial Skills</div>
-          <div className="text-3xl font-bold text-yellow-800 mt-2">{stats.partial_count || 0}</div>
-          <div className="text-xs text-yellow-600 mt-1">Need improvement</div>
-        </div>
-
-        <div className="card bg-gradient-to-br from-red-50 to-red-100">
-          <div className="text-sm text-red-600 font-semibold">❌ Missing Skills</div>
-          <div className="text-3xl font-bold text-red-800 mt-2">{stats.missing_count || 0}</div>
-          <div className="text-xs text-red-600 mt-1">To learn</div>
-        </div>
-
-        <div className="card bg-gradient-to-br from-purple-50 to-purple-100">
-          <div className="text-sm text-purple-600 font-semibold">📊 Readiness</div>
-          <div className="text-3xl font-bold text-purple-800 mt-2">{stats.readiness_score || 0}/100</div>
-          <div className="text-xs text-purple-600 mt-1">Job readiness score</div>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="card">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">Coverage Analysis</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Skill Coverage</span>
-            <span className="font-bold text-purple-600">{stats.coverage_percentage || 0}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-4 rounded-full transition-all duration-300"
-              style={{ width: `${stats.coverage_percentage || 0}%` }}
-            />
+        <div className="flex gap-2">
+          <div className="glass-card py-2 px-4 flex items-center gap-2">
+            <FiActivity className="text-[#00f3ff]" />
+            <span className="text-sm font-black text-white">{stats.readiness_score || 0}%</span>
           </div>
         </div>
       </div>
 
-      {/* Known Skills */}
-      {knownSkills.length > 0 && (
-        <div className="card">
-          <h2 className="text-2xl font-bold text-green-700 mb-4">✅ Known Skills ({knownSkills.length})</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            These skills are already in your skillset and meet or exceed job requirements
-          </p>
-          <div className="space-y-2">
-            {knownSkills.map((skill) => (
-              <SkillCard
-                key={skill.name}
-                skill={skill}
-                status="known"
-                onExpand={toggleExpand}
-                isExpanded={expandedSkill === skill.name}
-              />
-            ))}
+      {/* Hero Progress Section */}
+      <div className="card bg-gradient-to-br from-[#bc13fe]/5 to-transparent border-white/10">
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <h3 className="text-xs font-black text-[#bc13fe] uppercase tracking-widest mb-1">Overall Curriculum Coverage</h3>
+            <p className="text-3xl font-black text-white">{stats.coverage_percentage || 0}%</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Status</p>
+            <p className="text-sm font-black text-[#00f3ff] uppercase tracking-wider italic">
+              {stats.readiness_score > 70 ? 'Accelerated Path' : 'Standard Path'}
+            </p>
           </div>
         </div>
-      )}
-
-      {/* Partial Skills */}
-      {partialSkills.length > 0 && (
-        <div className="card">
-          <h2 className="text-2xl font-bold text-yellow-700 mb-4">⚠️ Partial Skills ({partialSkills.length})</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            You have some experience but need improvement to meet job requirements
-          </p>
-          <div className="space-y-2">
-            {partialSkills.map((skill) => (
-              <SkillCard
-                key={skill.name}
-                skill={skill}
-                status="partial"
-                onExpand={toggleExpand}
-                isExpanded={expandedSkill === skill.name}
-              />
-            ))}
-          </div>
+        <div className="progress-bar-container h-3 bg-white/5 border border-white/10">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${stats.coverage_percentage || 0}%` }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="progress-bar-fill bg-gradient-to-r from-[#bc13fe] via-[#00f3ff] to-[#ff00e5]"
+          />
         </div>
-      )}
+      </div>
 
-      {/* Missing Skills */}
-      {missingSkills.length > 0 && (
-        <div className="card">
-          <h2 className="text-2xl font-bold text-red-700 mb-4">❌ Missing Skills ({missingSkills.length})</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Critical skills you need to learn to be fully qualified for the role
-          </p>
-          <div className="space-y-2">
-            {missingSkills.map((skill) => (
-              <SkillCard
-                key={skill.name}
-                skill={skill}
-                status="missing"
-                onExpand={toggleExpand}
-                isExpanded={expandedSkill === skill.name}
-              />
-            ))}
+      {/* Skill Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Missing Skills - High Priority */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-[#ff00e5] shadow-[0_0_8px_#ff00e5]"></div>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Critical Gaps ({missingSkills.length})</h3>
           </div>
+          {missingSkills.map((skill, i) => (
+            <SkillCard key={skill.name} skill={skill} status="missing" i={i} />
+          ))}
+          {missingSkills.length === 0 && (
+            <p className="text-xs text-gray-500 italic uppercase font-bold tracking-wider text-center py-10 bg-white/[0.02] rounded-xl border border-dashed border-white/10">No Critical Gaps Found</p>
+          )}
         </div>
-      )}
 
-      {/* Summary */}
-      <div className="card bg-gradient-to-r from-blue-50 to-purple-50">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">📋 Summary</h3>
-        <p className="text-gray-700">
-          You have <strong>{stats.known_count}</strong> out of <strong>{stats.total_required_skills}</strong> required skills.
-          Your skill coverage is <strong>{stats.coverage_percentage}%</strong>, with a job readiness score of <strong>{stats.readiness_score}/100</strong>.
-          Focus on addressing the <strong>{stats.partial_count + stats.missing_count}</strong> skill gaps through targeted learning.
+        {/* Partial Skills */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-[#bc13fe] shadow-[0_0_8px_#bc13fe]"></div>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Growth Areas ({partialSkills.length})</h3>
+          </div>
+          {partialSkills.map((skill, i) => (
+            <SkillCard key={skill.name} skill={skill} status="partial" i={i} />
+          ))}
+        </div>
+
+        {/* Known Skills */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-[#00f3ff] shadow-[0_0_8px_#00f3ff]"></div>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Core Strengths ({knownSkills.length})</h3>
+          </div>
+          {knownSkills.map((skill, i) => (
+            <SkillCard key={skill.name} skill={skill} status="known" i={i} />
+          ))}
+        </div>
+      </div>
+
+      {/* Tactical Summary */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card border-white/10 bg-white/[0.02]"
+      >
+        <h3 className="text-xs font-black text-[#00f3ff] uppercase tracking-[0.2em] mb-4">Strategic Assessment</h3>
+        <p className="text-sm text-gray-300 leading-relaxed font-medium">
+          Detection analysis identifies <span className="text-[#00f3ff] font-black">{stats.known_count}</span> verified competencies. 
+          To achieve 100% readiness, focus must be prioritized on the <span className="text-[#ff00e5] font-black">{stats.missing_count}</span> critical gaps 
+          and <span className="text-[#bc13fe] font-black">{stats.partial_count}</span> optimization points.
         </p>
-      </div>
+      </motion.div>
     </div>
   )
 }

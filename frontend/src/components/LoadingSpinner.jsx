@@ -1,23 +1,55 @@
 import React from 'react'
+import { motion } from 'framer-motion'
+import { FiCpu } from 'react-icons/fi'
 
 export default function LoadingSpinner() {
   return (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="relative w-16 h-16 mb-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full animate-spin" />
-        <div className="absolute inset-1 bg-gradient-to-br from-slate-900 to-slate-900 rounded-full" />
-        <div className="absolute inset-1 flex items-center justify-center">
-          <span className="text-2xl">🧠</span>
+    <div className="flex flex-col items-center justify-center py-24 space-y-8">
+      <div className="relative">
+        {/* Outer Glow Ring */}
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+          className="w-32 h-32 rounded-full border-t-2 border-b-2 border-[#00f3ff] shadow-[0_0_40px_rgba(0,243,255,0.3)]"
+        />
+        
+        {/* Inner Counter-Rotating Ring */}
+        <motion.div 
+          animate={{ rotate: -360 }}
+          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+          className="absolute inset-4 rounded-full border-l-2 border-r-2 border-[#bc13fe] shadow-[0_0_30px_rgba(188,19,254,0.3)]"
+        />
+
+        {/* Central Core */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+          >
+            <FiCpu className="text-3xl text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+          </motion.div>
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-white mt-4">Analyzing Your Profile...</h2>
-      <p className="text-purple-200 mt-2 text-center">
-        Extracting skills • Analyzing gaps • Generating learning path
-      </p>
-      <div className="mt-6 flex gap-2">
-        <div className="w-2 h-8 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-        <div className="w-2 h-8 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-        <div className="w-2 h-8 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+
+      <div className="text-center space-y-3">
+        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">
+          Neural <span className="text-[#00f3ff]">Synthesis</span>
+        </h2>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-[10px] font-black text-[#bc13fe] uppercase tracking-[0.4em] animate-pulse">
+            Constructing Adaptation Matrix
+          </p>
+          <div className="flex gap-1.5 mt-2">
+            {[0, 0.1, 0.2].map((delay, i) => (
+              <motion.div
+                key={i}
+                animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }}
+                transition={{ repeat: Infinity, duration: 0.8, delay }}
+                className="w-1 h-3 bg-[#00f3ff] rounded-full"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

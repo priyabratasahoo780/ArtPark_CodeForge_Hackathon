@@ -1,26 +1,24 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiUsers, FiPlus, FiTrash2, FiZap, FiAward, FiChevronDown, FiAlertCircle } from 'react-icons/fi'
 
 const API_BASE_URL = 'http://localhost:8000'
 
-const TIER_STYLES = {
-  'Strong Fit 🟢':      { bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200', ring: 'border-emerald-400' },
-  'Potential Fit 🟡':   { bar: 'bg-amber-400',   badge: 'bg-amber-100 text-amber-700 border-amber-200',   ring: 'border-amber-400' },
-  'Moderate Gap 🟠':    { bar: 'bg-orange-400',  badge: 'bg-orange-100 text-orange-700 border-orange-200', ring: 'border-orange-400' },
-  'Significant Gap 🔴': { bar: 'bg-red-400',     badge: 'bg-red-100 text-red-700 border-red-200',         ring: 'border-red-400' },
+const TIER_CONFIG = {
+  'Strong Fit 🟢':      { color: '#00f3ff', label: 'Strong' },
+  'Potential Fit 🟡':   { color: '#bc13fe', label: 'Potential' },
+  'Moderate Gap 🟠':    { color: '#ff00e5', label: 'Gap' },
+  'Significant Gap 🔴': { color: '#ff4b2b', label: 'Critical' },
 }
 
 const EMPTY_CANDIDATE = { name: '', resumeText: '' }
 
-/**
- * CandidateBenchmark — Feature 8
- * A self-contained panel with its own submit flow (separate from main analysis).
- */
 export default function CandidateBenchmark() {
   const [jdText, setJdText] = useState('')
   const [candidates, setCandidates] = useState([
-    { ...EMPTY_CANDIDATE, name: 'Candidate 1' },
-    { ...EMPTY_CANDIDATE, name: 'Candidate 2' },
+    { ...EMPTY_CANDIDATE, name: 'Candidate Alpha' },
+    { ...EMPTY_CANDIDATE, name: 'Candidate Beta' },
   ])
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -28,263 +26,186 @@ export default function CandidateBenchmark() {
 
   const addCandidate = () => {
     if (candidates.length >= 10) return
-    setCandidates(prev => [...prev, { name: `Candidate ${prev.length + 1}`, resumeText: '' }])
-  }
-
-  const removeCandidate = (idx) => {
-    if (candidates.length <= 2) return
-    setCandidates(prev => prev.filter((_, i) => i !== idx))
-  }
-
-  const updateCandidate = (idx, field, value) => {
-    setCandidates(prev => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c))
+    setCandidates(prev => [...prev, { name: `Candidate ${String.fromCharCode(65 + prev.length)}`, resumeText: '' }])
   }
 
   const handleBenchmark = async () => {
-    if (!jdText.trim()) { setError('Please enter a job description.'); return }
+    if (!jdText.trim()) { setError('Target architecture metrics required.'); return }
     const valid = candidates.filter(c => c.resumeText.trim().length >= 10)
-    if (valid.length < 2) { setError('Please provide at least 2 resumes with content.'); return }
+    if (valid.length < 2) { setError('Minimum 2 neural profiles required for benchmarking.'); return }
 
     setLoading(true); setError(null); setResults(null)
     try {
       const resp = await axios.post(`${API_BASE_URL}/benchmark/candidates`, {
         job_description_text: jdText,
-        candidates: valid.map(c => ({ name: c.name || 'Unnamed', resume_text: c.resumeText })),
+        candidates: valid.map(c => ({ name: c.name || 'Unknown Unit', resume_text: c.resumeText })),
       })
       setResults(resp.data)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Benchmark failed')
+      setError(err.response?.data?.detail || err.message || 'Benchmarking sequence failed')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Job Description */}
-      <div className="card">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">💼 Job Description</h3>
-        <textarea
-          id="benchmark-jd"
-          value={jdText}
-          onChange={e => setJdText(e.target.value)}
-          placeholder="Paste the job description here..."
-          className="w-full h-32 p-3 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-400"
-        />
-      </div>
-
-      {/* Candidate inputs */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-gray-800">👥 Candidates ({candidates.length})</h3>
-          <button
-            onClick={addCandidate}
-            disabled={candidates.length >= 10}
-            className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-40 transition-all"
+    <div className="space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* JD Input */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-1 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FiZap className="text-[#00f3ff]" />
+            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Target Metrics</h3>
+          </div>
+          <textarea
+            value={jdText}
+            onChange={e => setJdText(e.target.value)}
+            placeholder="Paste Job Description..."
+            className="w-full h-48 p-4 bg-white/[0.02] border border-white/10 rounded-2xl focus:border-[#00f3ff] focus:outline-none text-xs text-gray-400 font-medium resize-none shadow-inner transition-all"
+          />
+          {error && <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-bold text-red-500 uppercase tracking-widest flex items-center gap-2">
+            <FiAlertCircle /> {error}
+          </div>}
+          <motion.button
+            whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(0,243,255,0.2)" }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleBenchmark}
+            disabled={loading}
+            className="w-full py-4 bg-gradient-to-r from-[#00f3ff] to-[#00a8ff] text-[#0a0a0c] font-black rounded-2xl uppercase tracking-[0.2em] text-xs shadow-lg disabled:opacity-30 transition-all flex items-center justify-center gap-2"
           >
-            + Add Candidate
-          </button>
-        </div>
-        <div className="space-y-4">
-          {candidates.map((c, idx) => (
-            <div key={idx} className="border border-gray-100 rounded-xl p-4 bg-gray-50">
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  value={c.name}
-                  onChange={e => updateCandidate(idx, 'name', e.target.value)}
-                  placeholder="Candidate name"
-                  className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                />
-                {candidates.length > 2 && (
-                  <button
-                    onClick={() => removeCandidate(idx)}
-                    className="text-red-400 hover:text-red-600 text-sm"
-                  >✕</button>
-                )}
-              </div>
-              <textarea
-                value={c.resumeText}
-                onChange={e => updateCandidate(idx, 'resumeText', e.target.value)}
-                placeholder={`Paste ${c.name || 'candidate'}'s resume text...`}
-                className="w-full h-28 p-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-300"
-              />
+            {loading ? <FiZap className="animate-spin" /> : <FiAward />}
+            {loading ? 'Processing...' : 'Execute Benchmark'}
+          </motion.button>
+        </motion.div>
+
+        {/* Candidate List */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <FiUsers className="text-[#bc13fe]" />
+              <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Neural Profiles ({candidates.length})</h3>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-          ⚠️ {error}
-        </div>
-      )}
-
-      {/* Run button */}
-      <button
-        id="run-benchmark-btn"
-        onClick={handleBenchmark}
-        disabled={loading}
-        className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 transition-all shadow-lg"
-      >
-        {loading ? '⏳ Benchmarking...' : '🏆 Run Benchmark'}
-      </button>
-
-      {/* Results */}
-      {results && <BenchmarkResults results={results} />}
-    </div>
-  )
-}
-
-function BenchmarkResults({ results }) {
-  const { ranked_candidates: candidates, summary, job_description_skills } = results
-  const [expanded, setExpanded] = useState(null)
-
-  return (
-    <div className="space-y-4">
-      {/* Summary bar */}
-      <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg">
-        <h3 className="text-lg font-bold mb-3">📊 Benchmark Summary</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <SummaryChip label="Candidates" value={summary.total_candidates} />
-          <SummaryChip label="Strong Fits" value={summary.strong_fits} />
-          <SummaryChip label="Avg Score" value={`${summary.avg_composite_score}/100`} />
-          <SummaryChip label="JD Skills" value={summary.total_required_skills} />
-        </div>
-        {summary.matched_role && (
-          <p className="mt-3 text-indigo-200 text-sm">
-            📌 Role matched: <strong className="text-white">{summary.matched_role.role}</strong>
-            {' '}({Math.round(summary.matched_role.confidence * 100)}% confidence)
-          </p>
-        )}
-      </div>
-
-      {/* Ranked list */}
-      <div className="card">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">🏆 Candidate Rankings</h3>
-        <div className="space-y-3">
-          {candidates.map(c => {
-            const tier = TIER_STYLES[c.recommendation] || TIER_STYLES['Significant Gap 🔴']
-            const isExpanded = expanded === c.rank
-            return (
-              <div
-                key={c.rank}
-                className={`border-2 rounded-xl ${tier.ring} overflow-hidden transition-all`}
-              >
-                {/* Card header */}
-                <button
-                  className="w-full text-left p-4 hover:bg-gray-50 transition-all"
-                  onClick={() => setExpanded(isExpanded ? null : c.rank)}
+            <button onClick={addCandidate} className="text-[9px] font-black text-[#bc13fe] uppercase tracking-widest flex items-center gap-1 hover:text-white transition-colors">
+              <FiPlus /> Add Unit
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AnimatePresence>
+              {candidates.map((c, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="glass-card border-white/5 bg-white/[0.01] hover:bg-white/[0.03] p-4 group"
                 >
-                  <div className="flex items-center gap-3">
-                    {/* Rank badge */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-white shadow ${
-                      c.rank === 1 ? 'bg-amber-400' : c.rank === 2 ? 'bg-gray-400' : c.rank === 3 ? 'bg-orange-400' : 'bg-gray-300 text-gray-700'
-                    }`}>
-                      {c.rank === 1 ? '🥇' : c.rank === 2 ? '🥈' : c.rank === 3 ? '🥉' : `#${c.rank}`}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-gray-800 truncate">{c.name}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${tier.badge}`}>
-                          {c.recommendation}
-                        </span>
-                      </div>
-                      {/* Score bar */}
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${tier.bar} transition-all duration-700`}
-                            style={{ width: `${c.composite_score}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-bold text-gray-700 w-14 text-right">
-                          {c.composite_score}/100
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Mini stats */}
-                    <div className="hidden md:flex gap-3 text-xs text-gray-500 items-center">
-                      <span>Match: <strong className="text-gray-700">{c.skill_match_pct}%</strong></span>
-                      <span>Gap: <strong className="text-gray-700">{c.gap_score}</strong></span>
-                      <span className="text-gray-400">{isExpanded ? '▲' : '▼'}</span>
-                    </div>
-                  </div>
-                </button>
-
-                {/* Expanded detail */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 border-t border-gray-100 bg-gray-50">
-                    {c.error ? (
-                      <p className="text-red-500 text-sm mt-3">⚠️ {c.error}</p>
-                    ) : (
-                      <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <MiniStat label="Coverage" value={`${c.skill_match_pct}%`} />
-                        <MiniStat label="Readiness" value={`${c.readiness_score}/100`} />
-                        <MiniStat label="Confidence" value={`${Math.round(c.avg_confidence * 100)}%`} />
-                        <MiniStat label="Percentile" value={`Top ${Math.round(100 - c.percentile + 1)}%`} />
-                        <SkillPills label="✅ Known" skills={c.known_skills} colour="bg-emerald-100 text-emerald-700" />
-                        <SkillPills label="⚠️ Partial" skills={c.partial_skills} colour="bg-amber-100 text-amber-700" />
-                        <SkillPills label="❌ Missing" skills={c.missing_skills} colour="bg-red-100 text-red-700" />
-                      </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={c.name}
+                      onChange={e => {
+                        const newC = [...candidates]; newC[idx].name = e.target.value; setCandidates(newC);
+                      }}
+                      className="flex-1 bg-transparent border-none text-[10px] font-black text-white uppercase tracking-widest focus:ring-0 p-0 placeholder:text-gray-700"
+                    />
+                    {candidates.length > 2 && (
+                      <button onClick={() => setCandidates(candidates.filter((_, i) => i !== idx))} className="text-gray-600 hover:text-red-500 transition-colors">
+                        <FiTrash2 size={12} />
+                      </button>
                     )}
                   </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* JD skills reference */}
-      {job_description_skills?.length > 0 && (
-        <div className="card">
-          <p className="text-sm font-semibold text-gray-600 mb-2">📋 Required JD Skills ({job_description_skills.length})</p>
-          <div className="flex flex-wrap gap-1.5">
-            {job_description_skills.map(s => (
-              <span key={typeof s === 'string' ? s : s.name}
-                className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium border border-indigo-100">
-                {typeof s === 'string' ? s : s.name}
-              </span>
-            ))}
+                  <textarea
+                    value={c.resumeText}
+                    onChange={e => {
+                      const newC = [...candidates]; newC[idx].resumeText = e.target.value; setCandidates(newC);
+                    }}
+                    placeholder="Paste resume content..."
+                    className="w-full h-24 bg-transparent border-none text-[10px] text-gray-500 font-medium resize-none focus:ring-0 p-0 scrollbar-hide"
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
-      )}
-    </div>
-  )
-}
-
-function SummaryChip({ label, value }) {
-  return (
-    <div className="bg-white/20 rounded-lg p-2.5 text-center">
-      <div className="text-xl font-black">{value}</div>
-      <div className="text-xs opacity-80">{label}</div>
-    </div>
-  )
-}
-
-function MiniStat({ label, value }) {
-  return (
-    <div className="bg-white rounded-lg border border-gray-100 p-2.5">
-      <div className="text-xs text-gray-400">{label}</div>
-      <div className="font-bold text-gray-800">{value}</div>
-    </div>
-  )
-}
-
-function SkillPills({ label, skills, colour }) {
-  if (!skills?.length) return null
-  return (
-    <div className="col-span-2 md:col-span-4">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <div className="flex flex-wrap gap-1">
-        {skills.map(s => (
-          <span key={s} className={`px-2 py-0.5 rounded-full text-xs font-medium ${colour}`}>{s}</span>
-        ))}
       </div>
+
+      <AnimatePresence>
+        {results && (
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+            {/* Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                    { label: 'Units', value: results.summary.total_candidates, color: '#bc13fe' },
+                    { label: 'Strong Fits', value: results.summary.strong_fits, color: '#00f3ff' },
+                    { label: 'Avg Grade', value: results.summary.avg_composite_score, color: '#ff00e5' },
+                    { label: 'JD Indices', value: results.summary.total_required_skills, color: '#00f3ff' },
+                ].map((s, i) => (
+                    <div key={i} className="glass-card flex flex-col items-center py-6 border-b-2" style={{ borderBottomColor: s.color }}>
+                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">{s.label}</span>
+                        <span className="text-2xl font-black text-white">{s.value}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Rankings */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-[#00f3ff] uppercase tracking-[0.3em] ml-1">Ranked Matrix</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {results.ranked_candidates.map((c, i) => {
+                  const config = TIER_CONFIG[c.recommendation] || { color: '#ffffff' }
+                  return (
+                    <motion.div 
+                      key={c.rank}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className="glass-card group border-white/5 hover:border-white/20 p-5 flex flex-col md:flex-row md:items-center gap-6"
+                    >
+                      <div className="flex items-center gap-6 flex-1">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg italic shadow-lg ${
+                           c.rank === 1 ? 'bg-gradient-to-br from-[#00f3ff] to-[#bc13fe] text-white' : 'bg-white/5 text-gray-500'
+                        }`}>
+                            {c.rank}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-sm font-black text-white uppercase tracking-tight">{c.name}</h4>
+                            <span className="text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-widest" style={{ color: config.color, borderColor: `${config.color}44` }}>
+                                {c.recommendation}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${c.composite_score}%` }}
+                                    className="h-full" 
+                                    style={{ backgroundColor: config.color }} 
+                                />
+                            </div>
+                            <span className="text-[10px] font-black text-white mono w-12 text-right">{c.composite_score}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-6 border-l border-white/5 pl-6">
+                        <div className="text-center">
+                            <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Match</p>
+                            <p className="text-xs font-black text-white">{c.skill_match_pct}%</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Readiness</p>
+                            <p className="text-xs font-black text-[#00f3ff]">{c.readiness_score}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

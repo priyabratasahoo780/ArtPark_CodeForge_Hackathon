@@ -1,5 +1,6 @@
 import React from 'react'
-import { FiUpload } from 'react-icons/fi'
+import { FiUpload, FiFileText, FiBriefcase, FiZap } from 'react-icons/fi'
+import { motion } from 'framer-motion'
 
 export default function UploadSection({
   resumeText,
@@ -38,23 +39,26 @@ export default function UploadSection({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Resume Upload */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">📄 Resume</h2>
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="card border-white/10 group"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <FiFileText className="text-2xl text-[#bc13fe] group-hover:glow-text-purple transition-all" />
+            <h2 className="text-xl font-black text-white uppercase italic tracking-wider">Candidate <span className="text-[#bc13fe]">Persona</span></h2>
+          </div>
           
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Upload Resume File or Paste Text
-            </label>
-            
-            <div className="mb-3">
-              <label className="flex items-center justify-center w-full p-3 border-2 border-dashed border-purple-300 rounded-lg hover:border-purple-500 cursor-pointer transition-colors bg-purple-50">
+            <div className="mb-4">
+              <label className="flex items-center justify-center w-full p-6 border-2 border-dashed border-white/10 rounded-2xl hover:border-[#bc13fe]/50 cursor-pointer transition-all bg-white/[0.02] hover:bg-[#bc13fe]/5">
                 <div className="flex flex-col items-center justify-center">
-                  <FiUpload className="w-8 h-8 text-purple-600 mb-1" />
-                  <span className="text-sm text-purple-600 font-semibold">Click to upload or drag file</span>
-                  <span className="text-xs text-purple-500">TXT, PDF, DOCX</span>
+                  <FiUpload className="w-8 h-8 text-[#bc13fe] mb-2" />
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Inject Resume Data</span>
+                  <span className="text-[9px] text-[#bc13fe]/60 font-medium mt-1">PDF • DOCX • TXT</span>
                 </div>
                 <input
                   type="file"
@@ -65,34 +69,38 @@ export default function UploadSection({
               </label>
             </div>
 
+            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Manual Data Entry</p>
             <textarea
               value={resumeText}
               onChange={(e) => onResumeChange(e.target.value)}
-              placeholder="Or paste your resume text here..."
-              className="w-full h-48 p-4 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none resize-none"
+              placeholder="Paste raw resume text for neural analysis..."
+              className="w-full h-48 p-4 bg-[#0a0a0c] border border-white/10 rounded-2xl focus:border-[#bc13fe] focus:ring-1 focus:ring-[#bc13fe]/30 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner"
             />
           </div>
 
-          <div className="text-right text-sm text-gray-500">
-            {resumeText.length} characters
+          <div className="text-right text-[10px] font-black text-[#bc13fe] uppercase tracking-widest opacity-40">
+            {resumeText.length} Bytes Detected
           </div>
-        </div>
+        </motion.div>
 
         {/* Job Description Upload */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">💼 Job Description</h2>
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="card border-white/10 group"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <FiBriefcase className="text-2xl text-[#00f3ff] group-hover:glow-text-cyan transition-all" />
+            <h2 className="text-xl font-black text-white uppercase italic tracking-wider">Target <span className="text-[#00f3ff]">Architecture</span></h2>
+          </div>
           
           <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Upload Job Description File or Paste Text
-            </label>
-            
-            <div className="mb-3">
-              <label className="flex items-center justify-center w-full p-3 border-2 border-dashed border-indigo-300 rounded-lg hover:border-indigo-500 cursor-pointer transition-colors bg-indigo-50">
+            <div className="mb-4">
+              <label className="flex items-center justify-center w-full p-6 border-2 border-dashed border-white/10 rounded-2xl hover:border-[#00f3ff]/50 cursor-pointer transition-all bg-white/[0.02] hover:bg-[#00f3ff]/5">
                 <div className="flex flex-col items-center justify-center">
-                  <FiUpload className="w-8 h-8 text-indigo-600 mb-1" />
-                  <span className="text-sm text-indigo-600 font-semibold">Click to upload or drag file</span>
-                  <span className="text-xs text-indigo-500">TXT, PDF, DOCX</span>
+                  <FiUpload className="w-8 h-8 text-[#00f3ff] mb-2" />
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Import Job Metrics</span>
+                  <span className="text-[9px] text-[#00f3ff]/60 font-medium mt-1">PDF • DOCX • TXT</span>
                 </div>
                 <input
                   type="file"
@@ -103,108 +111,72 @@ export default function UploadSection({
               </label>
             </div>
 
+            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Specification Matrix</p>
             <textarea
               value={jobDescriptionText}
               onChange={(e) => onJobDescriptionChange(e.target.value)}
-              placeholder="Or paste the job description here..."
-              className="w-full h-48 p-4 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none resize-none"
+              placeholder="Paste requirements to generate adaptation path..."
+              className="w-full h-48 p-4 bg-[#0a0a0c] border border-white/10 rounded-2xl focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff]/30 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner"
             />
           </div>
 
-          <div className="text-right text-sm text-gray-500">
-            {jobDescriptionText.length} characters
+          <div className="text-right text-[10px] font-black text-[#00f3ff] uppercase tracking-widest opacity-40">
+            {jobDescriptionText.length} Bytes Detected
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Analyze Button */}
-      <div className="flex justify-center">
-        <button
+      <div className="flex justify-center py-4">
+        <motion.button
+          whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(188,19,254,0.4)" }}
+          whileTap={{ scale: 0.95 }}
           onClick={onAnalyze}
           disabled={loading || !resumeText.trim() || !jobDescriptionText.trim()}
-          className={`btn-primary text-lg px-12 py-4 ${
+          className={`group flex items-center gap-3 bg-gradient-to-r from-[#bc13fe] to-[#8a2be2] text-white text-base font-black px-12 py-5 rounded-2xl uppercase tracking-widest shadow-[0_0_20px_rgba(188,19,254,0.2)] transition-all ${
             loading || !resumeText.trim() || !jobDescriptionText.trim()
-              ? 'opacity-50 cursor-not-allowed'
-              : ''
+              ? 'opacity-30 cursor-not-allowed grayscale'
+              : 'hover:glow-purple'
           }`}
         >
-          {loading ? '⚙️ Analyzing...' : '🚀 Analyze & Generate Learning Path'}
-        </button>
+          {loading ? (
+            <>
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                <FiZap />
+              </motion.div>
+              <span>Synthesizing...</span>
+            </>
+          ) : (
+            <>
+              <FiZap className="text-xl group-hover:animate-pulse" />
+              <span>Initiate Deep Analysis</span>
+            </>
+          )}
+        </motion.button>
       </div>
 
-      {/* Sample Data */}
-      <div className="card bg-gradient-to-r from-purple-50 to-indigo-50">
-        <h3 className="text-lg font-bold text-gray-800 mb-3">📝 Sample Templates</h3>
-        <p className="text-sm text-gray-600 mb-3">Don't have content? Try these sample inputs:</p>
-        
-        <div className="space-y-2 text-sm">
+      {/* Sample Templates */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card border-white/5 bg-white/[0.01] p-6 text-center"
+      >
+        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">Baseline Templates</h3>
+        <div className="flex flex-wrap justify-center gap-6">
           <button
-            onClick={() => onResumeChange(`JOHN DOE
-Mobile: (555) 123-4567 | Email: john@example.com | LinkedIn: linkedin.com/in/johndoe
-
-PROFESSIONAL SUMMARY
-Experienced Software Engineer with 5 years in full-stack development using JavaScript, Python, React and Node.js. Strong problem-solving skills and track record of delivering scalable solutions.
-
-TECHNICAL SKILLS
-- Languages: JavaScript, Python, SQL, HTML, CSS
-- Frontend: React, Vue.js, Bootstrap, Tailwind CSS
-- Backend: Node.js, Express, Django, FastAPI
-- Databases: MongoDB, PostgreSQL, MySQL
-- Tools & Platforms: Git, Docker, AWS, Linux
-
-PROFESSIONAL EXPERIENCE
-Senior Frontend Developer - Tech Corp (2022-Present)
-- Built and maintained React-based applications serving 1M+ users
-- Implemented responsive UI components with Tailwind CSS
-- Led team of 3 junior developers
-
-Full Stack Developer - StartUp Inc (2020-2022)
-- Developed full-stack features using Node.js and React
-- Managed PostgreSQL databases
-- Implemented CI/CD pipelines with Docker
-
-EDUCATION
-B.S. in Computer Science - Tech University (2020)`)}
-            className="text-purple-600 hover:text-purple-800 font-semibold"
+            onClick={() => onResumeChange(`JOHN DOE\nFull-Stack Dev\nSkills: React, Node, Python`)}
+            className="text-[10px] font-black text-[#bc13fe] hover:text-white uppercase tracking-widest border-b border-[#bc13fe]/30 hover:border-white transition-all pb-1"
           >
-            → Load Sample Resume
+            Load Tech Resume
           </button>
-          
           <button
-            onClick={() => onJobDescriptionChange(`FULL STACK DEVELOPER - TechCorp
-
-About the Role:
-We are looking for an experienced Full Stack Developer to join our growing team. You will work on building scalable web applications and APIs.
-
-Responsibilities:
-- Design and implement backend APIs using FastAPI or Node.js
-- Develop responsive frontend applications with React
-- Manage and optimize PostgreSQL databases
-- Write clean, maintainable code with strong documentation
-- Collaborate with cross-functional teams
-
-Required Skills:
-- 3+ years professional development experience
-- Strong JavaScript and React knowledge
-- Python or Node.js backend development
-- SQL and database design
-- Git version control
-- Communication and teamwork skills
-
-Nice to Have:
-- Docker and Kubernetes experience
-- AWS cloud platform
-- TypeScript
-- Machine Learning knowledge
-- Agile/Scrum methodology
-
-Compensation: $120K - $160K + benefits`)}
-            className="text-indigo-600 hover:text-indigo-800 font-semibold"
+            onClick={() => onJobDescriptionChange(`ROLE: FULL STACK\nREQ: Node, React, AWS`)}
+            className="text-[10px] font-black text-[#00f3ff] hover:text-white uppercase tracking-widest border-b border-[#00f3ff]/30 hover:border-white transition-all pb-1"
           >
-            → Load Sample Job Description
+            Load Standard JD
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

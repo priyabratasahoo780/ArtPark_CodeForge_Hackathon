@@ -1,4 +1,6 @@
 import React from 'react'
+import { motion } from 'framer-motion'
+import { FiTarget, FiZap, FiCpu } from 'react-icons/fi'
 
 export default function SkillsAnalysis({ data }) {
   const resumeSkills = data?.resume_skills?.skills || []
@@ -8,109 +10,125 @@ export default function SkillsAnalysis({ data }) {
   const jobCategories = data?.job_requirements?.skill_categories || {}
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Resume Skills */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">📄 Your Skills</h2>
-          
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Total: <span className="font-bold text-purple-600">{resumeSkills.length}</span> skills found
-            </p>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="card border-[#bc13fe]/20 bg-[#bc13fe]/5"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <FiCpu className="text-xl text-[#bc13fe]" />
+            <h2 className="text-lg font-black text-white uppercase italic tracking-wider">Detected <span className="text-[#bc13fe]">Competencies</span></h2>
           </div>
-
-          <div className="space-y-4">
-            {Object.entries(resumeCategories).map(([category, skills]) => (
-              <div key={category}>
-                <h3 className="text-sm font-bold text-gray-700 mb-2 border-b-2 border-purple-200 pb-1">
+          
+          <div className="space-y-6">
+            {Object.entries(resumeCategories).map(([category, skills], idx) => (
+              <motion.div 
+                key={category}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <h3 className="text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] border-b border-white/5 pb-1">
                   {category}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill) => {
                     const skillData = resumeSkills.find(s => s.name === skill)
                     return (
-                      <span key={skill} className="skill-badge known">
+                      <span key={skill} className="skill-badge known border-[#00f3ff]/30 text-[10px]">
                         {skill}
-                        {skillData?.level && ` (${skillData.level})`}
+                        {skillData?.level && <span className="ml-1 opacity-60">[{skillData.level}]</span>}
                       </span>
                     )
                   })}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Job Required Skills */}
-        <div className="card">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">💼 Job Requirements</h2>
-          
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Total: <span className="font-bold text-indigo-600">{jobSkills.length}</span> skills required
-            </p>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="card border-[#00f3ff]/20 bg-[#00f3ff]/5"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <FiTarget className="text-xl text-[#00f3ff]" />
+            <h2 className="text-lg font-black text-white uppercase italic tracking-wider">Required <span className="text-[#00f3ff]">Matrix</span></h2>
           </div>
 
-          <div className="space-y-4">
-            {Object.entries(jobCategories).map(([category, skills]) => (
-              <div key={category}>
-                <h3 className="text-sm font-bold text-gray-700 mb-2 border-b-2 border-indigo-200 pb-1">
+          <div className="space-y-6">
+            {Object.entries(jobCategories).map(([category, skills], idx) => (
+              <motion.div 
+                key={category}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <h3 className="text-[10px] font-black text-gray-500 mb-3 uppercase tracking-[0.2em] border-b border-white/5 pb-1">
                   {category}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map((skill) => (
-                    <span key={skill} className="skill-badge">
+                    <span key={skill} className="skill-badge border-white/10 text-gray-400 text-[10px]">
                       {skill}
                     </span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Detailed Skills Table */}
-      <div className="card">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Detailed Skills Breakdown</h2>
+      {/* Detailed Table */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="card border-white/10 overflow-hidden p-0"
+      >
+        <div className="p-6 border-b border-white/5 flex items-center gap-3">
+          <FiZap className="text-[#ff00e5]" />
+          <h2 className="text-lg font-black text-white uppercase italic tracking-widest">Neural Breakdown</h2>
+        </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full text-left">
             <thead>
-              <tr className="bg-gradient-to-r from-purple-50 to-indigo-50">
-                <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Skill</th>
-                <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Category</th>
-                <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Your Level</th>
-                <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Confidence</th>
+              <tr className="bg-white/5">
+                <th className="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Skill Index</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Classification</th>
+                <th className="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">Confidence Score</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {resumeSkills.map((skill, idx) => (
-                <tr
-                  key={idx}
-                  className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                >
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-800">{skill.name}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{skill.category}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${
-                      skill.level === 'Advanced' ? 'bg-green-100 text-green-700' :
-                      skill.level === 'Intermediate' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {skill.level}
+                <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-black text-white uppercase tracking-tight group-hover:glow-text-cyan transition-all">{skill.name}</div>
+                    <div className="text-[9px] font-bold text-[#bc13fe] uppercase tracking-widest mt-1 opacity-60">Level: {skill.level}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white/5 py-1 px-3 rounded-full border border-white/10">
+                        {skill.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full"
-                          style={{ width: `${(skill.confidence || 0.9) * 100}%` }}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-32 bg-white/5 rounded-full h-1.5 overflow-hidden border border-white/5">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${(skill.confidence || 0.9) * 100}%` }}
+                          className="bg-gradient-to-r from-[#bc13fe] to-[#00f3ff] h-full"
                         />
                       </div>
-                      <span className="text-xs font-bold text-gray-600">
+                      <span className="text-[10px] font-bold text-[#00f3ff] mono">
                         {Math.round((skill.confidence || 0.9) * 100)}%
                       </span>
                     </div>
@@ -120,7 +138,7 @@ export default function SkillsAnalysis({ data }) {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

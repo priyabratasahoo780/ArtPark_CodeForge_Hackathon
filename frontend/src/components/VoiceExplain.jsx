@@ -1,15 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiMic, FiSquare, FiChevronDown, FiCloud, FiActivity } from 'react-icons/fi'
 
 const API_BASE_URL = 'http://localhost:8000'
 
-/**
- * VoiceExplain — Voice Explanation Component (Feature 6)
- *
- * Strategy (layered, fastest-first):
- *  1. Browser Web Speech API (SpeechSynthesis) — zero latency, no backend call
- *  2. Backend gTTS endpoint    — server-side MP3, fallback if browser TTS unavailable
- *  3. Text-only display        — always available
- */
 export default function VoiceExplain({ reasoningTrace, gapStats }) {
   const [mode, setMode] = useState('idle') // idle | speaking | loading | playing | error
   const [script, setScript] = useState('')
@@ -20,49 +14,18 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
   const utteranceRef = useRef(null)
   const audioRef = useRef(null)
 
-  // Build a concise spoken script client-side (mirrors backend logic, avoids network for speed)
   const buildScript = useCallback(() => {
     const parts = []
     parts.push("Here is your personalized onboarding analysis.")
-
     if (gapStats) {
-      const { known_count, total_required_skills, coverage_percentage, readiness_score, missing_count, partial_count } = gapStats
-      parts.push(
-        `You currently have ${known_count} out of ${total_required_skills} required skills. ` +
-        `Your skill coverage is ${coverage_percentage} percent and your readiness score is ${readiness_score} out of 100.`
-      )
-      if ((missing_count || 0) + (partial_count || 0) > 0) {
-        parts.push(`You have ${missing_count || 0} missing skills and ${partial_count || 0} skills that need improvement.`)
-      }
+      parts.push(`You currently have ${gapStats.known_count} out of ${gapStats.total_required_skills} required skills. Readiness score is ${gapStats.readiness_score} percent.`)
     }
-
-    const roleInfo = reasoningTrace?.role_analysis
-    if (roleInfo?.matched_role) {
-      parts.push(
-        `Your closest role match is ${roleInfo.matched_role}, with ${Math.round((roleInfo.confidence || 0) * 100)} percent confidence.`
-      )
-      if (roleInfo.skills_added_from_role?.length > 0) {
-        parts.push(`Core skills added from your role track: ${roleInfo.skills_added_from_role.slice(0, 4).join(', ')}.`)
-      }
-    }
-
     const insights = reasoningTrace?.key_insights || []
-    if (insights.length > 0) {
-      parts.push("Key insights.")
-      insights.slice(0, 3).forEach(i => parts.push(i + '.'))
-    }
-
-    const recs = reasoningTrace?.recommendations || []
-    if (recs.length > 0) {
-      parts.push("Recommendations.")
-      recs.slice(0, 2).forEach(r => parts.push(r + '.'))
-    }
-
-    parts.push("Good luck with your onboarding journey!")
+    if (insights.length > 0) parts.push("Key insights include " + insights.slice(0, 2).join('. '))
+    parts.push("Good luck with your journey!")
     return parts.join(' ')
   }, [reasoningTrace, gapStats])
 
-  // ---- Browser Web Speech API ----
   const speakWithBrowser = useCallback(() => {
     if (!browserTTSAvailable) return false
     const text = buildScript()
@@ -71,194 +34,136 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
     setError(null)
 
     const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 0.92
+    utterance.rate = 0.9
     utterance.pitch = 1.0
-    utterance.lang = 'en-US'
     utterance.onend = () => setMode('idle')
-    utterance.onerror = (e) => {
-      setError(`Browser TTS error: ${e.error}`)
-      setMode('error')
-    }
+    utterance.onerror = () => setMode('error')
     utteranceRef.current = utterance
-    window.speechSynthesis.cancel() // stop any previous
+    window.speechSynthesis.cancel()
     window.speechSynthesis.speak(utterance)
     return true
   }, [browserTTSAvailable, buildScript])
 
-  // ---- Backend gTTS fallback ----
   const speakWithBackend = useCallback(async () => {
     setMode('loading')
-    setError(null)
     try {
       const res = await fetch(`${API_BASE_URL}/explain/voice`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reasoning_trace: reasoningTrace, gap_stats: gapStats }),
       })
-      if (!res.ok) throw new Error(`Server error ${res.status}`)
       const data = await res.json()
       setScript(data.script || '')
-      if (data.tts_available && data.audio_b64) {
-        const src = `data:${data.audio_mime};base64,${data.audio_b64}`
-        setAudioSrc(src)
+      if (data.audio_b64) {
+        setAudioSrc(`data:${data.audio_mime};base64,${data.audio_b64}`)
         setMode('playing')
       } else {
-        // Text-only fallback
-        setMode('idle')
-        setExpanded(true)
+        setMode('idle'); setExpanded(true)
       }
     } catch (err) {
-      setError(`Could not reach backend TTS: ${err.message}`)
-      setMode('error')
-      // Still show script from client-side build
-      setScript(buildScript())
-      setExpanded(true)
+      setError('Connection failed'); setMode('error')
     }
-  }, [reasoningTrace, gapStats, buildScript])
+  }, [reasoningTrace, gapStats])
 
-  // Main speak handler
-  const handleSpeak = useCallback(() => {
-    if (mode === 'speaking') {
+  const handleSpeak = () => {
+    if (mode === 'speaking' || mode === 'playing') {
       window.speechSynthesis.cancel()
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
       setMode('idle')
       return
     }
-    if (mode === 'playing' && audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      setMode('idle')
-      return
-    }
-    if (browserTTSAvailable) {
-      speakWithBrowser()
-    } else {
-      speakWithBackend()
-    }
-  }, [mode, browserTTSAvailable, speakWithBrowser, speakWithBackend])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis?.cancel()
-    }
-  }, [])
-
-  // Auto-play when audio src is ready
-  useEffect(() => {
-    if (audioSrc && audioRef.current) {
-      audioRef.current.play().catch(() => {})
-    }
-  }, [audioSrc])
-
-  const buttonLabel = {
-    idle: '🎤 Explain',
-    speaking: '⏹ Stop',
-    loading: '⏳ Loading...',
-    playing: '⏹ Stop',
-    error: '🔄 Retry',
-  }[mode]
-
-  const buttonColor = {
-    idle: 'from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700',
-    speaking: 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700',
-    loading: 'from-gray-500 to-gray-600 cursor-wait',
-    playing: 'from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700',
-    error: 'from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700',
-  }[mode]
+    browserTTSAvailable ? speakWithBrowser() : speakWithBackend()
+  }
 
   return (
-    <div className="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-4 shadow-sm">
-      {/* Header row */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🎤</span>
+    <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="glass-card bg-gradient-to-br from-[#bc13fe]/10 to-[#00f3ff]/5 border-white/10 relative overflow-hidden group"
+    >
+      <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+        <FiMic size={40} className="text-[#bc13fe]" />
+      </div>
+
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSpeak}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-2xl transition-all duration-300 ${
+                mode === 'speaking' || mode === 'playing' ? 'bg-[#ff00e5] animate-pulse' : 'bg-gradient-to-br from-[#bc13fe] to-[#8a2be2]'
+              }`}
+            >
+              {(mode === 'speaking' || mode === 'playing') ? <FiSquare size={20} /> : <FiMic size={24} />}
+            </motion.button>
+            {(mode === 'speaking' || mode === 'playing') && (
+                <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1.5, opacity: 0 }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="absolute inset-0 rounded-2xl border-2 border-[#ff00e5] pointer-events-none"
+                />
+            )}
+          </div>
           <div>
-            <p className="font-semibold text-violet-800 text-sm">Voice Explanation</p>
-            <p className="text-xs text-violet-500">
-              {browserTTSAvailable ? 'Browser TTS ready' : 'Using backend TTS'}
+            <h3 className="text-sm font-black text-white uppercase tracking-widest leading-tight">Neural <span className="text-[#00f3ff]">Narrative</span></h3>
+            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+              {mode === 'speaking' || mode === 'playing' ? 'Synthesizing Audio Stream...' : 'AI Generated Voice Briefing'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Speaking animation */}
-          {mode === 'speaking' && (
-            <div className="flex items-end gap-0.5 h-5">
-              {[1, 2, 3, 2, 1].map((h, i) => (
-                <div
+        <div className="flex items-center gap-3">
+          {(mode === 'speaking' || mode === 'playing') && (
+            <div className="flex items-end gap-1 h-6 px-4 border-l border-white/10">
+              {[0.4, 0.8, 0.5, 1.0, 0.7].map((h, i) => (
+                <motion.div
                   key={i}
-                  className="w-1 bg-violet-500 rounded-full"
-                  style={{
-                    height: `${h * 4}px`,
-                    animation: `pulse 0.${6 + i}s ease-in-out infinite alternate`,
-                  }}
+                  animate={{ height: ['20%', '100%', '20%'] }}
+                  transition={{ repeat: Infinity, duration: 0.5 + i * 0.1, ease: 'easeInOut' }}
+                  className="w-1 bg-[#00f3ff] rounded-full"
                 />
               ))}
             </div>
           )}
 
-          {/* Main button */}
-          <button
-            id="voice-explain-btn"
-            onClick={handleSpeak}
-            disabled={mode === 'loading'}
-            className={`px-4 py-2 rounded-lg text-white font-semibold text-sm bg-gradient-to-r transition-all shadow-md ${buttonColor}`}
-          >
-            {buttonLabel}
-          </button>
-
-          {/* Script toggle */}
-          {script && (
-            <button
-              onClick={() => setExpanded(e => !e)}
-              className="px-3 py-2 rounded-lg text-violet-700 bg-white border border-violet-200 hover:bg-violet-50 text-sm font-medium transition-all"
-            >
-              {expanded ? '📄 Hide Text' : '📄 Show Text'}
-            </button>
-          )}
-
-          {/* Backend TTS fallback button (when browser TTS is available, offer server option too) */}
-          {browserTTSAvailable && mode === 'idle' && (
-            <button
-              onClick={speakWithBackend}
-              title="Use server-side TTS (gTTS)"
-              className="px-3 py-2 rounded-lg text-violet-600 bg-white border border-violet-200 hover:bg-violet-50 text-sm transition-all"
-            >
-              ☁️
-            </button>
-          )}
+          <div className="flex gap-2">
+            {script && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="btn-secondary py-1.5 px-3 text-[10px] flex items-center gap-1"
+              >
+                <FiActivity size={12} /> {expanded ? 'Hide Script' : 'View Script'}
+              </button>
+            )}
+            {browserTTSAvailable && mode === 'idle' && (
+              <button onClick={speakWithBackend} className="btn-secondary py-1.5 px-3 text-[10px]" title="Backend Engine">
+                <FiCloud size={12} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Error message */}
-      {error && (
-        <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-700">
-          ⚠️ {error} — showing text below instead.
-        </div>
-      )}
+      <AnimatePresence>
+        {expanded && script && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-6 pt-6 border-t border-white/10"
+          >
+            <div className="bg-[#0a0a0c] p-4 rounded-xl border border-white/5 relative">
+              <div className="absolute -top-2 left-4 px-2 bg-[#0a0a0c] text-[8px] font-black text-[#bc13fe] uppercase tracking-[0.2em]">Neural Transcript</div>
+              <p className="text-xs text-gray-400 font-medium leading-relaxed italic">"{script}"</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Hidden audio element for backend MP3 */}
-      {audioSrc && (
-        <audio
-          ref={audioRef}
-          src={audioSrc}
-          controls
-          className="w-full mt-3 rounded-lg"
-          onEnded={() => setMode('idle')}
-          onError={() => {
-            setError('Audio playback failed')
-            setMode('error')
-          }}
-        />
-      )}
-
-      {/* Script text */}
-      {expanded && script && (
-        <div className="mt-3 p-3 bg-white border border-violet-100 rounded-lg text-sm text-gray-700 leading-relaxed max-h-48 overflow-y-auto">
-          <p className="font-semibold text-violet-700 mb-1 text-xs uppercase tracking-wide">Script</p>
-          {script}
-        </div>
-      )}
-    </div>
+      {audioSrc && <audio ref={audioRef} src={audioSrc} hidden onEnded={() => setMode('idle')} />}
+    </motion.div>
   )
 }

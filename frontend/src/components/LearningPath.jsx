@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { FiChevronDown, FiChevronUp, FiCheck } from 'react-icons/fi'
+import { FiChevronDown, FiChevronUp, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar } from 'react-icons/fi'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function LearningPath({ data }) {
   const [expandedModule, setExpandedModule] = useState(null)
@@ -9,10 +10,6 @@ export default function LearningPath({ data }) {
   const timeline = data?.timeline || {}
   const milestones = data?.milestones || []
   const strategies = data?.strategies || []
-
-  const toggleExpand = (moduleId) => {
-    setExpandedModule(expandedModule === moduleId ? null : moduleId)
-  }
 
   const toggleComplete = (moduleId) => {
     const newCompleted = new Set(completedModules)
@@ -27,210 +24,152 @@ export default function LearningPath({ data }) {
   const completionPercentage = Math.round((completedModules.size / modules.length) * 100)
 
   return (
-    <div className="space-y-6">
-      {/* Timeline Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="card bg-gradient-to-br from-blue-50 to-blue-100">
-          <div className="text-sm text-blue-600 font-semibold">⏱️ Total Duration</div>
-          <div className="text-3xl font-bold text-blue-800 mt-2">{timeline.estimated_weeks || 0}w</div>
-          <div className="text-xs text-blue-600 mt-1">~{timeline.total_hours || 0} hours</div>
-        </div>
-
-        <div className="card bg-gradient-to-br from-purple-50 to-purple-100">
-          <div className="text-sm text-purple-600 font-semibold">📚 Modules</div>
-          <div className="text-3xl font-bold text-purple-800 mt-2">{modules.length}</div>
-          <div className="text-xs text-purple-600 mt-1">Learning steps</div>
-        </div>
-
-        <div className="card bg-gradient-to-br from-green-50 to-green-100">
-          <div className="text-sm text-green-600 font-semibold">✅ Completed</div>
-          <div className="text-3xl font-bold text-green-800 mt-2">{completedModules.size}</div>
-          <div className="text-xs text-green-600 mt-1">{completionPercentage}% progress</div>
-        </div>
-
-        <div className="card bg-gradient-to-br from-indigo-50 to-indigo-100">
-          <div className="text-sm text-indigo-600 font-semibold">📅 Pace</div>
-          <div className="text-2xl font-bold text-indigo-800 mt-2">{timeline.pace || 'Self'}</div>
-          <div className="text-xs text-indigo-600 mt-1">No deadlines</div>
+    <div className="space-y-12">
+      {/* Header Info */}
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Duration', value: `${timeline.estimated_weeks || 0}w`, icon: <FiClock />, color: '#00f3ff' },
+            { label: 'Modules', value: modules.length, icon: <FiBookOpen />, color: '#bc13fe' },
+            { label: 'Progress', value: `${completionPercentage}%`, icon: <FiZap />, color: '#ff00e5' },
+            { label: 'Pace', value: timeline.pace || 'Self', icon: <FiTarget />, color: '#00f3ff' },
+          ].map((stat, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1 }}
+              className="glass-card flex flex-col items-center justify-center p-4 border border-white/5"
+            >
+              <div className="text-xl mb-2" style={{ color: stat.color }}>{stat.icon}</div>
+              <div className="text-xs font-black uppercase tracking-widest text-gray-500 mb-1">{stat.label}</div>
+              <div className="text-xl font-black text-white">{stat.value}</div>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="card">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-bold text-gray-800">Learning Progress</h3>
-          <span className="text-lg font-bold text-purple-600">{completionPercentage}%</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div
-            className="bg-gradient-to-r from-green-400 to-green-600 h-4 rounded-full transition-all duration-300"
-            style={{ width: `${completionPercentage}%` }}
-          />
-        </div>
-        <p className="text-sm text-gray-600 mt-2">{completedModules.size} of {modules.length} modules completed</p>
-      </div>
-
-      {/* Learning Strategies */}
-      <div className="card">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Learning Strategies</h3>
+      {/* Strategies Section */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-black text-[#00f3ff] uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+          <FiStar /> Learning Strategies
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {strategies.map((strategy, idx) => (
-            <div key={idx} className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-lg border-l-4 border-purple-500">
-              <h4 className="font-bold text-gray-800">{strategy.name}</h4>
-              <p className="text-sm text-gray-600 mt-2">{strategy.description}</p>
-              <p className="text-xs text-purple-600 mt-2 font-semibold">→ {strategy.implementation}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Learning Modules */}
-      <div className="card">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">🗺️ Learning Modules</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Complete modules in order for optimal learning. Each module includes resources and assessment criteria.
-        </p>
-
-        <div className="space-y-3">
-          {modules.map((module) => (
-            <div
-              key={module.id}
-              className={`border-l-4 pl-4 py-4 rounded-r-lg bg-white shadow-sm hover:shadow-md transition-all ${
-                completedModules.has(module.id) ? 'border-green-500 opacity-75' : 'border-purple-500'
-              }`}
+            <motion.div 
+              key={idx}
+              whileHover={{ y: -5 }}
+              className="glass-card border-l-2 border-[#bc13fe] bg-[#bc13fe]/5"
             >
-              <div
-                onClick={() => toggleExpand(module.id)}
-                className="cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleComplete(module.id)
-                      }}
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                        completedModules.has(module.id)
-                          ? 'bg-green-500 border-green-500'
-                          : 'border-purple-300 hover:border-purple-500'
-                      }`}
-                    >
-                      {completedModules.has(module.id) && <FiCheck className="text-white" />}
-                    </button>
-                    <div>
-                      <h4 className="font-bold text-gray-800">
-                        Module {module.order}: {module.skill_name}
-                      </h4>
-                      <p className="text-sm text-gray-600">{module.category}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="ml-4 flex items-center gap-3">
-                  <div className="text-right hidden sm:block">
-                    <div className="text-sm font-bold text-purple-600">{module.time_estimate_hours}h</div>
-                    <div className="text-xs text-gray-500">{module.difficulty}</div>
-                  </div>
-                  {expandedModule === module.id ? <FiChevronUp /> : <FiChevronDown />}
-                </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-wider mb-2">{strategy.name}</h4>
+              <p className="text-xs text-gray-400 font-medium leading-relaxed mb-3">{strategy.description}</p>
+              <div className="text-[10px] font-black text-[#bc13fe] uppercase tracking-widest bg-[#bc13fe]/10 py-1 px-2 rounded inline-block">
+                Action: {strategy.implementation}
               </div>
-
-              {expandedModule === module.id && (
-                <div className="mt-4 pt-4 border-t-2 border-gray-200 space-y-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Reason</p>
-                    <p className="text-sm text-gray-600 mt-1">{module.reason}</p>
-                  </div>
-
-                  {module.prerequisites && module.prerequisites.length > 0 && (
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700">Prerequisites</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {module.prerequisites.map((prereq) => (
-                          <span key={prereq} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                            {prereq}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Learning Objectives</p>
-                    <ul className="list-disc list-inside space-y-1 mt-1">
-                      {module.learning_objectives?.map((obj, idx) => (
-                        <li key={idx} className="text-sm text-gray-600">{obj}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Assessment Criteria</p>
-                    <ul className="list-disc list-inside space-y-1 mt-1">
-                      {module.assessment_criteria?.map((criteria, idx) => (
-                        <li key={idx} className="text-sm text-gray-600">{criteria}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {module.resources && module.resources.length > 0 && (
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700">Recommended Resources</p>
-                      <div className="space-y-2 mt-1">
-                        {module.resources.map((resource, idx) => (
-                          <div key={idx} className="bg-blue-50 p-2 rounded text-sm">
-                            <p className="font-semibold text-blue-900">{resource.name}</p>
-                            <p className="text-xs text-blue-700">
-                              {resource.type} • {resource.platform} • {resource.duration}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Milestones */}
-      {milestones.length > 0 && (
-        <div className="card">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">🎖️ Milestones</h3>
-          <div className="space-y-3">
-            {milestones.map((milestone, idx) => (
-              <div
-                key={idx}
-                className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-lg border-l-4 border-purple-500"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl font-bold text-purple-600">🎖️</div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">Milestone {milestone.milestone_number}</h4>
-                    <p className="text-sm text-gray-600 mt-1">{milestone.description}</p>
-                    <p className="text-xs text-purple-600 mt-2">
-                      {milestone.modules_completed} modules • {milestone.total_hours_invested} hours invested
-                    </p>
-                    <p className="text-sm text-gray-700 mt-1 font-semibold">→ {milestone.checkpoint}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Vertical Timeline */}
+      <div className="relative">
+        <h3 className="text-xs font-black text-[#bc13fe] uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+          <FiMap className="text-[#bc13fe]" /> Adaptive Roadmap
+        </h3>
+        
+        <div className="absolute left-6 top-16 bottom-0 w-0.5 bg-gradient-to-b from-[#bc13fe] via-[#00f3ff] to-[#ff00e5] opacity-20 hidden md:block"></div>
 
-      {/* Timeline Recommendation */}
-      <div className="card bg-gradient-to-r from-indigo-50 to-purple-50">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">📈 Timeline Recommendation</h3>
-        <p className="text-gray-700">{timeline.recommendation}</p>
-        <p className="text-sm text-gray-600 mt-3">
-          💡 <strong>Pro Tip:</strong> Start with prerequisite modules first. Each module builds on previous knowledge.
-          Dedicate focused time blocks for learning and hands-on practice for best results.
-        </p>
+        <div className="space-y-8">
+          {modules.map((module, i) => {
+            const isCompleted = completedModules.has(module.id)
+            const isExpanded = expandedModule === module.id
+            
+            return (
+              <motion.div 
+                key={module.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={`relative md:pl-16 group ${isCompleted ? 'opacity-60' : ''}`}
+              >
+                {/* Timeline Dot */}
+                <div className={`absolute left-4 md:left-[1.35rem] top-0 w-4 h-4 rounded-full border-2 z-10 transition-all duration-500 ${
+                  isCompleted ? 'bg-[#00f3ff] border-[#00f3ff] shadow-[0_0_15px_#00f3ff]' : 'bg-[#0a0a0c] border-[#bc13fe] group-hover:border-[#00f3ff]'
+                }`}></div>
+
+                <div className={`glass-card transition-all duration-300 ${isExpanded ? 'border-[#bc13fe]/50' : 'hover:border-white/20'}`}>
+                  <div 
+                    onClick={() => setExpandedModule(isExpanded ? null : module.id)}
+                    className="flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-3xl font-black text-white/5 absolute -top-4 -right-2 select-none group-hover:text-[#bc13fe]/10 transition-colors uppercase italic">{module.order}</div>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); toggleComplete(module.id); }}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${
+                          isCompleted ? 'bg-[#00f3ff] border-[#00f3ff] text-[#0a0a0c]' : 'bg-white/5 border-white/10 text-gray-400 group-hover:border-[#00f3ff]/50'
+                        }`}
+                      >
+                        {isCompleted ? <FiCheck className="font-bold" /> : <span className="text-[10px] font-black">{module.order}</span>}
+                      </button>
+                      <div>
+                        <h4 className="text-sm font-black text-white uppercase tracking-wider group-hover:glow-text-cyan transition-all">{module.skill_name}</h4>
+                        <p className="text-[10px] font-bold text-[#bc13fe] uppercase tracking-widest">{module.category} • {module.difficulty}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Est. Effort</p>
+                        <p className="text-xs font-black text-white">{module.time_estimate_hours}H</p>
+                      </div>
+                      <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+                        <FiChevronDown className="text-gray-500" />
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-6 pt-6 border-t border-white/10 space-y-6">
+                          <div>
+                            <p className="text-[9px] font-black text-[#bc13fe] uppercase tracking-widest mb-2">Learning Objectives</p>
+                            <ul className="space-y-2">
+                              {module.learning_objectives?.map((obj, idx) => (
+                                <li key={idx} className="text-xs text-gray-400 font-medium flex gap-2">
+                                  <span className="text-[#00f3ff]">▹</span> {obj}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {module.resources && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {module.resources.map((res, idx) => (
+                                <div key={idx} className="bg-white/[0.02] border border-white/5 p-3 rounded-xl hover:bg-white/[0.04] transition-colors">
+                                  <p className="text-[10px] font-black text-white uppercase mb-1">{res.name}</p>
+                                  <div className="flex justify-between items-center text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <span>{res.platform}</span>
+                                    <span className="text-[#00f3ff] px-1.5 py-0.5 bg-[#00f3ff]/10 rounded">{res.duration}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

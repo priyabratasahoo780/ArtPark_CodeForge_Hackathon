@@ -2,59 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --neon-purple: #bc13fe;
+  --neon-cyan: #00f3ff;
+  --neon-pink: #ff00e5;
+  --dark-bg: #0a0a0c;
+  --dark-surface: #121216;
+  --glass-surface: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
 /* Custom styles */
 body {
-  @apply bg-gradient-to-br from-slate-50 to-slate-100;
+  @apply bg-[#0a0a0c] text-slate-200 selection:bg-[#bc13fe] selection:text-white;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(188, 19, 254, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(0, 243, 255, 0.05) 0%, transparent 40%);
+  min-height: 100 vh;
 }
 
 .btn-primary {
-  @apply px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all;
+  @apply px-6 py-3 bg-gradient-to-r from-[#bc13fe] to-[#8a2be2] text-white rounded-lg font-bold shadow-[0_0_15px_rgba(188,19,254,0.3)] hover:shadow-[0_0_25px_rgba(188,19,254,0.5)] transform hover:scale-105 transition-all;
 }
 
 .btn-secondary {
-  @apply px-6 py-3 bg-white text-purple-600 border-2 border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all;
+  @apply px-6 py-3 bg-transparent text-[#00f3ff] border-2 border-[#00f3ff] rounded-lg font-bold hover:bg-[#00f3ff]/10 hover:shadow-[0_0_15px_rgba(0,243,255,0.3)] transition-all;
+}
+
+.glass-card {
+  @apply bg-[rgba(255,255,255,0.03)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 transition-all;
 }
 
 .card {
-  @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-6;
+  @apply glass-card hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.05)];
 }
 
 .skill-badge {
-  @apply inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium;
+  @apply inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider;
 }
 
 .skill-badge.known {
-  @apply bg-green-100 text-green-700;
+  @apply bg-[#00f3ff]/10 text-[#00f3ff] border border-[#00f3ff]/30 shadow-[0_0_8px_rgba(0,243,255,0.2)];
 }
 
 .skill-badge.partial {
-  @apply bg-yellow-100 text-yellow-700;
+  @apply bg-[#bc13fe]/10 text-[#bc13fe] border border-[#bc13fe]/30 shadow-[0_0_8px_rgba(188,19,254,0.2)];
 }
 
 .skill-badge.missing {
-  @apply bg-red-100 text-red-700;
+  @apply bg-[#ff00e5]/10 text-[#ff00e5] border border-[#ff00e5]/30 shadow-[0_0_8px_rgba(255,0,229,0.2)];
 }
 
-.progress-bar {
-  @apply w-full bg-gray-200 rounded-full h-3;
+.progress-bar-container {
+  @apply w-full bg-[#1e1e24] rounded-full h-2 overflow-hidden;
 }
 
-.progress-fill {
-  @apply bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all;
+.progress-bar-fill {
+  @apply h-full rounded-full transition-all duration-1000 ease-out;
 }
 
-.module-item {
-  @apply border-l-4 border-purple-600 pl-4 py-3 mb-4;
+.glow-text-purple {
+  text-shadow: 0 0 10px rgba(188, 19, 254, 0.5);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.timeline-line {
+  @apply absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#bc13fe] via-[#00f3ff] to-[#ff00e5];
 }
 
 .loading {
-  @apply animate-pulse;
-}
-
-.fade-enter {
-  @apply opacity-0;
-}
-
-.fade-enter-active {
-  @apply opacity-100 transition-opacity duration-300;
+  @apply animate-pulse bg-slate-800;
 }
