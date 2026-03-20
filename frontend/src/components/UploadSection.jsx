@@ -7,6 +7,10 @@ export default function UploadSection({
   jobDescriptionText,
   onResumeChange,
   onJobDescriptionChange,
+  targetRole,
+  onTargetRoleChange,
+  timelineDays,
+  onTimelineChange,
   onAnalyze,
   loading
 }) {
@@ -125,6 +129,43 @@ export default function UploadSection({
           </div>
         </motion.div>
       </div>
+
+      {/* Advanced Goal Setting Options */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card border-white/10"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <FiTarget className="text-xl text-[#34d399]" />
+          <h2 className="text-lg font-black text-white uppercase italic tracking-wider">Smart <span className="text-[#34d399]">Goal Parameters</span> (Optional)</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Target Persona / Role</label>
+            <input 
+              type="text" 
+              value={targetRole || ''}
+              onChange={(e) => onTargetRoleChange(e.target.value)}
+              placeholder="e.g. Frontend Developer"
+              className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 font-medium focus:border-[#34d399] outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Target Timeline (Days)</label>
+            <input 
+              type="number" 
+              value={timelineDays || ''}
+              onChange={(e) => onTimelineChange(e.target.value ? parseInt(e.target.value) : undefined)}
+              placeholder="e.g. 30"
+              min="1"
+              max="365"
+              className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 font-medium focus:border-[#34d399] outline-none"
+            />
+          </div>
+        </div>
+      </motion.div>
 
       {/* Analyze Button */}
       <div className="flex justify-center py-4">

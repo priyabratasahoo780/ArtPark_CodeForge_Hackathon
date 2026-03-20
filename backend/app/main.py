@@ -17,6 +17,8 @@ from app.services.feedback_generator import ResumeFeedbackGenerator
 from app.services.domain_classifier import DomainClassifier
 from app.services.learning_style_analyzer import LearningStyleAnalyzer
 from app.services.burnout_detector import BurnoutDetector
+from app.services.career_path_predictor import CareerPathPredictor
+from app.services.market_trend_analyzer import MarketTrendAnalyzer
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -61,6 +63,8 @@ feedback_generator = ResumeFeedbackGenerator()
 domain_classifier = DomainClassifier()
 learning_style_analyzer = LearningStyleAnalyzer()
 burnout_detector = BurnoutDetector()
+career_path_predictor = CareerPathPredictor()
+market_trend_analyzer = MarketTrendAnalyzer()
 
 # ==================== Pydantic Models ====================
 
@@ -91,6 +95,9 @@ class OnboardingRequest(BaseModel):
     job_description_text: str
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
+    engagement_metrics: Optional[Dict[str, Any]] = None
+    target_role: Optional[str] = None
+    timeline_days: Optional[int] = None
 
 
 class MultiOnboardingRequest(BaseModel):
@@ -221,7 +228,9 @@ class OnboardingResponse(BaseModel):
     efficiency_metrics: Optional[Dict] = None
     learning_style: Optional[str] = None
     burnout_status: Optional[Dict] = None
-
+    career_paths: Optional[List[str]] = None
+    market_insights: Optional[Dict[str, List[str]]] = None
+    goal: Optional[str] = None
 
 class ProgressUpdateRequest(BaseModel):
     resume_text: str
@@ -241,6 +250,13 @@ class BurnoutRequest(BaseModel):
 class VoiceExplainRequest(BaseModel):
     reasoning_trace: Dict
     gap_stats: Optional[Dict] = None
+
+class CareerPathRequest(BaseModel):
+    current_skills: List[str]
+
+class MarketTrendRequest(BaseModel):
+    current_skills: List[str]
+    domain: Optional[str] = "Full Stack"
     custom_text: Optional[str] = None
     lang: Optional[str] = "en"
     role: Optional[str] = "USER"
@@ -284,6 +300,20 @@ async def analyze_burnout(request: BurnoutRequest):
     """
     burnout_status = burnout_detector.detect(request.engagement_metrics)
     return burnout_status
+
+@app.post("/analyze/career-path", tags=["Analysis"])
+async def predict_career_path(request: CareerPathRequest):
+    """
+    Suggest future career roles based on current skills.
+    """
+    return career_path_predictor.predict(request.current_skills)
+
+@app.post("/analyze/market-trends", tags=["Analysis"])
+async def analyze_market_trends(request: MarketTrendRequest):
+    """
+    Compare user skills with industry demands to find trending skills.
+    """
+    return market_trend_analyzer.analyze(request.current_skills, request.domain)
 
 @app.post("/benchmark/candidates", tags=["Benchmarking"])
 async def benchmark_candidates(request: BenchmarkRequest):
@@ -612,18 +642,34 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         )
 
         # Step 4: Generate learning path
+        # Step 3: Generate Adaptive Learning Path
         logger.info("Generating adaptive learning path...")
-        gaps_to_address = gap_analyzer.prioritize_skills_to_learn(gap_analysis)
         learning_path = learning_path_generator.generate_learning_path(
-            gaps_to_address, 
-            resume_skills_full, 
-            learning_style=learning_style, 
-            burnout_detected=burnout_status['burnout']
+            gap_analysis['missing_skills'] + gap_analysis['partial_skills'],
+            resume_skills_full,
+            learning_style=learning_style,
+            burnout_detected=burnout_status.get('burnout', False),
+            target_role=request.target_role,
+            timeline_days=request.timeline_days
         )
 
         # Step 4b: Generate resume feedback
         logger.info("Generating actionable resume feedback...")
-        resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
+        resume_feedback = feedback_generator.generate_feedback(resume_skills_full, effective_required_skills, gap_analysis)
+
+        # Step 4c: Career Path Predictions
+        logger.info("Predicting future career paths...")
+        known_skill_names = [s['name'] for s in gap_analysis['known_skills']]
+        career_predictions = career_path_predictor.predict(known_skill_names)
+
+        # Step 4d: Market Trend Analysis
+        logger.info("Analyzing missing trending market skills...")
+        matched_domain_name = "Full Stack"
+        if isinstance(domain_result, dict) and "domain" in domain_result:
+            matched_domain_name = domain_result["domain"]
+        elif isinstance(domain_result, str):
+            matched_domain_name = domain_result
+        market_insights = market_trend_analyzer.analyze(known_skill_names, domain=matched_domain_name)
 
         # Step 4c: Calculate efficiency metrics (Feature 7)
         logger.info("Calculating time saved analytics...")
@@ -692,7 +738,10 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             resume_feedback=resume_feedback,
             efficiency_metrics=efficiency_metrics,
             learning_style=learning_style,
-            burnout_status=burnout_status
+            burnout_status=burnout_status,
+            career_paths=career_predictions['next_roles'],
+            market_insights=market_insights,
+            goal=learning_path.get('goal')
         )
     except HTTPException:
         raise
@@ -872,6 +921,13 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             if s.lower() not in {c.lower() for c in confirmed_completed}
         ]
 
+        # Step 5b: Predict next roles based on updated skills
+        all_known_skill_names = [s['name'] for s in updated_gap_analysis['known_skills']]
+        career_predictions = career_path_predictor.predict(all_known_skill_names)
+
+        # Step 5c: Market Trend Analysis
+        market_insights = market_trend_analyzer.analyze(all_known_skill_names)
+
         progress_summary = {
             'completed_skills_submitted': request.completed_skills,
             'confirmed_as_known': confirmed_completed,
@@ -900,6 +956,9 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'updated_learning_path': updated_learning_path,
             'learning_style': learning_style,
             'burnout_status': burnout_status,
+            'career_paths': career_predictions['next_roles'],
+            'market_insights': market_insights,
+            'goal': updated_learning_path.get('goal'),
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
