@@ -12,6 +12,7 @@ from app.services.dependency_resolver import DependencyResolver
 from app.services.role_matcher import RoleMatcher
 from app.services.voice_explainer import VoiceExplainer
 from app.services.time_analytics import TimeAnalytics
+from app.services.resume_benchmarker import ResumeBenchmarker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +42,11 @@ dependency_resolver = DependencyResolver()
 role_matcher = RoleMatcher()
 voice_explainer = VoiceExplainer()
 time_analytics = TimeAnalytics()
+resume_benchmarker = ResumeBenchmarker(
+    skill_extractor=skill_extractor,
+    gap_analyzer=gap_analyzer,
+    role_matcher=role_matcher,
+)
 
 
 # ==================== Pydantic Models ====================
@@ -103,7 +109,64 @@ class TimeSavedRequest(BaseModel):
     learning_path: Dict
 
 
+class CandidateInput(BaseModel):
+    name: str
+    resume_text: str
+
+
+class BenchmarkRequest(BaseModel):
+    job_description_text: str
+    candidates: List[CandidateInput]   # 2–20 candidates
+
+
 # ==================== Endpoints ====================
+
+@app.post("/benchmark/candidates", tags=["Benchmarking"])
+async def benchmark_candidates(request: BenchmarkRequest):
+    """
+    Multi-Resume Benchmarking — rank candidates against a job description.
+
+    Scoring (composite 0–100):
+      - Skill coverage  (known / total required)  40%
+      - Readiness score (gap_analyzer)            35%
+      - Avg confidence  (from resume context)     15%
+      - Depth bonus     (advanced skills ratio)   10%
+      + Nice-to-have bonus                        up to +3 pts
+
+    Input:
+        job_description_text: JD text
+        candidates:           list of {name, resume_text} (2–20)
+
+    Output:
+        ranked_candidates, summary, job_description_skills
+    """
+    try:
+        if len(request.candidates) < 2:
+            raise HTTPException(status_code=400, detail="At least 2 candidates required")
+        if len(request.candidates) > 20:
+            raise HTTPException(status_code=400, detail="Maximum 20 candidates per request")
+        if not request.job_description_text or len(request.job_description_text.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Job description text too short")
+
+        logger.info(f"Benchmarking {len(request.candidates)} candidates")
+
+        candidates_dicts = [
+            {"name": c.name, "resume_text": c.resume_text}
+            for c in request.candidates
+        ]
+
+        result = resume_benchmarker.benchmark(
+            candidates=candidates_dicts,
+            job_description_text=request.job_description_text,
+        )
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Benchmark error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Benchmark error: {str(e)}")
+
 
 @app.post("/analytics/time-saved", tags=["Analytics"])
 async def get_time_saved_analytics(request: TimeSavedRequest):

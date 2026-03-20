@@ -9,6 +9,7 @@ import LoadingSpinner from './components/LoadingSpinner'
 import ErrorAlert from './components/ErrorAlert'
 import VoiceExplain from './components/VoiceExplain'
 import TimeSavedAnalytics from './components/TimeSavedAnalytics'
+import CandidateBenchmark from './components/CandidateBenchmark'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -147,33 +148,53 @@ function App() {
 
         {!loading && (
           <div className="space-y-6">
-            {/* Tabs */}
-            {analysisResults && (
-              <div className="flex gap-2 flex-wrap">
-                {[
-                  { id: 'upload', label: '📄 Input' },
-                  { id: 'results', label: '📊 Results' },
-                  { id: 'skills', label: '🎯 Skills' },
-                  { id: 'gaps', label: '⚠️ Gaps' },
-                  { id: 'path', label: '🛣️ Learning Path' }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+            {/* Tabs — always shown once analysis done; Benchmark always visible */}
+            <div className="flex gap-2 flex-wrap">
+              {/* Benchmark tab always visible */}
+              <button
+                key="benchmark"
+                onClick={() => setActiveTab('benchmark')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  activeTab === 'benchmark'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                🏆 Benchmark
+              </button>
+
+              {analysisResults && [
+                { id: 'upload', label: '📄 Input' },
+                { id: 'results', label: '📊 Results' },
+                { id: 'skills', label: '🎯 Skills' },
+                { id: 'gaps', label: '⚠️ Gaps' },
+                { id: 'path', label: '🛣️ Learning Path' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Benchmark tab — self-contained workflow */}
+            {activeTab === 'benchmark' && (
+              <div className="card">
+                <h2 className="text-2xl font-bold text-gray-800 mb-1">🏆 Multi-Resume Benchmarking</h2>
+                <p className="text-sm text-gray-500 mb-5">Compare and rank multiple candidates against a single job description.</p>
+                <CandidateBenchmark />
               </div>
             )}
 
             {/* Content Sections */}
-            {activeTab === 'upload' || !analysisResults ? (
+            {(activeTab === 'upload' || (!analysisResults && activeTab !== 'benchmark')) ? (
               <UploadSection
                 resumeText={resumeText}
                 jobDescriptionText={jobDescriptionText}
