@@ -1,0 +1,381 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Skill dependency graph for AI-Adaptive Onboarding Engine",
+    "total_skills": 62
+  },
+  "skills": {
+    "HTML": {
+      "requires": [],
+      "category": "Frontend",
+      "level": "Beginner",
+      "description": "HyperText Markup Language - structure of web pages"
+    },
+    "CSS": {
+      "requires": ["HTML"],
+      "category": "Frontend",
+      "level": "Beginner",
+      "description": "Cascading Style Sheets - styling web pages"
+    },
+    "JavaScript": {
+      "requires": ["HTML", "CSS"],
+      "category": "Frontend",
+      "level": "Intermediate",
+      "description": "Core language for web interactivity"
+    },
+    "TypeScript": {
+      "requires": ["JavaScript"],
+      "category": "Frontend",
+      "level": "Intermediate",
+      "description": "Typed superset of JavaScript"
+    },
+    "React": {
+      "requires": ["JavaScript", "HTML", "CSS"],
+      "category": "Frontend Framework",
+      "level": "Intermediate",
+      "description": "UI library for building component-based interfaces"
+    },
+    "Next.js": {
+      "requires": ["React", "JavaScript"],
+      "category": "Frontend Framework",
+      "level": "Intermediate",
+      "description": "React framework for production with SSR/SSG"
+    },
+    "Vue.js": {
+      "requires": ["JavaScript", "HTML", "CSS"],
+      "category": "Frontend Framework",
+      "level": "Intermediate",
+      "description": "Progressive JavaScript framework"
+    },
+    "Angular": {
+      "requires": ["TypeScript", "JavaScript"],
+      "category": "Frontend Framework",
+      "level": "Advanced",
+      "description": "Full-featured frontend framework by Google"
+    },
+    "Redux": {
+      "requires": ["React", "JavaScript"],
+      "category": "State Management",
+      "level": "Intermediate",
+      "description": "Predictable state container for JavaScript apps"
+    },
+    "Tailwind CSS": {
+      "requires": ["CSS", "HTML"],
+      "category": "CSS Framework",
+      "level": "Beginner",
+      "description": "Utility-first CSS framework"
+    },
+    "Python": {
+      "requires": [],
+      "category": "Programming Language",
+      "level": "Beginner",
+      "description": "General-purpose high-level programming language"
+    },
+    "Java": {
+      "requires": [],
+      "category": "Programming Language",
+      "level": "Intermediate",
+      "description": "Object-oriented programming language"
+    },
+    "Go": {
+      "requires": [],
+      "category": "Programming Language",
+      "level": "Intermediate",
+      "description": "Systems programming language by Google"
+    },
+    "Rust": {
+      "requires": [],
+      "category": "Programming Language",
+      "level": "Advanced",
+      "description": "Systems language focused on safety and performance"
+    },
+    "FastAPI": {
+      "requires": ["Python"],
+      "category": "Backend Framework",
+      "level": "Intermediate",
+      "description": "Modern, fast Python web framework"
+    },
+    "Django": {
+      "requires": ["Python"],
+      "category": "Backend Framework",
+      "level": "Intermediate",
+      "description": "Batteries-included Python web framework"
+    },
+    "Flask": {
+      "requires": ["Python"],
+      "category": "Backend Framework",
+      "level": "Beginner",
+      "description": "Lightweight Python web microframework"
+    },
+    "Node.js": {
+      "requires": ["JavaScript"],
+      "category": "Backend Runtime",
+      "level": "Intermediate",
+      "description": "JavaScript runtime built on Chrome V8 engine"
+    },
+    "Express.js": {
+      "requires": ["Node.js", "JavaScript"],
+      "category": "Backend Framework",
+      "level": "Intermediate",
+      "description": "Minimal and flexible Node.js web framework"
+    },
+    "Spring Boot": {
+      "requires": ["Java"],
+      "category": "Backend Framework",
+      "level": "Intermediate",
+      "description": "Java-based framework for microservices"
+    },
+    "REST API": {
+      "requires": ["HTTP"],
+      "category": "API Design",
+      "level": "Intermediate",
+      "description": "Representational State Transfer API design"
+    },
+    "GraphQL": {
+      "requires": ["REST API", "JavaScript"],
+      "category": "API Design",
+      "level": "Intermediate",
+      "description": "Query language for APIs"
+    },
+    "HTTP": {
+      "requires": [],
+      "category": "Networking",
+      "level": "Beginner",
+      "description": "HyperText Transfer Protocol fundamentals"
+    },
+    "SQL": {
+      "requires": [],
+      "category": "Database Language",
+      "level": "Beginner",
+      "description": "Structured Query Language for relational databases"
+    },
+    "PostgreSQL": {
+      "requires": ["SQL"],
+      "category": "Database",
+      "level": "Intermediate",
+      "description": "Advanced open-source relational database"
+    },
+    "MySQL": {
+      "requires": ["SQL"],
+      "category": "Database",
+      "level": "Beginner",
+      "description": "Popular open-source relational database"
+    },
+    "MongoDB": {
+      "requires": [],
+      "category": "Database",
+      "level": "Intermediate",
+      "description": "Document-oriented NoSQL database"
+    },
+    "Redis": {
+      "requires": [],
+      "category": "Database",
+      "level": "Intermediate",
+      "description": "In-memory data structure store for caching"
+    },
+    "NumPy": {
+      "requires": ["Python"],
+      "category": "ML Library",
+      "level": "Intermediate",
+      "description": "Numerical computing library for Python"
+    },
+    "Pandas": {
+      "requires": ["Python", "NumPy"],
+      "category": "ML Library",
+      "level": "Intermediate",
+      "description": "Data analysis and manipulation library"
+    },
+    "Matplotlib": {
+      "requires": ["Python", "NumPy"],
+      "category": "Data Visualization",
+      "level": "Beginner",
+      "description": "Plotting library for Python"
+    },
+    "Scikit-learn": {
+      "requires": ["Python", "NumPy", "Pandas"],
+      "category": "ML Library",
+      "level": "Intermediate",
+      "description": "Machine learning library for Python"
+    },
+    "Machine Learning": {
+      "requires": ["Python", "NumPy", "Pandas", "Scikit-learn"],
+      "category": "AI/ML",
+      "level": "Intermediate",
+      "description": "Algorithms and statistical models for learning from data"
+    },
+    "Deep Learning": {
+      "requires": ["Machine Learning", "Python", "NumPy"],
+      "category": "AI/ML",
+      "level": "Advanced",
+      "description": "Neural network-based machine learning"
+    },
+    "TensorFlow": {
+      "requires": ["Python", "NumPy", "Machine Learning"],
+      "category": "ML Framework",
+      "level": "Intermediate",
+      "description": "End-to-end ML platform by Google"
+    },
+    "PyTorch": {
+      "requires": ["Python", "NumPy", "Deep Learning"],
+      "category": "ML Framework",
+      "level": "Advanced",
+      "description": "Dynamic neural network library"
+    },
+    "NLP": {
+      "requires": ["Python", "Machine Learning"],
+      "category": "AI/ML",
+      "level": "Advanced",
+      "description": "Natural Language Processing"
+    },
+    "Transformers": {
+      "requires": ["Deep Learning", "NLP", "PyTorch"],
+      "category": "AI/ML",
+      "level": "Advanced",
+      "description": "Attention-based deep learning architecture"
+    },
+    "LLM": {
+      "requires": ["Transformers", "NLP"],
+      "category": "AI/ML",
+      "level": "Advanced",
+      "description": "Large Language Model development and fine-tuning"
+    },
+    "Git": {
+      "requires": [],
+      "category": "DevOps",
+      "level": "Beginner",
+      "description": "Distributed version control system"
+    },
+    "Linux": {
+      "requires": [],
+      "category": "Operating System",
+      "level": "Beginner",
+      "description": "Linux command line and system administration"
+    },
+    "Docker": {
+      "requires": ["Linux"],
+      "category": "DevOps",
+      "level": "Intermediate",
+      "description": "Containerization platform"
+    },
+    "Kubernetes": {
+      "requires": ["Docker", "Linux"],
+      "category": "DevOps",
+      "level": "Advanced",
+      "description": "Container orchestration system"
+    },
+    "CI/CD": {
+      "requires": ["Git", "Docker"],
+      "category": "DevOps",
+      "level": "Intermediate",
+      "description": "Continuous Integration and Deployment pipelines"
+    },
+    "Terraform": {
+      "requires": ["Linux", "Cloud Platform"],
+      "category": "DevOps",
+      "level": "Advanced",
+      "description": "Infrastructure as Code tool"
+    },
+    "AWS": {
+      "requires": ["Linux", "HTTP"],
+      "category": "Cloud Platform",
+      "level": "Intermediate",
+      "description": "Amazon Web Services cloud platform"
+    },
+    "GCP": {
+      "requires": ["Linux", "HTTP"],
+      "category": "Cloud Platform",
+      "level": "Intermediate",
+      "description": "Google Cloud Platform"
+    },
+    "Azure": {
+      "requires": ["Linux", "HTTP"],
+      "category": "Cloud Platform",
+      "level": "Intermediate",
+      "description": "Microsoft Azure cloud platform"
+    },
+    "Cloud Platform": {
+      "requires": ["Linux"],
+      "category": "Cloud",
+      "level": "Intermediate",
+      "description": "General cloud platform concepts"
+    },
+    "Microservices": {
+      "requires": ["REST API", "Docker"],
+      "category": "Architecture",
+      "level": "Advanced",
+      "description": "Distributed system architectural style"
+    },
+    "System Design": {
+      "requires": ["REST API", "SQL", "Docker"],
+      "category": "Architecture",
+      "level": "Advanced",
+      "description": "Designing scalable distributed systems"
+    },
+    "Data Structures": {
+      "requires": [],
+      "category": "Computer Science",
+      "level": "Intermediate",
+      "description": "Fundamental data organization concepts"
+    },
+    "Algorithms": {
+      "requires": ["Data Structures"],
+      "category": "Computer Science",
+      "level": "Intermediate",
+      "description": "Problem-solving computational procedures"
+    },
+    "OOP": {
+      "requires": [],
+      "category": "Computer Science",
+      "level": "Beginner",
+      "description": "Object-Oriented Programming principles"
+    },
+    "Design Patterns": {
+      "requires": ["OOP"],
+      "category": "Software Engineering",
+      "level": "Intermediate",
+      "description": "Reusable solutions to common software design problems"
+    },
+    "Testing": {
+      "requires": [],
+      "category": "Software Engineering",
+      "level": "Beginner",
+      "description": "Software testing methodologies and tools"
+    },
+    "Unit Testing": {
+      "requires": ["Testing"],
+      "category": "Software Engineering",
+      "level": "Intermediate",
+      "description": "Automated testing of individual code units"
+    },
+    "Agile": {
+      "requires": [],
+      "category": "Methodology",
+      "level": "Beginner",
+      "description": "Agile software development methodologies"
+    },
+    "Apache Kafka": {
+      "requires": ["Linux", "Java"],
+      "category": "Messaging",
+      "level": "Advanced",
+      "description": "Distributed event streaming platform"
+    },
+    "Elasticsearch": {
+      "requires": ["Linux", "REST API"],
+      "category": "Search",
+      "level": "Intermediate",
+      "description": "Distributed search and analytics engine"
+    },
+    "Security": {
+      "requires": ["HTTP", "Linux"],
+      "category": "Cybersecurity",
+      "level": "Intermediate",
+      "description": "Application security and vulnerability mitigation"
+    },
+    "MLOps": {
+      "requires": ["Machine Learning", "Docker", "CI/CD"],
+      "category": "AI/ML",
+      "level": "Advanced",
+      "description": "ML lifecycle management in production"
+    }
+  }
+}

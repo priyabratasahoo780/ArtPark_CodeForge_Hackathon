@@ -8,6 +8,7 @@ from pathlib import Path
 from app.services.skill_extractor import SkillExtractor
 from app.services.gap_analyzer import SkillGapAnalyzer
 from app.services.learning_path_generator import LearningPathGenerator
+from app.services.dependency_resolver import DependencyResolver
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +34,7 @@ app.add_middleware(
 skill_extractor = SkillExtractor()
 gap_analyzer = SkillGapAnalyzer()
 learning_path_generator = LearningPathGenerator()
+dependency_resolver = DependencyResolver()
 
 
 # ==================== Pydantic Models ====================
@@ -274,7 +276,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest):
                 f'You currently have {gap_analysis["statistics"]["known_count"]} of {gap_analysis["statistics"]["total_required_skills"]} required skills',
                 f'Skill coverage: {gap_analysis["statistics"]["coverage_percentage"]}%',
                 f'Readiness score: {gap_analysis["statistics"]["readiness_score"]}/100',
-                f'Estimated learning time: {learning_path["total_duration_weeks"]} weeks (~{learning_path["total_duration_hours"]} hours)'
+                f'Estimated learning time: {learning_path.get("timeline", {}).get("estimated_weeks", "N/A")} weeks (~{learning_path.get("total_duration_hours", "N/A")} hours)',
+                f'Learning path includes {len(learning_path.get("modules", []))} modules ({sum(1 for m in learning_path.get("modules", []) if m.get("is_injected_prerequisite"))} auto-injected prerequisites)'
             ],
             'recommendations': [
                 'Follow the learning path in recommended order for optimal learning',
@@ -327,6 +330,57 @@ async def get_skill_explanation(skill_name: str, request: OnboardingRequest):
         return explanation
     except Exception as e:
         logger.error(f"Error getting skill explanation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.get("/graph/skills", tags=["Dependency Graph"])
+async def get_skill_graph(skills: str = None):
+    """
+    Return the full skill dependency graph for visualization.
+
+    Query param:
+        skills: Optional comma-separated list of skill names to scope the graph.
+                If omitted, returns the complete graph.
+
+    Returns:
+        nodes: List of skill nodes with category/level metadata
+        edges: List of prerequisite edges (from → to)
+    """
+    try:
+        skill_list = [s.strip() for s in skills.split(",")] if skills else None
+        graph = dependency_resolver.build_full_graph(skill_list)
+        return graph
+    except Exception as e:
+        logger.error(f"Error building skill graph: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error building graph: {str(e)}")
+
+
+@app.post("/graph/prerequisites/{skill_name}", tags=["Dependency Graph"])
+async def get_skill_prerequisites(skill_name: str, request: Resume):
+    """
+    Return ordered prerequisite chain for a specific skill,
+    excluding skills already present in the provided resume text.
+
+    Args:
+        skill_name: Target skill to resolve prerequisites for.
+        request.text: Resume text (used to extract known skills to skip).
+
+    Returns:
+        prerequisites: Ordered list of prerequisite skill names
+        dependency_chain_length: Number of prerequisites needed
+    """
+    try:
+        resume_result = skill_extractor.extract_from_resume(request.text)
+        known_skills = {s['name'].lower() for s in resume_result['skills']}
+        prereqs = dependency_resolver.get_prerequisites(skill_name, known_skills)
+        return {
+            "skill": skill_name,
+            "prerequisites": prereqs,
+            "dependency_chain_length": len(prereqs),
+            "known_skills_skipped": len(known_skills),
+        }
+    except Exception as e:
+        logger.error(f"Error resolving prerequisites for {skill_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 

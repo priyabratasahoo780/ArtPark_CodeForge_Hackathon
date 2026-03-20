@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import logging
 
+from app.services.dependency_resolver import DependencyResolver
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,155 +38,90 @@ class LearningPathGenerator:
             current_dir = Path(__file__).parent.parent / "datasets" / "skills_taxonomy.json"
         else:
             current_dir = Path(taxonomy_path)
-        
+
         with open(current_dir, 'r') as f:
             self.taxonomy = json.load(f)
-        
-        self.dependencies = self._build_dependency_graph()
-    
-    def _build_dependency_graph(self) -> Dict[str, Set[str]]:
-        """Build graph of skill prerequisites."""
-        graph = {}
-        
-        for category, skills in self.taxonomy['skills'].items():
-            for skill_name, skill_data in skills.items():
-                prerequisites = skill_data.get('prerequisites', [])
-                graph[skill_name.lower()] = {p.lower() for p in prerequisites}
-        
-        return graph
+
+        # Graph-aware dependency resolver (uses skill_graph.json)
+        self.dependency_resolver = DependencyResolver()
     
     def generate_learning_path(self, gaps_to_address: List[Dict], resume_skills: List[Dict]) -> Dict:
         """
         Generate comprehensive learning path for addressing skill gaps.
-        
+
+        Uses the DependencyResolver to:
+        1. Inject missing prerequisites automatically
+        2. Guarantee prerequisites appear before dependent skills
+        3. Skip skills the user already knows
+
         Args:
             gaps_to_address: Skills that need to be learned (from gap analysis)
             resume_skills: Current skills from resume
-            
+
         Returns:
-            Structured learning path with modules, timeline, and reasoning
+            Structured learning path with modules, timeline, and dependency info
         """
-        # Build current skills set
-        current_skills = {skill['name'].lower() for skill in resume_skills}
-        
-        # Get list of prerequisite skills to include
-        all_prereqs = set()
-        for gap in gaps_to_address:
-            prereqs = gap.get('prerequisites', [])
-            for prereq in prereqs:
-                if prereq.lower() not in current_skills:
-                    all_prereqs.add(prereq.lower())
-        
-        # Combine gaps and prerequisites
-        skills_to_learn = gaps_to_address + [
-            {
-                'name': self._get_skill_name(p),
-                'category': 'Prerequisite',
-                'required_level': 'Intermediate',
-                'prerequisites': [],
-                'gap_score': 2,
-                'reason': 'Prerequisite for other skills'
-            }
-            for p in all_prereqs
-        ]
-        
-        # Build learning sequence using topological sort
-        sequence = self._topological_sort_skills(skills_to_learn, current_skills)
-        
+        # Known skills set (lowercase) — these are SKIPPED by the resolver
+        known_skills: Set[str] = {skill['name'].lower() for skill in resume_skills}
+
+        # Use DependencyResolver to order skills and inject prerequisites
+        sequence = self.dependency_resolver.resolve(gaps_to_address, known_skills)
+
         # Create learning modules
-        modules = self._create_learning_modules(sequence, current_skills)
-        
+        modules = self._create_learning_modules(sequence, known_skills)
+
         # Calculate timeline
         timeline = self._calculate_timeline(modules)
-        
+
+        # Build full dependency graph for visualization
+        all_skill_names = [s['name'] for s in sequence]
+        dependency_graph = self.dependency_resolver.build_full_graph(all_skill_names)
+
         return {
             'modules': modules,
             'timeline': timeline,
             'total_duration_hours': timeline['total_hours'],
             'total_duration_days': timeline['estimated_days'],
-            'learning_sequence': sequence,
+            'learning_sequence': [s['name'] for s in sequence],
+            'dependency_graph': dependency_graph,
             'strategies': self._generate_learning_strategies(modules),
             'milestones': self._create_milestones(modules),
             'reasoning': {
-                'approach': 'Dependency-based adaptive learning path',
-                'optimization': 'Prerequisites first, then critical gaps, then nice-to-haves',
+                'approach': 'Graph-aware adaptive learning path (skill_graph.json)',
+                'optimization': 'Prerequisites auto-injected, already-known skills skipped',
                 'personalization': 'Based on your current skill level and job requirements'
             }
         }
     
+    # NOTE: _topological_sort_skills and _build_dependency_graph have been
+    # replaced by DependencyResolver.resolve() above. Kept as no-op for
+    # backward compatibility if called externally.
     def _topological_sort_skills(self, skills: List[Dict], current_skills: Set[str]) -> List[Dict]:
-        """
-        Sort skills by dependencies using topological sort.
-        Skills with no unmet dependencies come first.
-        """
-        skills_to_learn = {s['name'].lower(): s for s in skills}
-        sorted_path = []
-        visited = set()
-        visiting = set()
-        
-        def visit(skill_name: str, path: List):
-            """DFS visit for topological sort."""
-            skill_name_lower = skill_name.lower()
-            
-            if skill_name_lower in visited:
-                return True
-            
-            if skill_name_lower in visiting:
-                return False  # Cycle detected
-            
-            visiting.add(skill_name_lower)
-            
-            # Visit dependencies first
-            if skill_name_lower in self.dependencies:
-                for dep in self.dependencies[skill_name_lower]:
-                    if dep not in current_skills and dep in skills_to_learn:
-                        if not visit(dep, path):
-                            return False
-            
-            visiting.remove(skill_name_lower)
-            visited.add(skill_name_lower)
-            
-            if skill_name_lower in skills_to_learn:
-                path.append(skills_to_learn[skill_name_lower])
-            
-            return True
-        
-        # Process skills by priority (gap_score descending)
-        sorted_skills = sorted(skills, key=lambda x: -x.get('gap_score', 0))
-        
-        for skill in sorted_skills:
-            visit(skill['name'].lower(), sorted_path)
-        
-        return sorted_path
+        """Deprecated: use DependencyResolver.resolve() instead."""
+        return self.dependency_resolver.resolve(skills, current_skills)
     
     def _create_learning_modules(self, sequence: List[Dict], current_skills: Set[str]) -> List[Dict]:
         """Convert skill sequence into structured learning modules."""
         modules = []
-        
+
         for i, skill in enumerate(sequence):
-            # Estimate learning difficulty and time
             required_level = skill.get('required_level', 'Intermediate')
             category = skill.get('category', 'Other')
-            
-            # Determine learning difficulty
-            difficulty = self._estimate_difficulty(
-                skill, current_skills, required_level
-            )
-            
-            # Estimate time
-            time_estimate = self._estimate_learning_time(
-                difficulty, category, required_level
-            )
-            
+
+            difficulty = self._estimate_difficulty(skill, current_skills, required_level)
+            time_estimate = self._estimate_learning_time(difficulty, category, required_level)
+
             module = {
                 'id': f"module_{i+1}",
                 'order': i + 1,
                 'skill_name': skill['name'],
-                'category': skill['category'],
+                'category': skill.get('category', 'General'),
                 'level': required_level,
                 'difficulty': difficulty,
                 'time_estimate_hours': time_estimate,
                 'prerequisites': skill.get('prerequisites', []),
+                'dependency_chain': skill.get('dependency_chain', []),  # from resolver
+                'is_injected_prerequisite': skill.get('is_injected_prerequisite', False),
                 'gap_score': skill.get('gap_score', 0),
                 'reason': skill.get('reason', 'Building required skill'),
                 'resources': self._suggest_resources(skill['name'], required_level),
@@ -192,9 +129,9 @@ class LearningPathGenerator:
                 'assessment_criteria': self._generate_assessment_criteria(skill),
                 'status': 'pending'
             }
-            
+
             modules.append(module)
-        
+
         return modules
     
     def _estimate_difficulty(self, skill: Dict, current_skills: Set[str], level: str) -> str:
