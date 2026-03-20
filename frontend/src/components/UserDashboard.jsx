@@ -6,6 +6,7 @@ import LearningPath from './LearningPath'
 import GapAnalysis from './GapAnalysis'
 import ResumeFeedback from './ResumeFeedback'
 import CareerPredictor from './CareerPredictor'
+import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
 import { FiMessageSquare } from 'react-icons/fi'
 
@@ -221,6 +222,10 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
 
           <div className="space-y-4">
              <CareerPredictor roles={analysisResults.career_paths || []} />
+          </div>
+
+          <div className="space-y-4">
+             <MarketInsights insights={analysisResults.market_insights} />
           </div>
 
           <div className="space-y-4">

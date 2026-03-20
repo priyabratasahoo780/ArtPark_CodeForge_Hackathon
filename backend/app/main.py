@@ -18,6 +18,7 @@ from app.services.domain_classifier import DomainClassifier
 from app.services.learning_style_analyzer import LearningStyleAnalyzer
 from app.services.burnout_detector import BurnoutDetector
 from app.services.career_path_predictor import CareerPathPredictor
+from app.services.market_trend_analyzer import MarketTrendAnalyzer
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -63,6 +64,7 @@ domain_classifier = DomainClassifier()
 learning_style_analyzer = LearningStyleAnalyzer()
 burnout_detector = BurnoutDetector()
 career_path_predictor = CareerPathPredictor()
+market_trend_analyzer = MarketTrendAnalyzer()
 
 # ==================== Pydantic Models ====================
 
@@ -264,7 +266,7 @@ class OnboardingResponse(BaseModel):
     learning_style: Optional[str] = None
     burnout_status: Optional[Dict] = None
     career_paths: Optional[List[str]] = None
-
+    market_insights: Optional[Dict[str, List[str]]] = None
 
 class ProgressUpdateRequest(BaseModel):
     resume_text: str
@@ -287,6 +289,10 @@ class VoiceExplainRequest(BaseModel):
 
 class CareerPathRequest(BaseModel):
     current_skills: List[str]
+
+class MarketTrendRequest(BaseModel):
+    current_skills: List[str]
+    domain: Optional[str] = "Full Stack"
     custom_text: Optional[str] = None
     lang: Optional[str] = "en"
     role: Optional[str] = "USER"
@@ -337,6 +343,13 @@ async def predict_career_path(request: CareerPathRequest):
     Suggest future career roles based on current skills.
     """
     return career_path_predictor.predict(request.current_skills)
+
+@app.post("/analyze/market-trends", tags=["Analysis"])
+async def analyze_market_trends(request: MarketTrendRequest):
+    """
+    Compare user skills with industry demands to find trending skills.
+    """
+    return market_trend_analyzer.analyze(request.current_skills, request.domain)
 
 @app.post("/benchmark/candidates", tags=["Benchmarking"])
 async def benchmark_candidates(request: BenchmarkRequest, current_user=Depends(RoleChecker([RoleEnum.HR]))):
@@ -683,6 +696,15 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         known_skill_names = [s['name'] for s in gap_analysis['known_skills']]
         career_predictions = career_path_predictor.predict(known_skill_names)
 
+        # Step 4d: Market Trend Analysis
+        logger.info("Analyzing missing trending market skills...")
+        matched_domain_name = "Full Stack"
+        if isinstance(domain_result, dict) and "domain" in domain_result:
+            matched_domain_name = domain_result["domain"]
+        elif isinstance(domain_result, str):
+            matched_domain_name = domain_result
+        market_insights = market_trend_analyzer.analyze(known_skill_names, domain=matched_domain_name)
+
         # Step 4c: Calculate efficiency metrics (Feature 7)
         logger.info("Calculating time saved analytics...")
         efficiency_metrics = time_analytics.calculate(
@@ -751,7 +773,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             efficiency_metrics=efficiency_metrics,
             learning_style=learning_style,
             burnout_status=burnout_status,
-            career_paths=career_predictions['next_roles']
+            career_paths=career_predictions['next_roles'],
+            market_insights=market_insights
         )
     except HTTPException:
         raise
@@ -935,6 +958,9 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         all_known_skill_names = [s['name'] for s in updated_gap_analysis['known_skills']]
         career_predictions = career_path_predictor.predict(all_known_skill_names)
 
+        # Step 5c: Market Trend Analysis
+        market_insights = market_trend_analyzer.analyze(all_known_skill_names)
+
         progress_summary = {
             'completed_skills_submitted': request.completed_skills,
             'confirmed_as_known': confirmed_completed,
@@ -964,6 +990,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'learning_style': learning_style,
             'burnout_status': burnout_status,
             'career_paths': career_predictions['next_roles'],
+            'market_insights': market_insights,
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
