@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { FiChevronDown, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar, FiMap, FiAward } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function LearningPath({ data, onToggleSkill, completedSkillNames }) {
+export default function LearningPath({ data, onToggleSkill, completedSkillNames, onResourceClick }) {
   const [expandedModule, setExpandedModule] = useState(null)
   const [internalCompleted, setInternalCompleted] = useState(new Set())
 
@@ -186,8 +186,15 @@ export default function LearningPath({ data, onToggleSkill, completedSkillNames 
                               </p>
                               <div className="space-y-2.5">
                                 {module.resources?.map((res, idx) => (
-                                  <div key={idx} className="bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:border-white/20 transition-all group/res">
-                                    <p className="text-xs font-black text-white uppercase group-hover/res:text-[#00f3ff] transition-colors tracking-wide">{res.name}</p>
+                                  <div 
+                                    key={idx} 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (onResourceClick) onResourceClick(res.type || 'article');
+                                    }}
+                                    className="bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:border-white/20 transition-all cursor-pointer group/res"
+                                  >
+                                    <p className="text-xs font-black text-white uppercase group-hover/res:text-[#00f3ff] transition-colors tracking-wide">{res.title || res.name}</p>
                                     <div className="flex justify-between items-center text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-2">
                                       <span className="flex items-center gap-1.5"><FiBookOpen className="text-xs" /> {res.platform}</span>
                                       <span className="text-[#00f3ff] px-2.5 py-1 bg-[#00f3ff]/5 rounded-md border border-[#00f3ff]/10">{res.duration}</span>

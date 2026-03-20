@@ -15,6 +15,7 @@ from app.services.time_analytics import TimeAnalytics
 from app.services.resume_benchmarker import ResumeBenchmarker
 from app.services.feedback_generator import ResumeFeedbackGenerator
 from app.services.domain_classifier import DomainClassifier
+from app.services.learning_style_analyzer import LearningStyleAnalyzer
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -57,6 +58,7 @@ resume_benchmarker = ResumeBenchmarker(
 )
 feedback_generator = ResumeFeedbackGenerator()
 domain_classifier = DomainClassifier()
+learning_style_analyzer = LearningStyleAnalyzer()
 
 # ==================== Pydantic Models ====================
 
@@ -85,6 +87,8 @@ class Resume(BaseModel):
 class OnboardingRequest(BaseModel):
     resume_text: str
     job_description_text: str
+    interactions: Optional[Dict[str, int]] = None
+    learning_style_override: Optional[str] = None
 
 
 class MultiOnboardingRequest(BaseModel):
@@ -227,6 +231,8 @@ class Resume(BaseModel):
 class OnboardingRequest(BaseModel):
     resume_text: str
     job_description_text: str
+    interactions: Optional[Dict[str, int]] = None
+    learning_style_override: Optional[str] = None
 
 
 class MultiOnboardingRequest(BaseModel):
@@ -250,6 +256,7 @@ class OnboardingResponse(BaseModel):
     reasoning_trace: Dict
     resume_feedback: List[Dict]
     efficiency_metrics: Optional[Dict] = None
+    learning_style: Optional[str] = None
 
 
 class ProgressUpdateRequest(BaseModel):
@@ -257,6 +264,11 @@ class ProgressUpdateRequest(BaseModel):
     job_description_text: str
     completed_skills: List[str]  # Skill names the user has now completed
     session_id: Optional[str] = None  # Optional session tracking
+    interactions: Optional[Dict[str, int]] = None
+    learning_style_override: Optional[str] = None
+
+class LearningStyleRequest(BaseModel):
+    interactions: Dict[str, int]
 
 class VoiceExplainRequest(BaseModel):
     reasoning_trace: Dict
@@ -288,6 +300,14 @@ class BenchmarkRequest(BaseModel):
 
 
 # ==================== Endpoints ====================
+
+@app.post("/analyze/learning-style", tags=["Analysis"])
+async def analyze_learning_style(request: LearningStyleRequest):
+    """
+    Detect user's preferred learning style based on interaction counts.
+    """
+    style = learning_style_analyzer.detect_style(request.interactions)
+    return {"learning_style": style}
 
 @app.post("/benchmark/candidates", tags=["Benchmarking"])
 async def benchmark_candidates(request: BenchmarkRequest, current_user=Depends(RoleChecker([RoleEnum.HR]))):
@@ -573,6 +593,13 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         if not request.job_description_text or len(request.job_description_text.strip()) < 10:
             raise HTTPException(status_code=400, detail="Job description text too short")
 
+        # Step 0: Determine Learning Style
+        if request.learning_style_override:
+            learning_style = request.learning_style_override
+        else:
+            learning_style = learning_style_analyzer.detect_style(request.interactions or {})
+        logger.info(f"Detected learning style: {learning_style}")
+
         # Step 1: Extract skills from resume
         logger.info("Extracting skills from resume...")
         resume_result = skill_extractor.extract_from_resume(request.resume_text)
@@ -608,7 +635,7 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         # Step 4: Generate learning path
         logger.info("Generating adaptive learning path...")
         gaps_to_address = gap_analyzer.prioritize_skills_to_learn(gap_analysis)
-        learning_path = learning_path_generator.generate_learning_path(gaps_to_address, resume_skills_full)
+        learning_path = learning_path_generator.generate_learning_path(gaps_to_address, resume_skills_full, learning_style=learning_style)
 
         # Step 4b: Generate resume feedback
         logger.info("Generating actionable resume feedback...")
@@ -679,7 +706,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             learning_path=learning_path,
             reasoning_trace=reasoning_trace,
             resume_feedback=resume_feedback,
-            efficiency_metrics=efficiency_metrics
+            efficiency_metrics=efficiency_metrics,
+            learning_style=learning_style
         )
     except HTTPException:
         raise
@@ -817,26 +845,38 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         )
         effective_required_skills = hybrid_result['skills']
 
+        # Step 3b: Determine Learning Style
+        if request.learning_style_override:
+            learning_style = request.learning_style_override
+            logger.info(f"Learning style overridden to: {learning_style}")
+        else:
+            learning_style = learning_style_analyzer.detect_style(request.interactions or {})
+            logger.info(f"Detected learning style: {learning_style}")
+
         # Step 4: Re-run gap analysis (completed skills now in resume pool → show as known)
-        updated_gap = gap_analyzer.analyze_gaps(augmented_resume_skills, effective_required_skills)
+        updated_gap_analysis = gap_analyzer.analyze_gaps(augmented_resume_skills, effective_required_skills)
+        
+        # For learning path generation, we need the full set of skills that are considered 'known'
+        # This includes original resume skills + newly injected completed skills
+        hybrid_skills_for_path = augmented_resume_skills 
 
         # Step 5: Re-generate learning path (completed skills skipped by DependencyResolver)
-        gaps_to_address = gap_analyzer.prioritize_skills_to_learn(updated_gap)
-        updated_path = learning_path_generator.generate_learning_path(
-            gaps_to_address, augmented_resume_skills
+        gaps_to_address = gap_analyzer.prioritize_skills_to_learn(updated_gap_analysis)
+        updated_learning_path = learning_path_generator.generate_learning_path(
+            gaps_to_address, hybrid_skills_for_path, learning_style=learning_style
         )
 
         # Step 6: Build progress summary
-        total_required = updated_gap['statistics']['total_required_skills']
-        newly_known = updated_gap['statistics']['known_count']
+        total_required = updated_gap_analysis['statistics']['total_required_skills']
+        newly_known = updated_gap_analysis['statistics']['known_count']
         remaining_gaps = (
-            updated_gap['statistics']['missing_count'] +
-            updated_gap['statistics']['partial_count']
+            updated_gap_analysis['statistics']['missing_count'] +
+            updated_gap_analysis['statistics']['partial_count']
         )
 
         # Verify which completed skills are confirmed in known list
         confirmed_completed = [
-            s['name'] for s in updated_gap['known_skills']
+            s['name'] for s in updated_gap_analysis['known_skills']
             if s['name'].lower() in completed_lower
         ]
         not_yet_matched = [
@@ -852,25 +892,25 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'total_required_skills': total_required,
             'now_known': newly_known,
             'remaining_gaps': remaining_gaps,
-            'new_coverage_percentage': updated_gap['statistics']['coverage_percentage'],
-            'new_readiness_score': updated_gap['statistics']['readiness_score'],
-            'remaining_modules': len(updated_path['modules']),
-            'remaining_hours': updated_path['total_duration_hours'],
-            'remaining_weeks': updated_path.get('timeline', {}).get('estimated_weeks', 'N/A'),
+            'new_coverage_percentage': updated_gap_analysis['statistics']['coverage_percentage'],
+            'new_readiness_score': updated_gap_analysis['statistics']['readiness_score'],
+            'remaining_modules': len(updated_learning_path['modules']),
+            'remaining_hours': updated_learning_path['total_duration_hours'],
+            'remaining_weeks': updated_learning_path.get('timeline', {}).get('estimated_weeks', 'N/A'),
             'role_track': role_match['role'],
             'role_confidence': role_match['confidence'],
             'session_id': request.session_id,
             'message': (
                 f"Great progress! You've completed {len(confirmed_completed)} required skill(s). "
-                f"{remaining_gaps} gap(s) remaining. "
-                f"Updated roadmap has {len(updated_path['modules'])} module(s) left."
+                f"Your roadmap is adapted to a {learning_style} learning style."
             )
         }
 
         return {
             'progress_summary': progress_summary,
-            'updated_gap_analysis': updated_gap,
-            'updated_learning_path': updated_path,
+            'updated_gap_analysis': updated_gap_analysis,
+            'updated_learning_path': updated_learning_path,
+            'learning_style': learning_style,
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (

@@ -59,6 +59,7 @@ class CourseRecommender:
         required_level: str = "Intermediate",
         max_results: int = 3,
         prefer_free: bool = False,
+        learning_style: str = "Visual",
     ) -> List[Dict]:
         """
         Return ranked course recommendations for a skill.
@@ -80,7 +81,7 @@ class CourseRecommender:
 
         raw_courses = self.courses[canonical]
         scored = [
-            {**c, "relevance_score": self._score(c, required_level, prefer_free)}
+            {**c, "relevance_score": self._score(c, required_level, prefer_free, learning_style)}
             for c in raw_courses
         ]
         scored.sort(key=lambda x: -x["relevance_score"])
@@ -91,6 +92,7 @@ class CourseRecommender:
         skills: List[Dict],
         max_per_skill: int = 3,
         prefer_free: bool = False,
+        learning_style: str = "Visual",
     ) -> Dict[str, List[Dict]]:
         """
         Recommend courses for a list of skill dicts.
@@ -107,7 +109,7 @@ class CourseRecommender:
         for skill in skills:
             name = skill.get("name", "")
             level = skill.get("required_level", skill.get("level", "Intermediate"))
-            recommendations = self.recommend(name, level, max_per_skill, prefer_free)
+            recommendations = self.recommend(name, level, max_per_skill, prefer_free, learning_style)
             if recommendations:
                 results[name] = recommendations
         return results
@@ -121,6 +123,7 @@ class CourseRecommender:
         modules: List[Dict],
         max_per_skill: int = 3,
         prefer_free: bool = False,
+        learning_style: str = "Visual",
     ) -> List[Dict]:
         """
         Enrich learning path modules with course recommendations in-place.
@@ -139,7 +142,7 @@ class CourseRecommender:
         for module in modules:
             skill_name = module.get("skill_name", "")
             level = module.get("level", "Intermediate")
-            courses = self.recommend(skill_name, level, max_per_skill, prefer_free)
+            courses = self.recommend(skill_name, level, max_per_skill, prefer_free, learning_style)
 
             module["recommended_courses"] = courses
             module["has_course_data"] = len(courses) > 0
@@ -164,7 +167,7 @@ class CourseRecommender:
     # Private — scoring                                                    #
     # ------------------------------------------------------------------ #
 
-    def _score(self, course: Dict, required_level: str, prefer_free: bool) -> float:
+    def _score(self, course: Dict, required_level: str, prefer_free: bool, learning_style: str) -> float:
         """
         Compute a relevance score for a course given target skill level.
 
@@ -192,7 +195,16 @@ class CourseRecommender:
         elif course.get("free", False):
             score += 0.5  # small boost even without explicit preference
 
-        # Type preference
-        score += TYPE_PREFERENCE.get(course.get("type", "article"), 1) * 0.3
+        # Type preference based on learning style
+        if learning_style == "Visual":
+            type_pref = {"video": 3, "interactive": 2, "article": 1}
+        elif learning_style == "Reading":
+            type_pref = {"article": 3, "video": 1, "interactive": 2}
+        elif learning_style == "Practical":
+            type_pref = {"interactive": 3, "video": 2, "article": 1}
+        else:
+            type_pref = TYPE_PREFERENCE
+
+        score += type_pref.get(course.get("type", "article"), 1) * 0.5
 
         return score

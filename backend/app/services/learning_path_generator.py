@@ -49,7 +49,12 @@ class LearningPathGenerator:
         # Dataset-driven course recommender (uses course_dataset.json)
         self.course_recommender = CourseRecommender()
     
-    def generate_learning_path(self, gaps_to_address: List[Dict], resume_skills: List[Dict]) -> Dict:
+    def generate_learning_path(
+        self, 
+        gaps_to_address: List[Dict], 
+        resume_skills: List[Dict],
+        learning_style: str = "Visual"
+    ) -> Dict:
         """
         Generate comprehensive learning path for addressing skill gaps.
 
@@ -61,6 +66,7 @@ class LearningPathGenerator:
         Args:
             gaps_to_address: Skills that need to be learned (from gap analysis)
             resume_skills: Current skills from resume
+            learning_style: The detected user's learning style
 
         Returns:
             Structured learning path with modules, timeline, and dependency info
@@ -75,7 +81,7 @@ class LearningPathGenerator:
         modules = self._create_learning_modules(sequence, known_skills)
 
         # Enrich modules with real course recommendations (dataset-based, no hallucination)
-        modules = self.course_recommender.enrich_modules(modules, max_per_skill=3)
+        modules = self.course_recommender.enrich_modules(modules, max_per_skill=3, learning_style=learning_style)
 
         # Calculate timeline
         timeline = self._calculate_timeline(modules)

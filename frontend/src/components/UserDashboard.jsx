@@ -12,6 +12,15 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const [loading, setLoading] = useState(false)
   const [completedSkillNames, setCompletedSkillNames] = useState(new Set())
   const [message, setMessage] = useState(null)
+  const [interactions, setInteractions] = useState({})
+
+  const handleResourceClick = (type) => {
+    if (!type) return;
+    setInteractions(prev => ({
+      ...prev,
+      [type.toLowerCase()]: (prev[type.toLowerCase()] || 0) + 1
+    }))
+  }
 
   const handleToggleSkill = (skillName) => {
     const newCompleted = new Set(completedSkillNames)
@@ -35,7 +44,8 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
       const payload = {
         resume_text: analysisResults.skills_analysis.resume_skills.original_text || "", 
         job_description_text: analysisResults.skills_analysis.job_requirements.original_text || "",
-        completed_skills: Array.from(completedSkillNames)
+        completed_skills: Array.from(completedSkillNames),
+        interactions: interactions
       }
       
       const resp = await axios.post(`${API_BASE_URL}/update-progress`, payload, {
@@ -45,7 +55,8 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
       onUpdateResults({
         ...analysisResults,
         gap_analysis: resp.data.updated_gap_analysis,
-        learning_path: resp.data.updated_learning_path
+        learning_path: resp.data.updated_learning_path,
+        learning_style: resp.data.learning_style
       })
       
       setMessage({ type: 'success', text: resp.data.progress_summary.message })
@@ -64,6 +75,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
     { label: 'Neural Readiness', value: `${analysisResults.gap_analysis.statistics.readiness_score}%`, color: '#00f3ff', icon: FiActivity, delay: 0 },
     { label: 'Remaining Path',  value: analysisResults.learning_path.modules.length, color: '#bc13fe', icon: FiZap, delay: 0.1 },
     { label: 'Verified Nodes',  value: analysisResults.gap_analysis.statistics.known_count, color: '#ff00e5', icon: FiAward, delay: 0.2 },
+    { label: 'Learning Style',  value: analysisResults.learning_style || 'Detecting...', color: '#00f3ff', icon: FiBookOpen, delay: 0.3 },
   ]
 
   return (
@@ -108,7 +120,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
       </AnimatePresence>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
           <motion.div 
             key={i}
@@ -146,6 +158,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
                data={analysisResults.learning_path} 
                onToggleSkill={handleToggleSkill}
                completedSkillNames={completedSkillNames}
+               onResourceClick={handleResourceClick}
              />
           </div>
         </div>
