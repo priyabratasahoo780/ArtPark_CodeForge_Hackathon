@@ -85,9 +85,9 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
 
   const stats = [
     { label: 'Neural Readiness', value: `${analysisResults.gap_analysis.statistics.readiness_score}%`, color: '#00f3ff', icon: FiActivity, delay: 0 },
-    { label: 'Remaining Path',  value: analysisResults.learning_path.modules.length, color: '#bc13fe', icon: FiZap, delay: 0.1 },
-    { label: 'Verified Nodes',  value: analysisResults.gap_analysis.statistics.known_count, color: '#ff00e5', icon: FiAward, delay: 0.2 },
-    { label: 'Learning Style',  value: analysisResults.learning_style || 'Detecting...', color: '#00f3ff', icon: FiBookOpen, delay: 0.3 },
+    { label: 'Learning Efficiency', value: `${analysisResults.efficiency_score || 0}%`, color: '#34d399', icon: FiTrendingUp, delay: 0.1 },
+    { label: 'Remaining Path',  value: analysisResults.learning_path.modules.length, color: '#bc13fe', icon: FiZap, delay: 0.2 },
+    { label: 'Verified Nodes',  value: analysisResults.gap_analysis.statistics.known_count, color: '#ff00e5', icon: FiAward, delay: 0.3 },
   ]
 
   return (

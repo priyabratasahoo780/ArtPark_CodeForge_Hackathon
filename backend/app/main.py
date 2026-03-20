@@ -19,6 +19,7 @@ from app.services.learning_style_analyzer import LearningStyleAnalyzer
 from app.services.burnout_detector import BurnoutDetector
 from app.services.career_path_predictor import CareerPathPredictor
 from app.services.market_trend_analyzer import MarketTrendAnalyzer
+from app.services.learning_efficiency_calculator import LearningEfficiencyCalculator
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -65,6 +66,7 @@ learning_style_analyzer = LearningStyleAnalyzer()
 burnout_detector = BurnoutDetector()
 career_path_predictor = CareerPathPredictor()
 market_trend_analyzer = MarketTrendAnalyzer()
+learning_efficiency_calculator = LearningEfficiencyCalculator()
 
 # ==================== Pydantic Models ====================
 
@@ -270,6 +272,7 @@ class OnboardingResponse(BaseModel):
     career_paths: Optional[List[str]] = None
     market_insights: Optional[Dict[str, List[str]]] = None
     goal: Optional[str] = None
+    efficiency_score: Optional[int] = None
 
 class ProgressUpdateRequest(BaseModel):
     resume_text: str
@@ -758,10 +761,14 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             ]
         }
 
+        # Step 4f: Learning Efficiency
+        logger.info("Computing learning efficiency score...")
+        efficiency_result = learning_efficiency_calculator.calculate(request.engagement_metrics)
+
         return OnboardingResponse(
             skills_analysis={
-                'resume_skills': resume_result,
-                'job_requirements': job_result,
+                'resume_skills': resume_skills_full,
+                'job_requirements': effective_required_skills,
                 'role_track': {
                     'matched_role': role_match['role'],
                     'confidence': role_match['confidence'],
@@ -780,7 +787,8 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             burnout_status=burnout_status,
             career_paths=career_predictions['next_roles'],
             market_insights=market_insights,
-            goal=learning_path.get('goal')
+            goal=learning_path.get('goal'),
+            efficiency_score=efficiency_result['efficiency_score']
         )
     except HTTPException:
         raise
@@ -967,6 +975,9 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
         # Step 5c: Market Trend Analysis
         market_insights = market_trend_analyzer.analyze(all_known_skill_names)
 
+        # Step 5d: Learning Efficiency Score
+        efficiency_result = learning_efficiency_calculator.calculate(request.engagement_metrics)
+
         progress_summary = {
             'completed_skills_submitted': request.completed_skills,
             'confirmed_as_known': confirmed_completed,
@@ -998,6 +1009,7 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             'career_paths': career_predictions['next_roles'],
             'market_insights': market_insights,
             'goal': updated_learning_path.get('goal'),
+            'efficiency_score': efficiency_result['efficiency_score'],
             'reasoning': {
                 'approach': 'Adaptive Re-evaluation Loop',
                 'methodology': (
