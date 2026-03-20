@@ -5,6 +5,7 @@ import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiAct
 import LearningPath from './LearningPath'
 import GapAnalysis from './GapAnalysis'
 import ResumeFeedback from './ResumeFeedback'
+import CareerPredictor from './CareerPredictor'
 import SkillHeatmap from './SkillHeatmap'
 import { FiMessageSquare } from 'react-icons/fi'
 
@@ -216,6 +217,10 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
                 <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Critical Gap Nodes</h3>
              </div>
              <GapAnalysis data={analysisResults.gap_analysis} />
+          </div>
+
+          <div className="space-y-4">
+             <CareerPredictor roles={analysisResults.career_paths || []} />
           </div>
 
           <div className="space-y-4">
