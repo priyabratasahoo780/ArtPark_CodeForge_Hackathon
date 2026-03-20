@@ -14,6 +14,7 @@ import CandidateBenchmark from './components/CandidateBenchmark'
 import ResumeFeedback from './components/ResumeFeedback'
 import Login from './components/Login'
 import ProtectedRoute from './components/ProtectedRoute'
+import HRDashboard from './components/HRDashboard'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -194,7 +195,8 @@ function App() {
                 className="flex gap-2 flex-wrap bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 backdrop-blur-sm self-start inline-flex"
               >
                 {[
-                  { id: 'benchmark', label: 'Benchmark', icon: <FiAward /> },
+                  ...(auth.role === 'HR' ? [{ id: 'hr_dashboard', label: 'HR Dashboard', icon: <FiAward /> }] : []),
+                  { id: 'benchmark', label: 'Candidate Rank', icon: <FiAward /> },
                   ...(analysisResults ? [
                     { id: 'upload', label: 'Input', icon: <FiUpload /> },
                     { id: 'results', label: 'Overview', icon: <FiZap /> },
@@ -220,6 +222,17 @@ function App() {
 
               {/* Dynamic Content */}
               <AnimatePresence mode="wait">
+                {activeTab === 'hr_dashboard' && auth.role === 'HR' && (
+                  <ProtectedRoute allowedRoles={['HR']} auth={auth}>
+                    <motion.div 
+                      key="hr_dashboard"
+                      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                    >
+                      <HRDashboard auth={auth} />
+                    </motion.div>
+                  </ProtectedRoute>
+                )}
+
                 {activeTab === 'benchmark' && (
                   <ProtectedRoute allowedRoles={['HR']} auth={auth}>
                     <motion.div 
