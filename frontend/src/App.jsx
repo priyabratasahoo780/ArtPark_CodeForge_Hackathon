@@ -8,6 +8,7 @@ import LearningPath from './components/LearningPath'
 import LoadingSpinner from './components/LoadingSpinner'
 import ErrorAlert from './components/ErrorAlert'
 import VoiceExplain from './components/VoiceExplain'
+import TimeSavedAnalytics from './components/TimeSavedAnalytics'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -25,6 +26,7 @@ function App() {
   const [gapAnalysis, setGapAnalysis] = useState(null)
   const [learningPath, setLearningPath] = useState(null)
   const [reasoningTrace, setReasoningTrace] = useState(null)
+  const [timeSavedData, setTimeSavedData] = useState(null)
 
   const handleAnalyze = async () => {
     if (!resumeText.trim() || !jobDescriptionText.trim()) {
@@ -51,6 +53,17 @@ function App() {
       setLearningPath(response.data.learning_path)
       setReasoningTrace(response.data.reasoning_trace)
       setActiveTab('results')
+
+      // Feature 7: Fetch time-saved analytics (non-blocking — won't break UX if it fails)
+      try {
+        const tsResp = await axios.post(`${API_BASE_URL}/analytics/time-saved`, {
+          gap_analysis: response.data.gap_analysis,
+          learning_path: response.data.learning_path,
+        })
+        setTimeSavedData(tsResp.data)
+      } catch (_) {
+        // silently ignore — TimeSavedAnalytics is enhancement only
+      }
     } catch (err) {
       console.error('Analysis error:', err)
       setError(
@@ -71,6 +84,7 @@ function App() {
     setGapAnalysis(null)
     setLearningPath(null)
     setReasoningTrace(null)
+    setTimeSavedData(null)
     setError(null)
     setActiveTab('upload')
   }
@@ -177,6 +191,11 @@ function App() {
                   reasoningTrace={reasoningTrace}
                   gapStats={gapAnalysis?.statistics}
                 />
+
+                {/* ⏱️ Time Saved Analytics — Feature 7 */}
+                {timeSavedData && (
+                  <TimeSavedAnalytics data={timeSavedData} />
+                )}
 
                 <div className="card">
                   <h2 className="text-2xl font-bold text-gray-800 mb-4">📊 Analysis Summary</h2>

@@ -11,6 +11,7 @@ from app.services.learning_path_generator import LearningPathGenerator
 from app.services.dependency_resolver import DependencyResolver
 from app.services.role_matcher import RoleMatcher
 from app.services.voice_explainer import VoiceExplainer
+from app.services.time_analytics import TimeAnalytics
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +40,7 @@ learning_path_generator = LearningPathGenerator()
 dependency_resolver = DependencyResolver()
 role_matcher = RoleMatcher()
 voice_explainer = VoiceExplainer()
+time_analytics = TimeAnalytics()
 
 
 # ==================== Pydantic Models ====================
@@ -96,8 +98,38 @@ class VoiceExplainSkillRequest(BaseModel):
     signals: Optional[List[str]] = []
 
 
+class TimeSavedRequest(BaseModel):
+    gap_analysis: Dict
+    learning_path: Dict
+
 
 # ==================== Endpoints ====================
+
+@app.post("/analytics/time-saved", tags=["Analytics"])
+async def get_time_saved_analytics(request: TimeSavedRequest):
+    """
+    Time Saved Analytics — compare traditional vs adaptive learning time.
+
+    Traditional model: all required skills studied from scratch + 20% overhead.
+    Adaptive model:    only gap skills, actual hours from the generated roadmap.
+
+    Input:
+        gap_analysis:  gap_analysis dict from /onboarding/complete
+        learning_path: learning_path dict from /onboarding/complete
+
+    Output:
+        traditional_days, optimized_days, time_saved, efficiency_gain, breakdown
+    """
+    try:
+        result = time_analytics.calculate(
+            gap_analysis=request.gap_analysis,
+            learning_path=request.learning_path,
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Time analytics error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analytics error: {str(e)}")
+
 
 @app.post("/explain/voice", tags=["Voice Explanation"])
 async def explain_voice(request: VoiceExplainRequest):
