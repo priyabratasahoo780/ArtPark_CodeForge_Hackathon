@@ -113,8 +113,8 @@ function App() {
       const data = response.data
       setAnalysisResults(data)
       setSkillsAnalysis({
-        resume_skills: data.resume_skills,
-        job_requirements: data.job_requirements
+        resume_skills: data.skills_analysis?.resume_skills,
+        job_requirements: data.skills_analysis?.job_requirements
       })
       setGapAnalysis(data.gap_analysis)
       setLearningPath(data.learning_path)
@@ -125,7 +125,13 @@ function App() {
       setActiveTab('results')
     } catch (err) {
       console.error('Analysis error:', err)
-      setError(err.response?.data?.detail || 'Analysis failed. Please try again.')
+      if (!err.response) {
+        setError('Cannot reach backend server. Please ensure the backend is running on port 8000.')
+      } else if (err.response.status === 401 || err.response.status === 403) {
+        setError('Session expired. Please log out and log back in.')
+      } else {
+        setError(err.response?.data?.detail || 'Analysis failed. Please try again.')
+      }
     } finally {
       setLoading(false)
       setSyncStatus('idle')

@@ -40,12 +40,14 @@ export default function CandidateBenchmark({ auth }) {
       const resp = await axios.post(`${API_BASE_URL}/benchmark/candidates`, {
         job_description_text: jdText,
         candidates: valid.map(c => ({ name: c.name || 'Unknown Unit', resume_text: c.resumeText })),
-      }, {
-        headers: { Authorization: `Bearer ${auth?.token}` }
-      })
+      }, { timeout: 30000 })
       setResults(resp.data)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Benchmarking sequence failed')
+      if (!err.response) {
+        setError('Cannot reach backend server. Please ensure it is running on port 8000.')
+      } else {
+        setError(err.response?.data?.detail || 'Benchmarking failed. Please try again.')
+      }
     } finally {
       setLoading(false)
       setIsSyncing(false)

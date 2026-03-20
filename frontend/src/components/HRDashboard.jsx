@@ -32,7 +32,7 @@ const HRDashboard = ({ auth }) => {
   const fetchMetrics = async () => {
     try {
       const resp = await axios.get(`${API_BASE_URL}/hr/metrics`, {
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { 'Authorization': `Bearer ${auth?.token}` }
       })
       setMetrics(resp.data)
       setLastUpdated(new Date())
@@ -77,13 +77,17 @@ const HRDashboard = ({ auth }) => {
         job_description_text: jobDescription
       }
       const resp = await axios.post(`${API_BASE_URL}/hr/analyze-multiple`, payload, {
-        headers: { 'Authorization': `Bearer ${auth.token}` }
+        headers: { 'Authorization': `Bearer ${auth?.token}` }
       })
       setAnalysisResults(resp.data)
       // Refresh metrics after analysis
       fetchMetrics()
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error analyzing resumes')
+      if (!err.response) {
+        setError('Cannot reach backend. Please ensure the server is running.')
+      } else {
+        setError(err.response?.data?.detail || err.message || 'Error analyzing resumes')
+      }
     } finally {
       setLoading(false)
     }

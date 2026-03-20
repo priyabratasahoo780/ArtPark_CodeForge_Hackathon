@@ -1,0 +1,2 @@
+500
+{"detail":"Traceback (most recent call last):\n  File \"C:\\Users\\priyabrata\\Desktop\\iisc_Hackathon\\ArtPark_CodeForge_Hackathon\\backend\\app\\main.py\", line 125, in analyze_multiple_resumes\n    skills = skill_extractor.extract_skills(resume_text)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'SkillExtractor' object has no attribute 'extract_skills'\n"}

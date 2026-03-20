@@ -23,5 +23,10 @@
     "email": "vedantpatelxy12@gmail.com",
     "role": "HR",
     "hashed_password": "$pbkdf2-sha256$29000$aw3BmPNeqxWiVGqtFeLcmw$J8kTKsgzc0cQpGD/qzmqKosR35bg3oQ28BGCU9xlWdM"
+  },
+  "xzd@gmail.com": {
+    "email": "xzd@gmail.com",
+    "role": "HR",
+    "hashed_password": "$pbkdf2-sha256$29000$t7Z2jvE.x1iL0TrHeO/93w$U/c1F1ORENwp0Vah0n1lZJoVhXpZBlC90YyNF/UL9RU"
   }
 }
