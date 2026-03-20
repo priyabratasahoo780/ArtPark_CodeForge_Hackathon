@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiActivity, FiAward } from 'react-icons/fi'
+import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiActivity, FiAward, FiDownload, FiTrendingUp, FiMessageSquare } from 'react-icons/fi'
 import LearningPath from './LearningPath'
 import GapAnalysis from './GapAnalysis'
 import ResumeFeedback from './ResumeFeedback'
 import CareerPredictor from './CareerPredictor'
 import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
-import { FiMessageSquare } from 'react-icons/fi'
+
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -83,6 +83,42 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
 
   if (!analysisResults) return null;
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadResume = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch('http://localhost:8000/resume/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          original_resume: analysisResults.resume_text || "Professional Talent Profile",
+          completed_skills: analysisResults.gap_analysis.statistics.known_skills || [],
+          goal: analysisResults.goal
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.enhanced_resume) {
+        const blob = new Blob([data.enhanced_resume], { type: 'text/markdown' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Enhanced_Professional_Resume.md';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const stats = [
     { label: 'Neural Readiness', value: `${analysisResults.gap_analysis.statistics.readiness_score}%`, color: '#00f3ff', icon: FiActivity, delay: 0 },
     { label: 'Learning Efficiency', value: `${analysisResults.efficiency_score || 0}%`, color: '#34d399', icon: FiTrendingUp, delay: 0.1 },
@@ -131,6 +167,15 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
             title="Toggle simulated user fatigue"
           >
             {engagementMetrics.force_burnout ? 'Burnout On' : 'Simulate Burnout'}
+          </button>
+
+          <button
+            onClick={handleDownloadResume}
+            disabled={isDownloading}
+            className={`px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2 ${isDownloading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <FiDownload />
+            {isDownloading ? 'Generating...' : 'Download Enhanced Resume'}
           </button>
           
           <motion.button

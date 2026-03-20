@@ -22,6 +22,7 @@ from app.services.market_trend_analyzer import MarketTrendAnalyzer
 from app.services.learning_efficiency_calculator import LearningEfficiencyCalculator
 from app.services.doubt_detector import DoubtDetector
 from app.services.skill_decay_detector import SkillDecayDetector
+from app.services.resume_updater import ResumeUpdater
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -71,6 +72,7 @@ market_trend_analyzer = MarketTrendAnalyzer()
 learning_efficiency_calculator = LearningEfficiencyCalculator()
 doubt_detector = DoubtDetector()
 skill_decay_detector = SkillDecayDetector()
+resume_updater = ResumeUpdater()
 
 # ==================== Pydantic Models ====================
 
@@ -249,6 +251,25 @@ class ProgressUpdateRequest(BaseModel):
     interactions: Optional[Dict[str, int]] = None
     learning_style_override: Optional[str] = None
     engagement_metrics: Optional[Dict[str, Any]] = None
+
+class ProgressUpdateResponse(BaseModel):
+    updated_learning_path: Dict[str, Any]
+    progress_summary: Dict[str, Any]
+    burnout_status: bool
+    career_paths: Optional[List[str]] = None
+    market_insights: Optional[Dict[str, List[str]]] = None
+    goal: Optional[str] = None
+    efficiency_score: Optional[int] = None
+    doubt_status: Optional[Dict] = None
+    decayed_skills: Optional[List[Dict]] = None
+
+class ResumeGenerateRequest(BaseModel):
+    original_resume: str
+    completed_skills: List[str]
+    goal: Optional[str] = None
+
+class ResumeGenerateResponse(BaseModel):
+    enhanced_resume: str
 
 class LearningStyleRequest(BaseModel):
     interactions: Dict[str, int]
@@ -671,6 +692,10 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         known_skill_names = [s['name'] for s in gap_analysis['known_skills']]
         career_predictions = career_path_predictor.predict(known_skill_names)
 
+        # Step 4e: Classify domain
+        logger.info("Classifying domain...")
+        domain_result = domain_classifier.classify_domain(request.resume_text + " " + request.job_description_text)
+
         # Step 4d: Market Trend Analysis
         logger.info("Analyzing missing trending market skills...")
         matched_domain_name = "Full Stack"
@@ -680,16 +705,12 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             matched_domain_name = domain_result
         market_insights = market_trend_analyzer.analyze(known_skill_names, domain=matched_domain_name)
 
-        # Step 4c: Calculate efficiency metrics (Feature 7)
+        # Step 4f: Calculate efficiency metrics
         logger.info("Calculating time saved analytics...")
         efficiency_metrics = time_analytics.calculate(
             gap_analysis=gap_analysis,
             learning_path=learning_path
         )
-
-        # Step 5: Generate reasoning trace
-        logger.info("Classifying domain and building reasoning trace...")
-        domain_result = domain_classifier.classify_domain(request.resume_text + " " + request.job_description_text)
         
         role_info = (
             f"Role: '{role_match['role']}' (confidence {role_match['confidence']:.2f}, {hybrid_result['source']} mode)"
@@ -1015,6 +1036,26 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
     except Exception as e:
         logger.error(f"Error updating progress: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating progress: {str(e)}")
+
+
+@app.post("/generate/resume", response_model=ResumeGenerateResponse, tags=["Resume Generation"])
+async def generate_enhanced_resume(request: ResumeGenerateRequest):
+    """
+    Generate an enhanced resume with verified skills and platform achievements.
+    
+    Input: Original resume and list of completed skill names.
+    Output: Professionally enhanced resume text.
+    """
+    try:
+        enhanced_text = resume_updater.generate_enhanced_resume(
+            original_text=request.original_resume,
+            completed_skills=request.completed_skills,
+            goal=request.goal
+        )
+        return ResumeGenerateResponse(enhanced_resume=enhanced_text)
+    except Exception as e:
+        logger.error(f"Error generating enhanced resume: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
 @app.get("/roles/list", tags=["Role Tracks"])
