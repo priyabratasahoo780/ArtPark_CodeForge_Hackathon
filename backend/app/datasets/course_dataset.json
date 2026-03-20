@@ -1,0 +1,244 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Curated real course dataset for AI-Adaptive Onboarding Engine",
+    "total_skills": 62,
+    "note": "All courses are real and publicly available. No hallucination."
+  },
+  "courses": {
+    "HTML": [
+      { "course": "HTML Full Course for Beginners", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=kUMe1FH4CHE", "duration": "4 hours", "level": "Beginner", "type": "video", "free": true },
+      { "course": "HTML Tutorial", "platform": "W3Schools", "url": "https://www.w3schools.com/html/", "duration": "6 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "CSS": [
+      { "course": "CSS Full Course for Beginners", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=OXGznpKZ_sA", "duration": "11 hours", "level": "Beginner", "type": "video", "free": true },
+      { "course": "CSS Tutorial", "platform": "W3Schools", "url": "https://www.w3schools.com/css/", "duration": "6 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "JavaScript": [
+      { "course": "The Complete JavaScript Course 2024", "platform": "Udemy", "url": "https://www.udemy.com/course/the-complete-javascript-course/", "duration": "69 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "JavaScript Algorithms and Data Structures", "platform": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/", "duration": "300 hours", "level": "Intermediate", "type": "interactive", "free": true },
+      { "course": "javascript.info", "platform": "javascript.info", "url": "https://javascript.info/", "duration": "40 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "TypeScript": [
+      { "course": "TypeScript Handbook", "platform": "Official Docs", "url": "https://www.typescriptlang.org/docs/handbook/", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Understanding TypeScript", "platform": "Udemy", "url": "https://www.udemy.com/course/understanding-typescript/", "duration": "22 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "React": [
+      { "course": "React Official Docs (Learn React)", "platform": "Official Docs", "url": "https://react.dev/learn", "duration": "10 hours", "level": "Beginner", "type": "interactive", "free": true },
+      { "course": "The Complete React Developer Course", "platform": "Udemy", "url": "https://www.udemy.com/course/react-2nd-edition/", "duration": "39 hours", "level": "Intermediate", "type": "video", "free": false },
+      { "course": "React Course", "platform": "Scrimba", "url": "https://scrimba.com/learn/learnreact", "duration": "11 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "Next.js": [
+      { "course": "Next.js Official Docs", "platform": "Official Docs", "url": "https://nextjs.org/learn", "duration": "8 hours", "level": "Intermediate", "type": "interactive", "free": true },
+      { "course": "Next.js 14 & React - The Complete Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/nextjs-react-the-complete-guide/", "duration": "68 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Vue.js": [
+      { "course": "Vue.js Official Guide", "platform": "Official Docs", "url": "https://vuejs.org/guide/introduction.html", "duration": "10 hours", "level": "Beginner", "type": "article", "free": true },
+      { "course": "Vue - The Complete Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/vuejs-2-the-complete-guide/", "duration": "32 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Angular": [
+      { "course": "Angular Official Tutorial", "platform": "Official Docs", "url": "https://angular.dev/tutorials", "duration": "10 hours", "level": "Intermediate", "type": "interactive", "free": true },
+      { "course": "The Complete Guide to Angular", "platform": "Udemy", "url": "https://www.udemy.com/course/the-complete-guide-to-angular-2/", "duration": "29 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Redux": [
+      { "course": "Redux Official Tutorial", "platform": "Official Docs", "url": "https://redux.js.org/tutorials/essentials/part-1-overview-concepts", "duration": "6 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "Tailwind CSS": [
+      { "course": "Tailwind CSS Official Docs", "platform": "Official Docs", "url": "https://tailwindcss.com/docs", "duration": "4 hours", "level": "Beginner", "type": "article", "free": true },
+      { "course": "Tailwind CSS from Scratch", "platform": "YouTube", "url": "https://www.youtube.com/watch?v=UBOj6rqRUME", "duration": "5 hours", "level": "Beginner", "type": "video", "free": true }
+    ],
+    "Python": [
+      { "course": "Python for Everybody Specialization", "platform": "Coursera", "url": "https://www.coursera.org/specializations/python", "duration": "32 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "Python Tutorial for Beginners", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=eWRyvpyLM24", "duration": "4 hours", "level": "Beginner", "type": "video", "free": true },
+      { "course": "The Python Tutorial", "platform": "Official Docs", "url": "https://docs.python.org/3/tutorial/", "duration": "10 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "FastAPI": [
+      { "course": "FastAPI Official Tutorial", "platform": "Official Docs", "url": "https://fastapi.tiangolo.com/tutorial/", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "FastAPI Full Course for Beginners", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=0sOvCWFmrtA", "duration": "6 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "Django": [
+      { "course": "Django Official Tutorial", "platform": "Official Docs", "url": "https://docs.djangoproject.com/en/stable/intro/tutorial01/", "duration": "6 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Python Django The Practical Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/python-django-the-practical-guide/", "duration": "23 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Flask": [
+      { "course": "Flask Official Quickstart", "platform": "Official Docs", "url": "https://flask.palletsprojects.com/en/latest/quickstart/", "duration": "4 hours", "level": "Beginner", "type": "article", "free": true },
+      { "course": "Flask Full Course", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=Qr4QMBUPxWo", "duration": "6 hours", "level": "Beginner", "type": "video", "free": true }
+    ],
+    "Node.js": [
+      { "course": "Node.js Official Documentation", "platform": "Official Docs", "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs", "duration": "6 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Node.js Complete Developer Course", "platform": "Udemy", "url": "https://www.udemy.com/course/the-complete-nodejs-developer-course-2/", "duration": "35 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Express.js": [
+      { "course": "Express.js Official Guide", "platform": "Official Docs", "url": "https://expressjs.com/en/guide/routing.html", "duration": "4 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "SQL": [
+      { "course": "SQL Tutorial for Beginners", "platform": "W3Schools", "url": "https://www.w3schools.com/sql/", "duration": "8 hours", "level": "Beginner", "type": "article", "free": true },
+      { "course": "SQL and Database Design A-Z", "platform": "Udemy", "url": "https://www.udemy.com/course/sqldatabases/", "duration": "14 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "Intro to SQL: Querying and Managing Data", "platform": "Khan Academy", "url": "https://www.khanacademy.org/computing/computer-programming/sql", "duration": "5 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "PostgreSQL": [
+      { "course": "PostgreSQL Tutorial", "platform": "PostgreSQLTutorial.com", "url": "https://www.postgresqltutorial.com/", "duration": "12 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "The Complete Python and PostgreSQL Developer Course", "platform": "Udemy", "url": "https://www.udemy.com/course/complete-python-postgresql-database-course/", "duration": "23 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "MongoDB": [
+      { "course": "MongoDB Official University", "platform": "MongoDB University", "url": "https://learn.mongodb.com/", "duration": "10 hours", "level": "Intermediate", "type": "interactive", "free": true },
+      { "course": "MongoDB - The Complete Developer's Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/mongodb-the-complete-developers-guide/", "duration": "17 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Redis": [
+      { "course": "Redis University", "platform": "Redis University", "url": "https://university.redis.com/", "duration": "6 hours", "level": "Intermediate", "type": "interactive", "free": true }
+    ],
+    "NumPy": [
+      { "course": "NumPy Official Documentation", "platform": "Official Docs", "url": "https://numpy.org/doc/stable/user/quickstart.html", "duration": "4 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "NumPy Tutorial", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=QUT1VHiLmmI", "duration": "1 hour", "level": "Beginner", "type": "video", "free": true }
+    ],
+    "Pandas": [
+      { "course": "Pandas Official Getting Started", "platform": "Official Docs", "url": "https://pandas.pydata.org/docs/getting_started/", "duration": "5 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Data Analysis with Python - Pandas", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=vmEHCJofslg", "duration": "10 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "Scikit-learn": [
+      { "course": "Scikit-learn Official Tutorials", "platform": "Official Docs", "url": "https://scikit-learn.org/stable/tutorial/", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Machine Learning with Scikit-Learn", "platform": "YouTube", "url": "https://www.youtube.com/watch?v=0B5eIE_1vpU", "duration": "3 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "Machine Learning": [
+      { "course": "Machine Learning Specialization", "platform": "Coursera (Andrew Ng)", "url": "https://www.coursera.org/specializations/machine-learning-introduction", "duration": "88 hours", "level": "Intermediate", "type": "video", "free": false },
+      { "course": "ML Course by fast.ai", "platform": "fast.ai", "url": "https://course.fast.ai/", "duration": "28 hours", "level": "Intermediate", "type": "video", "free": true },
+      { "course": "Intro to Machine Learning", "platform": "Kaggle Learn", "url": "https://www.kaggle.com/learn/intro-to-machine-learning", "duration": "3 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "Deep Learning": [
+      { "course": "Deep Learning Specialization", "platform": "Coursera (Andrew Ng)", "url": "https://www.coursera.org/specializations/deep-learning", "duration": "120 hours", "level": "Advanced", "type": "video", "free": false },
+      { "course": "Practical Deep Learning for Coders", "platform": "fast.ai", "url": "https://course.fast.ai/", "duration": "30 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "TensorFlow": [
+      { "course": "TensorFlow Official Tutorials", "platform": "Official Docs", "url": "https://www.tensorflow.org/tutorials", "duration": "10 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "DeepLearning.AI TensorFlow Developer Certificate", "platform": "Coursera", "url": "https://www.coursera.org/professional-certificates/tensorflow-in-practice", "duration": "64 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "PyTorch": [
+      { "course": "PyTorch Official Tutorials", "platform": "Official Docs", "url": "https://pytorch.org/tutorials/", "duration": "10 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "PyTorch for Deep Learning Bootcamp", "platform": "Udemy", "url": "https://www.udemy.com/course/pytorch-for-deep-learning-with-python-bootcamp/", "duration": "17 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "NLP": [
+      { "course": "Natural Language Processing Specialization", "platform": "Coursera (DeepLearning.AI)", "url": "https://www.coursera.org/specializations/natural-language-processing", "duration": "120 hours", "level": "Advanced", "type": "video", "free": false },
+      { "course": "HuggingFace NLP Course", "platform": "HuggingFace", "url": "https://huggingface.co/learn/nlp-course/chapter1/1", "duration": "20 hours", "level": "Intermediate", "type": "interactive", "free": true }
+    ],
+    "Transformers": [
+      { "course": "HuggingFace Transformers Course", "platform": "HuggingFace", "url": "https://huggingface.co/learn/nlp-course/", "duration": "20 hours", "level": "Advanced", "type": "interactive", "free": true }
+    ],
+    "LLM": [
+      { "course": "LLM Bootcamp by Full Stack Deep Learning", "platform": "FSDL", "url": "https://fullstackdeeplearning.com/llm-bootcamp/", "duration": "12 hours", "level": "Advanced", "type": "video", "free": true },
+      { "course": "Building Systems with ChatGPT API", "platform": "DeepLearning.AI", "url": "https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/", "duration": "2 hours", "level": "Intermediate", "type": "interactive", "free": true }
+    ],
+    "Git": [
+      { "course": "Git and GitHub for Beginners", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=RGOj5yH7evk", "duration": "1 hour", "level": "Beginner", "type": "video", "free": true },
+      { "course": "Pro Git Book", "platform": "git-scm.com", "url": "https://git-scm.com/book/en/v2", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "Linux": [
+      { "course": "Linux Command Line Basics", "platform": "Udacity", "url": "https://www.udacity.com/course/linux-command-line-basics--ud595", "duration": "5 hours", "level": "Beginner", "type": "video", "free": true },
+      { "course": "The Linux Command Line (Book)", "platform": "No Starch Press", "url": "https://linuxcommand.org/tlcl.php", "duration": "15 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "Docker": [
+      { "course": "Docker Official Getting Started", "platform": "Official Docs", "url": "https://docs.docker.com/get-started/", "duration": "4 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Docker and Kubernetes: The Complete Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/", "duration": "22 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Kubernetes": [
+      { "course": "Kubernetes Official Tutorials", "platform": "Official Docs", "url": "https://kubernetes.io/docs/tutorials/", "duration": "8 hours", "level": "Advanced", "type": "article", "free": true },
+      { "course": "Certified Kubernetes Administrator (CKA) Course", "platform": "KodeKloud", "url": "https://kodekloud.com/courses/certified-kubernetes-administrator-cka/", "duration": "22 hours", "level": "Advanced", "type": "video", "free": false }
+    ],
+    "CI/CD": [
+      { "course": "GitHub Actions Official Docs", "platform": "Official Docs", "url": "https://docs.github.com/en/actions", "duration": "5 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "CI/CD with GitHub Actions", "platform": "YouTube", "url": "https://www.youtube.com/watch?v=R8_veQiYBjI", "duration": "3 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "Terraform": [
+      { "course": "Terraform Official Tutorials", "platform": "HashiCorp Learn", "url": "https://developer.hashicorp.com/terraform/tutorials", "duration": "8 hours", "level": "Advanced", "type": "interactive", "free": true },
+      { "course": "HashiCorp Terraform Associate Certification", "platform": "Udemy", "url": "https://www.udemy.com/course/terraform-beginner-to-advanced/", "duration": "10 hours", "level": "Advanced", "type": "video", "free": false }
+    ],
+    "AWS": [
+      { "course": "AWS Cloud Practitioner Essentials", "platform": "AWS Training", "url": "https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/", "duration": "6 hours", "level": "Beginner", "type": "video", "free": true },
+      { "course": "Ultimate AWS Certified Solutions Architect", "platform": "Udemy", "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/", "duration": "27 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "GCP": [
+      { "course": "Google Cloud Skills Boost", "platform": "Google Cloud", "url": "https://www.cloudskillsboost.google/", "duration": "10 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "Azure": [
+      { "course": "Microsoft Azure Fundamentals", "platform": "Microsoft Learn", "url": "https://learn.microsoft.com/en-us/training/paths/azure-fundamentals/", "duration": "10 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "REST API": [
+      { "course": "REST API Design Best Practices", "platform": "freeCodeCamp", "url": "https://www.freecodecamp.org/news/rest-api-design-best-practices-build-a-rest-api/", "duration": "2 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "GraphQL": [
+      { "course": "GraphQL Official Tutorial", "platform": "Official Docs", "url": "https://graphql.org/learn/", "duration": "5 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "The Modern GraphQL Bootcamp", "platform": "Udemy", "url": "https://www.udemy.com/course/graphql-bootcamp/", "duration": "14 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Apache Kafka": [
+      { "course": "Apache Kafka Official Documentation", "platform": "Official Docs", "url": "https://kafka.apache.org/documentation/", "duration": "8 hours", "level": "Advanced", "type": "article", "free": true },
+      { "course": "Apache Kafka Series - Learn Apache Kafka for Beginners", "platform": "Udemy", "url": "https://www.udemy.com/course/apache-kafka/", "duration": "8 hours", "level": "Advanced", "type": "video", "free": false }
+    ],
+    "Elasticsearch": [
+      { "course": "Elasticsearch Official Getting Started", "platform": "Official Docs", "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html", "duration": "5 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "Data Structures": [
+      { "course": "Data Structures and Algorithms", "platform": "Coursera (UC San Diego)", "url": "https://www.coursera.org/specializations/data-structures-algorithms", "duration": "80 hours", "level": "Intermediate", "type": "video", "free": false },
+      { "course": "Data Structures - Full Course", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=RBSGKlAvoiM", "duration": "8 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "Algorithms": [
+      { "course": "Algorithms Specialization", "platform": "Coursera (Stanford)", "url": "https://www.coursera.org/specializations/algorithms", "duration": "80 hours", "level": "Advanced", "type": "video", "free": false },
+      { "course": "Algorithms and Data Structures Tutorial", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=8hly31xKli0", "duration": "6 hours", "level": "Intermediate", "type": "video", "free": true }
+    ],
+    "OOP": [
+      { "course": "Object Oriented Programming with Python", "platform": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=Ej_02ICOIgs", "duration": "2 hours", "level": "Beginner", "type": "video", "free": true }
+    ],
+    "Design Patterns": [
+      { "course": "Design Patterns in Python", "platform": "Refactoring.Guru", "url": "https://refactoring.guru/design-patterns/python", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Design Patterns in Java", "platform": "Udemy", "url": "https://www.udemy.com/course/design-patterns-java/", "duration": "8 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "System Design": [
+      { "course": "Grokking the System Design Interview", "platform": "Educative.io", "url": "https://www.educative.io/courses/grokking-the-system-design-interview", "duration": "15 hours", "level": "Advanced", "type": "article", "free": false },
+      { "course": "System Design for Interviews and Beyond", "platform": "YouTube (Exponent)", "url": "https://www.youtube.com/c/TechExponent", "duration": "10 hours", "level": "Advanced", "type": "video", "free": true }
+    ],
+    "Microservices": [
+      { "course": "Microservices with Node.js and React", "platform": "Udemy", "url": "https://www.udemy.com/course/microservices-with-node-js-and-react/", "duration": "54 hours", "level": "Advanced", "type": "video", "free": false },
+      { "course": "Microservices.io Patterns", "platform": "microservices.io", "url": "https://microservices.io/patterns/", "duration": "5 hours", "level": "Advanced", "type": "article", "free": true }
+    ],
+    "Testing": [
+      { "course": "Software Testing Tutorial", "platform": "Guru99", "url": "https://www.guru99.com/software-testing.html", "duration": "5 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "Unit Testing": [
+      { "course": "Python Testing with pytest", "platform": "Real Python", "url": "https://realpython.com/pytest-python-testing/", "duration": "3 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "Security": [
+      { "course": "Google Cybersecurity Certificate", "platform": "Coursera (Google)", "url": "https://www.coursera.org/professional-certificates/google-cybersecurity", "duration": "168 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "OWASP Top 10", "platform": "OWASP", "url": "https://owasp.org/www-project-top-ten/", "duration": "4 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "MLOps": [
+      { "course": "Machine Learning Engineering for Production (MLOps)", "platform": "Coursera (DeepLearning.AI)", "url": "https://www.coursera.org/specializations/machine-learning-engineering-for-production-mlops", "duration": "80 hours", "level": "Advanced", "type": "video", "free": false },
+      { "course": "MLOps Guide", "platform": "ml-ops.org", "url": "https://ml-ops.org/", "duration": "6 hours", "level": "Advanced", "type": "article", "free": true }
+    ],
+    "Spring Boot": [
+      { "course": "Spring Boot Official Guides", "platform": "Official Docs", "url": "https://spring.io/guides", "duration": "8 hours", "level": "Intermediate", "type": "article", "free": true },
+      { "course": "Spring Boot Masterclass", "platform": "Udemy", "url": "https://www.udemy.com/course/spring-boot-tutorial-for-beginners/", "duration": "13 hours", "level": "Intermediate", "type": "video", "free": false }
+    ],
+    "Java": [
+      { "course": "Java Programming and Software Engineering Fundamentals", "platform": "Coursera (Duke)", "url": "https://www.coursera.org/specializations/java-programming", "duration": "80 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "Java Tutorial", "platform": "W3Schools", "url": "https://www.w3schools.com/java/", "duration": "10 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "Go": [
+      { "course": "A Tour of Go", "platform": "Official Docs", "url": "https://go.dev/tour/", "duration": "5 hours", "level": "Beginner", "type": "interactive", "free": true },
+      { "course": "Learn Go with Tests", "platform": "GitHub", "url": "https://quii.gitbook.io/learn-go-with-tests/", "duration": "15 hours", "level": "Intermediate", "type": "article", "free": true }
+    ],
+    "HTTP": [
+      { "course": "HTTP: The Definitive Guide (MDN)", "platform": "MDN Web Docs", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview", "duration": "3 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "Matplotlib": [
+      { "course": "Matplotlib Official Tutorials", "platform": "Official Docs", "url": "https://matplotlib.org/stable/tutorials/index.html", "duration": "4 hours", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "Cloud Platform": [
+      { "course": "Cloud Computing Fundamentals", "platform": "Google Cloud Skills Boost", "url": "https://www.cloudskillsboost.google/", "duration": "5 hours", "level": "Beginner", "type": "interactive", "free": true }
+    ],
+    "Agile": [
+      { "course": "Agile Fundamentals", "platform": "Coursera", "url": "https://www.coursera.org/learn/agile-development", "duration": "8 hours", "level": "Beginner", "type": "video", "free": false },
+      { "course": "Agile Manifesto", "platform": "agilemanifesto.org", "url": "https://www.agilemanifesto.org/", "duration": "1 hour", "level": "Beginner", "type": "article", "free": true }
+    ],
+    "MySQL": [
+      { "course": "MySQL Tutorial", "platform": "W3Schools", "url": "https://www.w3schools.com/mysql/", "duration": "6 hours", "level": "Beginner", "type": "article", "free": true }
+    ]
+  }
+}

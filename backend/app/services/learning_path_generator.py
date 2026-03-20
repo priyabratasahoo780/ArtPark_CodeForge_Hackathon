@@ -4,6 +4,7 @@ from pathlib import Path
 import logging
 
 from app.services.dependency_resolver import DependencyResolver
+from app.services.course_recommender import CourseRecommender
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,9 @@ class LearningPathGenerator:
 
         # Graph-aware dependency resolver (uses skill_graph.json)
         self.dependency_resolver = DependencyResolver()
+
+        # Dataset-driven course recommender (uses course_dataset.json)
+        self.course_recommender = CourseRecommender()
     
     def generate_learning_path(self, gaps_to_address: List[Dict], resume_skills: List[Dict]) -> Dict:
         """
@@ -70,12 +74,24 @@ class LearningPathGenerator:
         # Create learning modules
         modules = self._create_learning_modules(sequence, known_skills)
 
+        # Enrich modules with real course recommendations (dataset-based, no hallucination)
+        modules = self.course_recommender.enrich_modules(modules, max_per_skill=3)
+
         # Calculate timeline
         timeline = self._calculate_timeline(modules)
 
         # Build full dependency graph for visualization
         all_skill_names = [s['name'] for s in sequence]
         dependency_graph = self.dependency_resolver.build_full_graph(all_skill_names)
+
+        # Course coverage stats
+        with_courses = sum(1 for m in modules if m.get('has_course_data', False))
+        course_coverage = {
+            'modules_with_courses': with_courses,
+            'total_modules': len(modules),
+            'coverage_percentage': round(with_courses / len(modules) * 100, 1) if modules else 0,
+            'skills_in_dataset': self.course_recommender.get_all_skills_with_courses(),
+        }
 
         return {
             'modules': modules,
@@ -84,6 +100,7 @@ class LearningPathGenerator:
             'total_duration_days': timeline['estimated_days'],
             'learning_sequence': [s['name'] for s in sequence],
             'dependency_graph': dependency_graph,
+            'course_coverage': course_coverage,
             'strategies': self._generate_learning_strategies(modules),
             'milestones': self._create_milestones(modules),
             'reasoning': {
