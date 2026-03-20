@@ -115,6 +115,17 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
           </button>
           
           <button
+            onClick={() => setEngagementMetrics(prev => ({ 
+              ...prev, 
+              force_decay: !prev.force_decay
+            }))}
+            className={`px-3 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${engagementMetrics.force_decay ? 'bg-[#ff00e5]/20 border-[#ff00e5]/50 text-[#ff00e5]' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
+            title="Toggle simulated skill decay"
+          >
+            {engagementMetrics.force_decay ? 'Decay On' : 'Simulate Decay'}
+          </button>
+
+          <button
             onClick={() => setEngagementMetrics(prev => ({ ...prev, force_burnout: !prev.force_burnout }))}
             className={`px-3 py-2 border rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${engagementMetrics.force_burnout ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
             title="Toggle simulated user fatigue"
@@ -199,6 +210,34 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
             >
                Get Help
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {analysisResults.decayed_skills && analysisResults.decayed_skills.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-4 rounded-2xl border border-[#ff00e5]/30 bg-[#ff00e5]/10 text-[#ff00e5] shadow-[0_0_20px_rgba(255,0,229,0.1)] mb-4"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <FiZap className="text-xl" />
+              <h3 className="text-sm font-black uppercase tracking-widest">Skill Decay Warning</h3>
+            </div>
+            <div className="flex gap-4 flex-wrap">
+              {analysisResults.decayed_skills.map((skill, index) => (
+                <div key={index} className="flex-1 min-w-[200px] border border-[#ff00e5]/20 bg-[#0a0a0c]/50 rounded-xl p-3 flex flex-col gap-1">
+                   <div className="flex justify-between items-center">
+                      <span className="text-sm font-black text-white">{skill.skill}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 uppercase tracking-widest">{skill.status}</span>
+                   </div>
+                   <span className="text-[10px] text-gray-400 font-medium">Inactive for {skill.last_used_days} days. Confidence level dropped.</span>
+                   <span className="text-[10px] text-[#ff00e5]/70 italic font-medium">{skill.suggestion}</span>
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
