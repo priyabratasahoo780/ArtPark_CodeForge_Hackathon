@@ -157,7 +157,7 @@ export default function VoiceExplain({ reasoningTrace, gapStats }) {
           >
             <div className="bg-[#0a0a0c] p-4 rounded-xl border border-white/5 relative">
               <div className="absolute -top-2 left-4 px-2 bg-[#0a0a0c] text-[8px] font-black text-[#bc13fe] uppercase tracking-[0.2em]">Neural Transcript</div>
-              <p className="text-xs text-gray-400 font-medium leading-relaxed italic">"{script}"</p>
+              <p className="text-xs text-gray-400 font-medium leading-relaxed italic">&quot;{script}&quot;</p>
             </div>
           </motion.div>
         )}

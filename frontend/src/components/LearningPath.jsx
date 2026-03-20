@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FiChevronDown, FiChevronUp, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar } from 'react-icons/fi'
+import { FiChevronDown, FiChevronUp, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar, FiMap } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function LearningPath({ data }) {

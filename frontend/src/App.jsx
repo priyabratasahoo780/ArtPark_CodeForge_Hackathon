@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-import { FiUpload, FiRefreshCw, FiDownload, FiZap, FiTarget, FiAlertCircle, FiLightbulb, FiMap, FiAward } from 'react-icons/fi'
+import { FiUpload, FiRefreshCw, FiDownload, FiZap, FiTarget, FiAlertCircle, FiMessageSquare, FiMap, FiAward } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import UploadSection from './components/UploadSection'
 import SkillsAnalysis from './components/SkillsAnalysis'
@@ -169,7 +169,7 @@ function App() {
                     { id: 'results', label: 'Overview', icon: <FiZap /> },
                     { id: 'skills', label: 'Skills', icon: <FiTarget /> },
                     { id: 'gaps', label: 'Gaps', icon: <FiAlertCircle /> },
-                    { id: 'feedback', label: 'Feedback', icon: <FiLightbulb /> },
+                    { id: 'feedback', label: 'Feedback', icon: <FiMessageSquare /> },
                     { id: 'path', label: 'Roadmap', icon: <FiMap /> },
                   ] : [])
                 ].map(tab => (
