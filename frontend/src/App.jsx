@@ -15,6 +15,7 @@ import ResumeFeedback from './components/ResumeFeedback'
 import Login from './components/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import HRDashboard from './components/HRDashboard'
+import UserDashboard from './components/UserDashboard'
 import './index.css'
 
 const API_BASE_URL = 'http://localhost:8000'
@@ -65,7 +66,12 @@ function App() {
       setLearningPath(response.data.learning_path)
       setReasoningTrace(response.data.reasoning_trace)
       setResumeFeedback(response.data.resume_feedback)
-      setActiveTab('results')
+      
+      if (auth.role === 'USER') {
+        setActiveTab('user_dashboard')
+      } else {
+        setActiveTab('results')
+      }
 
       try {
         const tsResp = await axios.post(`${API_BASE_URL}/analytics/time-saved`, {
@@ -196,6 +202,7 @@ function App() {
               >
                 {[
                   ...(auth.role === 'HR' ? [{ id: 'hr_dashboard', label: 'HR Dashboard', icon: <FiAward /> }] : []),
+                  ...(auth.role === 'USER' && analysisResults ? [{ id: 'user_dashboard', label: 'My Roadmap', icon: <FiAward /> }] : []),
                   { id: 'benchmark', label: 'Candidate Rank', icon: <FiAward /> },
                   ...(analysisResults ? [
                     { id: 'upload', label: 'Input', icon: <FiUpload /> },
@@ -222,6 +229,19 @@ function App() {
 
               {/* Dynamic Content */}
               <AnimatePresence mode="wait">
+                {activeTab === 'user_dashboard' && auth.role === 'USER' && analysisResults && (
+                  <motion.div 
+                    key="user_dashboard"
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                  >
+                    <UserDashboard 
+                      auth={auth} 
+                      analysisResults={analysisResults} 
+                      onUpdateResults={setAnalysisResults} 
+                    />
+                  </motion.div>
+                )}
+
                 {activeTab === 'hr_dashboard' && auth.role === 'HR' && (
                   <ProtectedRoute allowedRoles={['HR']} auth={auth}>
                     <motion.div 

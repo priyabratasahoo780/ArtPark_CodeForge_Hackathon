@@ -2,26 +2,37 @@ import React, { useState } from 'react'
 import { FiChevronDown, FiChevronUp, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar, FiMap } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function LearningPath({ data }) {
+export default function LearningPath({ data, onToggleSkill, completedSkillNames }) {
   const [expandedModule, setExpandedModule] = useState(null)
-  const [completedModules, setCompletedModules] = useState(new Set())
+  const [internalCompleted, setInternalCompleted] = useState(new Set())
 
   const modules = data?.modules || []
   const timeline = data?.timeline || {}
   const milestones = data?.milestones || []
   const strategies = data?.strategies || []
 
-  const toggleComplete = (moduleId) => {
-    const newCompleted = new Set(completedModules)
-    if (newCompleted.has(moduleId)) {
-      newCompleted.delete(moduleId)
-    } else {
-      newCompleted.add(moduleId)
-    }
-    setCompletedModules(newCompleted)
+  // Use external state if provided, otherwise fallback to internal
+  const isSkillCompleted = (module) => {
+    if (completedSkillNames) return completedSkillNames.has(module.skill_name)
+    return internalCompleted.has(module.id)
   }
 
-  const completionPercentage = Math.round((completedModules.size / modules.length) * 100)
+  const toggleComplete = (module) => {
+    if (onToggleSkill) {
+      onToggleSkill(module.skill_name)
+    } else {
+      const newCompleted = new Set(internalCompleted)
+      if (newCompleted.has(module.id)) {
+        newCompleted.delete(module.id)
+      } else {
+        newCompleted.add(module.id)
+      }
+      setInternalCompleted(newCompleted)
+    }
+  }
+
+  const completionCount = modules.filter(m => isSkillCompleted(m)).length
+  const completionPercentage = modules.length > 0 ? Math.round((completionCount / modules.length) * 100) : 0
 
   return (
     <div className="space-y-12">
@@ -81,7 +92,7 @@ export default function LearningPath({ data }) {
 
         <div className="space-y-8">
           {modules.map((module, i) => {
-            const isCompleted = completedModules.has(module.id)
+            const isCompleted = isSkillCompleted(module)
             const isExpanded = expandedModule === module.id
             
             return (
@@ -105,7 +116,7 @@ export default function LearningPath({ data }) {
                     <div className="flex items-center gap-4">
                       <div className="text-3xl font-black text-white/5 absolute -top-4 -right-2 select-none group-hover:text-[#bc13fe]/10 transition-colors uppercase italic">{module.order}</div>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); toggleComplete(module.id); }}
+                        onClick={(e) => { e.stopPropagation(); toggleComplete(module); }}
                         className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${
                           isCompleted ? 'bg-[#00f3ff] border-[#00f3ff] text-[#0a0a0c]' : 'bg-white/5 border-white/10 text-gray-400 group-hover:border-[#00f3ff]/50'
                         }`}
