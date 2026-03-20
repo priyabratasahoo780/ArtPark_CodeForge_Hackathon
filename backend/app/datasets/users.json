@@ -28,5 +28,10 @@
     "email": "xzd@gmail.com",
     "role": "HR",
     "hashed_password": "$pbkdf2-sha256$29000$t7Z2jvE.x1iL0TrHeO/93w$U/c1F1ORENwp0Vah0n1lZJoVhXpZBlC90YyNF/UL9RU"
+  },
+  "priyabrata@gmail.com": {
+    "email": "priyabrata@gmail.com",
+    "role": "USER",
+    "hashed_password": "$pbkdf2-sha256$29000$3VsLISSkdA6hNEZoDWEMAQ$8qd6pj3vVbslGXfk46zVFgSUR1OVAQ9qjGfac64lFO4"
   }
 }
