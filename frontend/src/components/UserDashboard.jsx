@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiActivity, FiAward } from 'react-icons/fi'
+import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiActivity, FiAward, FiDownload, FiTrendingUp, FiMessageSquare } from 'react-icons/fi'
 import LearningPath from './LearningPath'
 import GapAnalysis from './GapAnalysis'
 import ResumeFeedback from './ResumeFeedback'
 import CareerPredictor from './CareerPredictor'
 import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
-import { FiMessageSquare } from 'react-icons/fi'
+
 
 const API_BASE_URL = 'http://localhost:8000'
 

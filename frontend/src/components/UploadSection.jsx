@@ -1,5 +1,5 @@
 import React from 'react'
-import { FiUpload, FiFileText, FiBriefcase, FiZap } from 'react-icons/fi'
+import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 
 export default function UploadSection({
