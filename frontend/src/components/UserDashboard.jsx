@@ -5,6 +5,8 @@ import { FiBookOpen, FiZap, FiTarget, FiRefreshCcw, FiCheckCircle, FiInfo, FiAct
 import LearningPath from './LearningPath'
 import GapAnalysis from './GapAnalysis'
 import ResumeFeedback from './ResumeFeedback'
+import SkillHeatmap from './SkillHeatmap'
+import { FiMessageSquare } from 'react-icons/fi'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -189,6 +191,10 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
       {/* Content Grid - No redundant .card wrappers */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
         <div className="xl:col-span-8 flex flex-col gap-10 min-w-0">
+          <div className="space-y-4">
+             <SkillHeatmap data={analysisResults.gap_analysis} />
+          </div>
+
           <div className="space-y-4">
              <div className="flex items-center gap-2 px-1">
                 <FiZap className="text-[#00f3ff]" />
