@@ -145,21 +145,21 @@ async def analyze_multiple_resumes(request: MultiOnboardingRequest):
             jd_skills = skill_extractor.extract_skills_from_text(request.job_description_text)
             role_match = role_matcher.match_role(request.job_description_text)
             gaps = gap_analyzer.analyze_gaps(skills, jd_skills, role_match.get('role', 'General'))
-            path = learning_path_generator.generate_path(gaps)
+            path = learning_path_generator.generate_learning_path(gaps['missing_skills'] + gaps['partial_skills'], skills)
 
-            # Calculate time saved (mock or real logic)
-            ts = time_analytics.calculate_time_saved(gaps, path)
+            # Calculate time saved
+            ts = time_analytics.calculate(gaps, path)
             
             results.append({
                 "name": name,
-                "readiness_score": gaps.statistics.readiness_score,
-                "skills_match": len(gaps.known_skills),
-                "missing_skills": [s.name for s in gaps.missing_skills[:3]],
-                "time_saved": ts.total_hours_saved
+                "readiness_score": gaps['statistics']['readiness_score'],
+                "skills_match": gaps['statistics']['known_count'],
+                "missing_skills": [s['name'] for s in gaps['missing_skills'][:3]],
+                "time_saved": ts['hours_saved']
             })
             
-            total_readiness += gaps.statistics.readiness_score
-            total_time_saved += ts.total_hours_saved
+            total_readiness += gaps['statistics']['readiness_score']
+            total_time_saved += ts['hours_saved']
             
         # Sort by readiness score
         results.sort(key=lambda x: x["readiness_score"], reverse=True)

@@ -1,4 +1,4 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 import json
 from pathlib import Path
 import logging
@@ -52,6 +52,7 @@ class LearningPathGenerator:
     def generate_learning_path(
         self, 
         gaps_to_address: List[Dict], 
+        resume_skills: List[Dict],
         learning_style: str = "Visual",
         burnout_detected: bool = False,
         target_role: Optional[str] = None,
