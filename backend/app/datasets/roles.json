@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Predefined role-based skill tracks for onboarding",
+    "total_roles": 12
+  },
+  "roles": {
+    "Frontend Developer": {
+      "description": "Build user interfaces and client-side web applications",
+      "keywords": ["frontend", "ui", "react", "angular", "vue", "html", "css", "javascript", "web developer", "web development", "spa", "responsive"],
+      "core_skills": ["HTML", "CSS", "JavaScript", "React", "TypeScript"],
+      "secondary_skills": ["Next.js", "Redux", "Tailwind CSS", "Testing", "Git"],
+      "nice_to_have": ["GraphQL", "Vue.js", "Angular", "Docker"],
+      "level_expectations": {
+        "Beginner": ["HTML", "CSS", "JavaScript"],
+        "Intermediate": ["React", "TypeScript", "Git"],
+        "Advanced": ["Next.js", "Redux", "System Design"]
+      },
+      "typical_stack": "React + TypeScript + Tailwind CSS + Vite"
+    },
+    "Backend Engineer": {
+      "description": "Build server-side APIs, services, and databases",
+      "keywords": ["backend", "server", "api", "microservices", "rest", "node", "python", "java", "spring", "fastapi", "django", "flask", "service"],
+      "core_skills": ["Python", "REST API", "SQL", "Docker", "Git"],
+      "secondary_skills": ["FastAPI", "PostgreSQL", "Redis", "Linux", "CI/CD"],
+      "nice_to_have": ["Kubernetes", "Kafka", "Elasticsearch", "Microservices"],
+      "level_expectations": {
+        "Beginner": ["Python", "SQL", "REST API"],
+        "Intermediate": ["FastAPI", "PostgreSQL", "Docker"],
+        "Advanced": ["Kubernetes", "Microservices", "System Design"]
+      },
+      "typical_stack": "Python + FastAPI + PostgreSQL + Docker + Redis"
+    },
+    "Full Stack Developer": {
+      "description": "Build both frontend and backend of web applications",
+      "keywords": ["fullstack", "full stack", "full-stack", "mern", "mean", "node react", "end-to-end", "complete developer"],
+      "core_skills": ["JavaScript", "React", "Node.js", "SQL", "Git"],
+      "secondary_skills": ["TypeScript", "Express.js", "MongoDB", "Docker", "REST API"],
+      "nice_to_have": ["Next.js", "PostgreSQL", "Redis", "CI/CD"],
+      "level_expectations": {
+        "Beginner": ["HTML", "CSS", "JavaScript", "SQL"],
+        "Intermediate": ["React", "Node.js", "MongoDB"],
+        "Advanced": ["TypeScript", "Docker", "System Design"]
+      },
+      "typical_stack": "React + Node.js (Express) + MongoDB or PostgreSQL"
+    },
+    "Data Scientist": {
+      "description": "Analyze data and build predictive ML models",
+      "keywords": ["data scientist", "data science", "machine learning", "ml engineer", "predictive", "statistical", "analytics", "modeling", "analysis"],
+      "core_skills": ["Python", "NumPy", "Pandas", "Scikit-learn", "Machine Learning"],
+      "secondary_skills": ["Matplotlib", "SQL", "TensorFlow", "Jupyter", "Statistics"],
+      "nice_to_have": ["Deep Learning", "NLP", "Apache Kafka", "Spark"],
+      "level_expectations": {
+        "Beginner": ["Python", "NumPy", "Pandas"],
+        "Intermediate": ["Scikit-learn", "Machine Learning", "SQL"],
+        "Advanced": ["Deep Learning", "TensorFlow", "NLP"]
+      },
+      "typical_stack": "Python + Scikit-learn + Pandas + Jupyter + SQL"
+    },
+    "ML Engineer": {
+      "description": "Build, train, and deploy production machine learning systems",
+      "keywords": ["ml engineer", "machine learning engineer", "ai engineer", "deep learning", "neural network", "nlp", "computer vision", "model training", "llm"],
+      "core_skills": ["Python", "Machine Learning", "Deep Learning", "TensorFlow", "Docker"],
+      "secondary_skills": ["PyTorch", "NumPy", "Pandas", "Kubernetes", "MLOps"],
+      "nice_to_have": ["Transformers", "LLM", "NLP", "CI/CD", "AWS"],
+      "level_expectations": {
+        "Beginner": ["Python", "NumPy", "Machine Learning"],
+        "Intermediate": ["Deep Learning", "TensorFlow", "Docker"],
+        "Advanced": ["MLOps", "Transformers", "Kubernetes"]
+      },
+      "typical_stack": "Python + PyTorch + Kubernetes + MLflow + Docker"
+    },
+    "DevOps Engineer": {
+      "description": "Automate infrastructure, deployment, and operations",
+      "keywords": ["devops", "sre", "site reliability", "infrastructure", "platform engineer", "cloud", "devsecops", "automation", "pipeline", "ci/cd", "kubernetes", "docker"],
+      "core_skills": ["Linux", "Docker", "Kubernetes", "CI/CD", "Git"],
+      "secondary_skills": ["Terraform", "AWS", "Python", "Bash", "Monitoring"],
+      "nice_to_have": ["GCP", "Azure", "Security", "Microservices", "Apache Kafka"],
+      "level_expectations": {
+        "Beginner": ["Linux", "Git", "Docker"],
+        "Intermediate": ["Kubernetes", "CI/CD", "Terraform"],
+        "Advanced": ["AWS", "Security", "System Design"]
+      },
+      "typical_stack": "Docker + Kubernetes + Terraform + GitHub Actions + AWS"
+    },
+    "Cloud Architect": {
+      "description": "Design and manage scalable cloud infrastructure",
+      "keywords": ["cloud architect", "solutions architect", "aws architect", "cloud engineer", "azure", "gcp", "infrastructure architect"],
+      "core_skills": ["AWS", "Docker", "Kubernetes", "Terraform", "Linux"],
+      "secondary_skills": ["GCP", "Azure", "Microservices", "System Design", "Security"],
+      "nice_to_have": ["CI/CD", "Apache Kafka", "Elasticsearch", "Networking"],
+      "level_expectations": {
+        "Beginner": ["Linux", "AWS", "Docker"],
+        "Intermediate": ["Kubernetes", "Terraform", "Microservices"],
+        "Advanced": ["System Design", "Security", "Multi-cloud"]
+      },
+      "typical_stack": "AWS + Terraform + Kubernetes + CDK + CloudWatch"
+    },
+    "Data Engineer": {
+      "description": "Build data pipelines, warehouses, and analytics infrastructure",
+      "keywords": ["data engineer", "data pipeline", "etl", "elt", "warehouse", "big data", "spark", "airflow", "dbt", "analytics engineer"],
+      "core_skills": ["Python", "SQL", "Apache Kafka", "Docker", "Linux"],
+      "secondary_skills": ["PostgreSQL", "Pandas", "Airflow", "Elasticsearch", "AWS"],
+      "nice_to_have": ["Kubernetes", "Terraform", "NumPy", "Spark"],
+      "level_expectations": {
+        "Beginner": ["Python", "SQL", "Linux"],
+        "Intermediate": ["Apache Kafka", "Docker", "Airflow"],
+        "Advanced": ["System Design", "Kubernetes", "Cloud Platform"]
+      },
+      "typical_stack": "Python + Airflow + Kafka + PostgreSQL + Spark"
+    },
+    "Mobile Developer": {
+      "description": "Build iOS and Android mobile applications",
+      "keywords": ["mobile", "ios", "android", "swift", "kotlin", "react native", "flutter", "mobile developer", "app developer"],
+      "core_skills": ["JavaScript", "React", "TypeScript", "Git", "REST API"],
+      "secondary_skills": ["React Native", "Node.js", "SQL", "Testing", "CI/CD"],
+      "nice_to_have": ["Docker", "AWS", "GraphQL", "MongoDB"],
+      "level_expectations": {
+        "Beginner": ["JavaScript", "React", "REST API"],
+        "Intermediate": ["TypeScript", "React Native", "Testing"],
+        "Advanced": ["Performance", "CI/CD", "Mobile Architecture"]
+      },
+      "typical_stack": "React Native + TypeScript + REST API + Firebase"
+    },
+    "Security Engineer": {
+      "description": "Protect systems and applications from threats and vulnerabilities",
+      "keywords": ["security", "cybersecurity", "penetration testing", "appsec", "infosec", "devsecops", "vulnerability", "soc", "threat"],
+      "core_skills": ["Security", "Linux", "Python", "HTTP", "Git"],
+      "secondary_skills": ["Docker", "AWS", "OOP", "Algorithms", "CI/CD"],
+      "nice_to_have": ["Kubernetes", "Terraform", "Elasticsearch", "SIEM"],
+      "level_expectations": {
+        "Beginner": ["Linux", "HTTP", "Security"],
+        "Intermediate": ["Python", "Docker", "AWS"],
+        "Advanced": ["Penetration Testing", "Architecture", "Threat Modeling"]
+      },
+      "typical_stack": "Python + Linux + Docker + SIEM tooling"
+    },
+    "Software Engineer": {
+      "description": "General software engineering across domains",
+      "keywords": ["software engineer", "software developer", "programmer", "sde", "swd", "engineer", "developer"],
+      "core_skills": ["Python", "Data Structures", "Algorithms", "Git", "OOP"],
+      "secondary_skills": ["SQL", "REST API", "Docker", "Testing", "Design Patterns"],
+      "nice_to_have": ["System Design", "Cloud Platform", "CI/CD", "Microservices"],
+      "level_expectations": {
+        "Beginner": ["Python", "Data Structures", "Git"],
+        "Intermediate": ["Algorithms", "SQL", "OOP"],
+        "Advanced": ["System Design", "Docker", "Design Patterns"]
+      },
+      "typical_stack": "Python or Java + SQL + REST API + Docker"
+    },
+    "Product Engineer": {
+      "description": "Build user-facing products with a focus on impact and metrics",
+      "keywords": ["product engineer", "growth engineer", "product developer", "user experience engineering"],
+      "core_skills": ["JavaScript", "React", "Python", "SQL", "Git"],
+      "secondary_skills": ["TypeScript", "REST API", "MongoDB", "Docker", "Testing"],
+      "nice_to_have": ["Next.js", "Analytics", "A/B Testing", "CI/CD"],
+      "level_expectations": {
+        "Beginner": ["JavaScript", "React", "SQL"],
+        "Intermediate": ["TypeScript", "Python", "REST API"],
+        "Advanced": ["System Design", "Performance", "Full Stack"]
+      },
+      "typical_stack": "React + Python FastAPI + PostgreSQL + Vercel"
+    }
+  }
+}
