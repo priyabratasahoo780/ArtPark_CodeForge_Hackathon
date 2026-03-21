@@ -1,0 +1,2 @@
+200
+{"candidates":[{"name":"react","readiness_score":100.0,"skills_match":1,"missing_skills":[],"time_saved":24.0},{"name":"github","readiness_score":0.0,"skills_match":0,"missing_skills":["React"],"time_saved":0.0}],"metrics":{"avg_readiness":50.0,"total_time_saved":24.0}}
