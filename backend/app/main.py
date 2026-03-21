@@ -780,52 +780,67 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
         if not request.job_description_text or len(request.job_description_text.strip()) < 10:
             raise HTTPException(status_code=400, detail="Job description text too short")
 
-        # Step 0: Determine Learning Style and Burnout
-        if request.learning_style_override:
-            learning_style = request.learning_style_override
-        else:
-            learning_style = learning_style_analyzer.detect_style(request.interactions or {})
-        logger.info(f"Detected learning style: {learning_style}")
+        # --- Phase 1: Independent Initial Extractions ---
+        logger.info("Starting concurrent initial extractions...")
         
-        burnout_status = burnout_detector.detect(request.engagement_metrics or {})
-        logger.info(f"Burnout detection: {burnout_status['burnout']}")
+        def get_learning_style():
+            return request.learning_style_override if request.learning_style_override else learning_style_analyzer.detect_style(request.interactions or {})
 
-        # Step 1: Extract skills from resume
-        logger.info("Extracting skills from resume...")
-        resume_result = skill_extractor.extract_from_resume(request.resume_text)
+        resume_task = asyncio.to_thread(skill_extractor.extract_from_resume, request.resume_text)
+        job_task = asyncio.to_thread(skill_extractor.extract_from_job_description, request.job_description_text)
+        role_task = asyncio.to_thread(role_matcher.match_role, request.job_description_text)
+        domain_task = asyncio.to_thread(domain_classifier.classify_domain, request.resume_text + " " + request.job_description_text)
+        style_task = asyncio.to_thread(get_learning_style)
+        burnout_task = asyncio.to_thread(burnout_detector.detect, request.engagement_metrics or {})
 
-        # Step 2: Extract skills from job description
-        logger.info("Extracting skills from job description...")
-        job_result = skill_extractor.extract_from_job_description(request.job_description_text)
-
-        # Step 2b: Role matching + hybrid skill set
-        logger.info("Matching job description to role track...")
-        role_match = role_matcher.match_role(request.job_description_text)
-        hybrid_result = role_matcher.hybrid_skill_set(
-            jd_skills=list(job_result['required_skills']),
-            jd_text=request.job_description_text,
-            match_result=role_match,
+        (
+            resume_result, 
+            job_result, 
+            role_match, 
+            domain_result, 
+            learning_style, 
+            burnout_status
+        ) = await asyncio.gather(
+            resume_task, job_task, role_task, domain_task, style_task, burnout_task
         )
-        # Use hybrid skills as the effective required skills for gap analysis
+
+        logger.info(f"Detected learning style: {learning_style}")
+        logger.info(f"Burnout detection: {burnout_status.get('burnout')}")
+
+        # --- Phase 2: Hybrid Skill Set & Gap Analysis ---
+        logger.info("Determining hybrid skills and analyzing gaps...")
+        hybrid_result = await asyncio.to_thread(
+            role_matcher.hybrid_skill_set,
+            list(job_result['required_skills']),
+            request.job_description_text,
+            role_match
+        )
         effective_required_skills = hybrid_result['skills']
 
-        # Step 3: Analyze gaps
-        logger.info("Analyzing skill gaps...")
         resume_skills_full = []
         for skill in resume_result['skills']:
             skill['level'] = skill.get('level', 'Intermediate')
             resume_skills_full.append(skill)
 
-        gap_analysis = gap_analyzer.analyze_gaps(
+        gap_analysis = await asyncio.to_thread(
+            gap_analyzer.analyze_gaps,
             resume_skills_full,
             effective_required_skills,
             role_match['role']
         )
 
-        # Step 4: Generate learning path
-        # Step 3: Generate Adaptive Learning Path
-        logger.info("Generating adaptive learning path...")
-        learning_path = learning_path_generator.generate_learning_path(
+        # --- Phase 3: Post-Gap Concurrent Generation ---
+        logger.info("Generating adaptive path, feedback, careers, and market trends...")
+        known_skill_names = [s['name'] for s in gap_analysis.get('known_skills', [])]
+        
+        matched_domain_name = "Full Stack"
+        if isinstance(domain_result, dict) and "domain" in domain_result:
+            matched_domain_name = domain_result["domain"]
+        elif isinstance(domain_result, str):
+            matched_domain_name = domain_result
+
+        path_task = asyncio.to_thread(
+            learning_path_generator.generate_learning_path,
             gap_analysis['missing_skills'] + gap_analysis['partial_skills'],
             resume_skills_full,
             learning_style=learning_style,
@@ -833,73 +848,58 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             target_role=request.target_role,
             timeline_days=request.timeline_days
         )
+        feedback_task = asyncio.to_thread(
+            feedback_generator.generate_feedback,
+            gap_analysis, 
+            request.resume_text
+        )
+        career_task = asyncio.to_thread(
+            career_path_predictor.predict,
+            known_skill_names
+        )
+        market_task = asyncio.to_thread(
+            market_trend_analyzer.analyze,
+            known_skill_names, 
+            domain=matched_domain_name
+        )
+        decay_task = asyncio.to_thread(
+            skill_decay_detector.detect,
+            gap_analysis.get('known_skills', []), 
+            request.engagement_metrics
+        )
 
-        # Step 4b: Generate resume feedback
-        logger.info("Generating actionable resume feedback...")
-        resume_feedback = feedback_generator.generate_feedback(gap_analysis, request.resume_text)
+        (
+            learning_path, 
+            resume_feedback, 
+            career_predictions, 
+            market_insights,
+            decayed_skills
+        ) = await asyncio.gather(
+            path_task, feedback_task, career_task, market_task, decay_task
+        )
 
-        # Step 4c: Career Path Predictions
-        logger.info("Predicting future career paths...")
-        known_skill_names = [s['name'] for s in gap_analysis['known_skills']]
-        career_predictions = career_path_predictor.predict(known_skill_names)
-
-        # Step 4e: Classify domain
-        logger.info("Classifying domain...")
-        domain_result = domain_classifier.classify_domain(request.resume_text + " " + request.job_description_text)
-
-        # Step 4d: Market Trend Analysis
-        logger.info("Analyzing missing trending market skills...")
-        matched_domain_name = "Full Stack"
-        if isinstance(domain_result, dict) and "domain" in domain_result:
-            matched_domain_name = domain_result["domain"]
-        elif isinstance(domain_result, str):
-            matched_domain_name = domain_result
-        market_insights = market_trend_analyzer.analyze(known_skill_names, domain=matched_domain_name)
-
-        # Step 4f: Calculate efficiency metrics
-        logger.info("Calculating time saved analytics...")
-        efficiency_metrics = time_analytics.calculate(
+        # --- Phase 4: Final Metrics & DB Sync ---
+        logger.info("Calculating final efficiency metrics...")
+        
+        efficiency_task = asyncio.to_thread(
+            time_analytics.calculate,
             gap_analysis=gap_analysis,
             learning_path=learning_path
         )
+        score_task = asyncio.to_thread(
+            learning_efficiency_calculator.calculate,
+            request.engagement_metrics
+        )
+        doubt_task = asyncio.to_thread(
+            doubt_detector.detect,
+            request.engagement_metrics
+        )
 
-        # --- Supabase Persistence ---
-        try:
-            # 1. Save Resume
-            supabase_service.save_resume(current_user.id, request.resume_text)
-            
-            # 2. Sync Skill Metadata and User Skills
-            all_skills = [s['name'] for s in gap_analysis.get('known_skills', [])] + \
-                         [s['name'] for s in gap_analysis.get('missing_skills', [])]
-            supabase_service.ensure_skills_exist(all_skills)
-            
-            for skill in gap_analysis.get('known_skills', []):
-                supabase_service.update_user_skill(current_user.id, skill['name'], 'Mastered', 1.0)
-            
-            for skill in gap_analysis.get('missing_skills', []):
-                supabase_service.update_user_skill(current_user.id, skill['name'], 'Identified', 0.0)
+        efficiency_metrics, efficiency_result, doubt_status = await asyncio.gather(
+            efficiency_task, score_task, doubt_task
+        )
 
-            # 3. Save Learning Path
-            supabase_service.save_learning_path(current_user.id, learning_path)
-            
-            logger.info(f"Successfully persisted onboarding data for user {current_user.email}")
-        except Exception as db_err:
-            logger.error(f"Supabase persistence error: {str(db_err)}")
-            # Don't fail the request if DB fails for now (hackathon resilience)
-        
         reasoning_trace = _build_reasoning_trace(gap_analysis, learning_path, role_match, hybrid_result)
-
-        # Step 4f: Learning Efficiency
-        logger.info("Computing learning efficiency score...")
-        efficiency_result = learning_efficiency_calculator.calculate(request.engagement_metrics)
-
-        # Step 4g: Doubt Detection
-        logger.info("Running auto-doubt detection...")
-        doubt_status = doubt_detector.detect(request.engagement_metrics)
-
-        # Step 4h: Skill Decay
-        logger.info("Running skill decay simulator...")
-        decayed_skills = skill_decay_detector.detect(gap_analysis.get('known_skills', []), request.engagement_metrics)
 
         return OnboardingResponse(
             skills_analysis={
