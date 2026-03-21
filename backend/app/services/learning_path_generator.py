@@ -85,7 +85,7 @@ class LearningPathGenerator:
         modules = self._create_learning_modules(sequence, known_skills, burnout_detected=burnout_detected)
 
         # Enrich modules with real course recommendations (dataset-based, no hallucination)
-        course_coverage = self.course_recommender.recommend_batch(modules, learning_style)
+        self.course_recommender.enrich_modules(modules, learning_style=learning_style)
 
         # Calculate initial total duration before scaling
         total_duration = sum(m['time_estimate_hours'] for m in modules)

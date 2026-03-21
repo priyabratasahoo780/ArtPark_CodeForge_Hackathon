@@ -1,0 +1,30 @@
+{
+  "en": {
+    "opening": "Here is your personalized onboarding analysis.",
+    "gap_summary": "You currently have {known} out of {total} required skills. Your skill coverage is {coverage} percent and your readiness score is {readiness} out of 100.",
+    "gaps_identified_hr": "There are {missing} critical gaps identified. This candidate requires targeted training in these areas to meet benchmark standards.",
+    "gaps_identified_user": "You have {missing} missing skills and {partial} skills that need improvement.",
+    "role_match_hr": "Our neural engine matches this profile to the {role_name} track with {confidence} percent certainty. We have automatically adjusted the required skill set for this role.",
+    "role_match_user": "Based on the job description, your closest role match is {role_name}, with a confidence of {confidence} percent. Mode: {mode}.",
+    "role_skills_added": "The following core skills were added from your role track: {skills}.",
+    "steps_intro": "Here is how the analysis was performed.",
+    "insights_intro": "Key insights from your analysis.",
+    "recommendations_intro": "Recommendations for your learning journey.",
+    "closing_hr": "This concludes the candidate potential brief. Detailed metrics are available in your dashboard.",
+    "closing_user": "Your personalized learning path has been generated. Good luck with your onboarding journey!"
+  },
+  "hi": {
+    "opening": "यहाँ आपका व्यक्तिगत ऑनबोर्डिंग विश्लेषण है।",
+    "gap_summary": "आपके पास वर्तमान में {total} आवश्यक कौशलों में से {known} कौशल हैं। आपका कौशल कवरेज {coverage} प्रतिशत है और आपका तैयारी स्कोर 100 में से {readiness} है।",
+    "gaps_identified_hr": "{missing} महत्वपूर्ण कमियों की पहचान की गई है। इस उम्मीदवार को बेंचमार्क मानकों को पूरा करने के लिए इन क्षेत्रों में लक्षित प्रशिक्षण की आवश्यकता है।",
+    "gaps_identified_user": "आपके पास {missing} गायब कौशल हैं और {partial} कौशल हैं जिनमें सुधार की आवश्यकता है।",
+    "role_match_hr": "हमारा न्यूरल इंजन इस प्रोफाइल को {confidence} प्रतिशत निश्चितता के साथ {role_name} ट्रैक से मिलाता है। हमने इस भूमिका के लिए आवश्यक कौशल सेट को स्वचालित रूप से समायोजित किया है।",
+    "role_match_user": "नौकरी विवरण के आधार पर, आपका सबसे करीबी भूमिका मिलान {role_name} है, जिसमें {confidence} प्रतिशत का विश्वास है। मोड: {mode}।",
+    "role_skills_added": "आपकी भूमिका ट्रैक से निम्नलिखित मुख्य कौशल जोड़े गए थे: {skills}।",
+    "steps_intro": "यहाँ बताया गया है कि विश्लेषण कैसे किया गया था।",
+    "insights_intro": "आपके विश्लेषण से मुख्य अंतर्दृष्टि।",
+    "recommendations_intro": "आपकी सीखने की यात्रा के लिए सिफारिशें।",
+    "closing_hr": "यह उम्मीदवार संभावित संक्षिप्त विवरण का निष्कर्ष निकालता है। विस्तृत मेट्रिक्स आपके डैशबोर्ड में उपलब्ध हैं।",
+    "closing_user": "आपका व्यक्तिगत सीखने का पथ तैयार कर लिया गया है। आपकी ऑनबोर्डिंग यात्रा के लिए शुभकामनाएँ!"
+  }
+}

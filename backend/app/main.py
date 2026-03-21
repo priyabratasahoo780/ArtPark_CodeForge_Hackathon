@@ -1,9 +1,12 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional, Any
 import logging
+import json
 from pathlib import Path
+import io
 
 from app.services.skill_extractor import SkillExtractor
 from app.services.gap_analyzer import SkillGapAnalyzer
@@ -23,6 +26,12 @@ from app.services.learning_efficiency_calculator import LearningEfficiencyCalcul
 from app.services.doubt_detector import DoubtDetector
 from app.services.skill_decay_detector import SkillDecayDetector
 from app.services.resume_updater import ResumeUpdater
+from app.services.lms_integrator import LMSIntegrator
+from app.services.interview_simulator import InterviewSimulator
+from app.services.career_predictor import CareerPredictor
+from app.services.audio_briefing_generator import AudioBriefingGenerator
+from app.services.decay_service import DecayService
+from app.services.benchmarking_service import BenchmarkingService
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -50,14 +59,94 @@ app.add_middleware(
 # Include Auth Router
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
+# ==================== Real-time Collaboration Manager ====================
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, session_id: str):
+        await websocket.accept()
+        if session_id not in self.active_connections:
+            self.active_connections[session_id] = []
+        self.active_connections[session_id].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, session_id: str):
+        if session_id in self.active_connections:
+            self.active_connections[session_id].remove(websocket)
+            if not self.active_connections[session_id]:
+                del self.active_connections[session_id]
+
+    async def broadcast(self, message: Any, session_id: str):
+        if session_id in self.active_connections:
+            for connection in self.active_connections[session_id]:
+                if isinstance(message, str):
+                    await connection.send_text(message)
+                else:
+                    await connection.send_json(message)
+
+    async def broadcast_exclude(self, message: Any, session_id: str, exclude: WebSocket):
+        if session_id in self.active_connections:
+            for connection in self.active_connections[session_id]:
+                if connection != exclude:
+                    if isinstance(message, str):
+                        await connection.send_text(message)
+                    else:
+                        await connection.send_json(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/progress/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    await manager.connect(websocket, session_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            try:
+                message = json.loads(data)
+                # Phase 6: Collaborative Drawing / Whiteboard
+                if message.get("type") == "draw_event":
+                    await manager.broadcast_exclude(data, session_id, exclude=websocket)
+                else:
+                    await manager.broadcast(message, session_id)
+            except json.JSONDecodeError:
+                # Raw text messages
+                await manager.broadcast(data, session_id)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, session_id)
+    except Exception as e:
+        logger.error(f"WebSocket error: {str(e)}")
+        manager.disconnect(websocket, session_id)
+
 # ==================== Initialize Services (must be before route handlers) ====================
 skill_extractor = SkillExtractor()
 gap_analyzer = SkillGapAnalyzer()
 learning_path_generator = LearningPathGenerator()
 dependency_resolver = DependencyResolver()
+voice_explainer = VoiceExplainer("app/datasets/translations.json")
+time_analytics = TimeAnalytics()
+resume_benchmarker = ResumeBenchmarker()
+feedback_generator = ResumeFeedbackGenerator()
+domain_classifier = DomainClassifier()
+learning_style_analyzer = LearningStyleAnalyzer()
+burnout_detector = BurnoutDetector()
+career_path_predictor = CareerPathPredictor()
+market_trend_analyzer = MarketTrendAnalyzer()
+learning_efficiency_calculator = LearningEfficiencyCalculator()
+doubt_detector = DoubtDetector()
+skill_decay_detector = SkillDecayDetector()
+resume_updater = ResumeUpdater()
+lms_integrator = LMSIntegrator()
+interview_simulator = InterviewSimulator()
+career_predictor = CareerPredictor()
+audio_briefing = AudioBriefingGenerator("app/datasets/translations.json")
+decay_service = DecayService()
+benchmarking_service = BenchmarkingService()
 role_matcher = RoleMatcher()
 voice_explainer = VoiceExplainer()
 time_analytics = TimeAnalytics()
+lms_integrator = LMSIntegrator()
+interview_simulator = InterviewSimulator()
+career_predictor = CareerPredictor()
 resume_benchmarker = ResumeBenchmarker(
     skill_extractor=skill_extractor,
     gap_analyzer=gap_analyzer,
@@ -613,6 +702,45 @@ async def generate_learning_path(request: OnboardingRequest):
         raise HTTPException(status_code=500, detail=f"Error generating learning path: {str(e)}")
 
 
+def _build_reasoning_trace(gap_analysis, learning_path, role_match, hybrid_result):
+    role_info = (
+        f"Role: '{role_match['role']}' (confidence {role_match['confidence']:.2f}, {hybrid_result['source']} mode)"
+    )
+    return {
+        'approach': 'AI-Adaptive Onboarding Engine',
+        'methodology': 'Skills extraction → Role matching → Gap analysis → Dependency-based path generation',
+        'role_analysis': {
+            'matched_role': role_match['role'],
+            'confidence': role_match['confidence'],
+            'mode': hybrid_result['source'],
+            'skills_added_from_role': hybrid_result['added_from_role'],
+            'reasoning': hybrid_result['reasoning'],
+            'top_role_scores': dict(list(role_match['all_scores'].items())[:5]),
+        },
+        'steps': [
+            '1. Extracted skills from your resume',
+            '2. Identified job requirements from description',
+            f'3. {role_info}',
+            '4. Calculated skill gaps with priority scoring',
+            f'5. Generated learning path with {len(learning_path["modules"])} modules',
+            '6. Ordered modules by prerequisites and criticality'
+        ],
+        'key_insights': [
+            f'You currently have {gap_analysis["statistics"]["known_count"]} of {gap_analysis["statistics"]["total_required_skills"]} required skills',
+            f'Skill coverage: {gap_analysis["statistics"]["coverage_percentage"]}%',
+            f'Readiness score: {gap_analysis["statistics"]["readiness_score"]}/100',
+            f'Estimated learning time: {learning_path.get("timeline", {}).get("estimated_weeks", "N/A")} weeks (~{learning_path.get("total_duration_hours", "N/A")} hours)',
+            f'Learning path includes {len(learning_path.get("modules", []))} modules ({sum(1 for m in learning_path.get("modules", []) if m.get("is_injected_prerequisite"))} auto-injected prerequisites)'
+        ],
+        'recommendations': [
+            'Follow the learning path in recommended order for optimal learning',
+            'Each module includes suggested resources and assessment criteria',
+            'Plan for spaced repetition and hands-on projects',
+            'Review prerequisites before starting each module'
+        ]
+    }
+
+
 @app.post("/onboarding/complete", response_model=OnboardingResponse, tags=["Onboarding"])
 async def complete_onboarding_analysis(request: OnboardingRequest, current_user=Depends(RoleChecker([RoleEnum.HR, RoleEnum.USER]))):
     """
@@ -712,42 +840,7 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             learning_path=learning_path
         )
         
-        role_info = (
-            f"Role: '{role_match['role']}' (confidence {role_match['confidence']:.2f}, {hybrid_result['source']} mode)"
-        )
-        reasoning_trace = {
-            'approach': 'AI-Adaptive Onboarding Engine',
-            'methodology': 'Skills extraction → Role matching → Gap analysis → Dependency-based path generation',
-            'role_analysis': {
-                'matched_role': role_match['role'],
-                'confidence': role_match['confidence'],
-                'mode': hybrid_result['source'],
-                'skills_added_from_role': hybrid_result['added_from_role'],
-                'reasoning': hybrid_result['reasoning'],
-                'top_role_scores': dict(list(role_match['all_scores'].items())[:5]),
-            },
-            'steps': [
-                '1. Extracted skills from your resume',
-                '2. Identified job requirements from description',
-                f'3. {role_info}',
-                '4. Calculated skill gaps with priority scoring',
-                f'5. Generated learning path with {len(learning_path["modules"])} modules',
-                '6. Ordered modules by prerequisites and criticality'
-            ],
-            'key_insights': [
-                f'You currently have {gap_analysis["statistics"]["known_count"]} of {gap_analysis["statistics"]["total_required_skills"]} required skills',
-                f'Skill coverage: {gap_analysis["statistics"]["coverage_percentage"]}%',
-                f'Readiness score: {gap_analysis["statistics"]["readiness_score"]}/100',
-                f'Estimated learning time: {learning_path.get("timeline", {}).get("estimated_weeks", "N/A")} weeks (~{learning_path.get("total_duration_hours", "N/A")} hours)',
-                f'Learning path includes {len(learning_path.get("modules", []))} modules ({sum(1 for m in learning_path.get("modules", []) if m.get("is_injected_prerequisite"))} auto-injected prerequisites)'
-            ],
-            'recommendations': [
-                'Follow the learning path in recommended order for optimal learning',
-                'Each module includes suggested resources and assessment criteria',
-                'Plan for spaced repetition and hands-on projects',
-                'Review prerequisites before starting each module'
-            ]
-        }
+        reasoning_trace = _build_reasoning_trace(gap_analysis, learning_path, role_match, hybrid_result)
 
         # Step 4f: Learning Efficiency
         logger.info("Computing learning efficiency score...")
@@ -1004,10 +1097,35 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             )
         }
 
+        # Step 5g: Efficiency Metrics
+        efficiency_metrics = time_analytics.calculate(
+            gap_analysis=updated_gap_analysis,
+            learning_path=updated_learning_path
+        )
+
+        # Step 5h: New Reasoning Trace
+        # Step 5h: New Reasoning Trace
+        updated_reasoning_trace = _build_reasoning_trace(updated_gap_analysis, updated_learning_path, role_match, hybrid_result)
+
+        # Step 5i: Broadcast Update to Collaborators
+        if request.session_id:
+            await manager.broadcast({
+                "type": "progress_updated",
+                "data": {
+                    "gap_analysis": updated_gap_analysis,
+                    "learning_path": updated_learning_path,
+                    "reasoning_trace": updated_reasoning_trace,
+                    "efficiency_metrics": efficiency_metrics,
+                    "goal": updated_learning_path.get('goal')
+                }
+            }, request.session_id)
+
         return {
             'progress_summary': progress_summary,
             'updated_gap_analysis': updated_gap_analysis,
             'updated_learning_path': updated_learning_path,
+            'reasoning_trace': updated_reasoning_trace,
+            'efficiency_metrics': efficiency_metrics,
             'learning_style': learning_style,
             'burnout_status': burnout_status,
             'career_paths': career_predictions['next_roles'],
@@ -1168,6 +1286,142 @@ async def get_skill_prerequisites(skill_name: str, request: Resume):
         logger.error(f"Error resolving prerequisites for {skill_name}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+@app.post("/lms/export/scorm", tags=["LMS Integration"])
+async def export_to_lms(request: Dict[str, Any]):
+    """
+    Export personalized learning path as a SCORM 1.2 zip package.
+    """
+    try:
+        learning_path = request.get('learning_path')
+        if not learning_path:
+            raise HTTPException(status_code=400, detail="Missing learning path data")
+            
+        zip_content = lms_integrator.generate_scorm_package(learning_path)
+        
+        return StreamingResponse(
+            io.BytesIO(zip_content),
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename=roadmap_scorm.zip"}
+        )
+    except Exception as e:
+        logger.error(f"LMS Export error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/doubt/solve", tags=["AI Tutor"])
+async def solve_technical_doubt(request: Dict[str, Any]):
+    """
+    Resolve a specific technical doubt related to a skill in the roadmap.
+    """
+    try:
+        skill_name = request.get('skill_name')
+        question = request.get('question')
+        if not skill_name or not question:
+            raise HTTPException(status_code=400, detail="Missing skill_name or question")
+            
+        result = doubt_detector.solve_doubt(skill_name, question)
+        return result
+    except Exception as e:
+        logger.error(f"Doubt solving error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/resume/optimize", tags=["Career Support"])
+async def suggest_resume_optimizations(request: Dict[str, Any]):
+    """
+    Suggest high-impact bullet points for the resume based on JD and mastered skills.
+    """
+    try:
+        mastered_skills = request.get('mastered_skills', [])
+        jd_text = request.get('job_description', "")
+        if not mastered_skills:
+            return {"suggestions": []}
+            
+        suggestions = resume_updater.suggest_optimizations(mastered_skills, jd_text)
+        return {"suggestions": suggestions}
+    except Exception as e:
+        logger.error(f"Resume optimization error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/interview/start", tags=["Career Support"])
+async def start_mock_interview(request: Dict[str, Any]):
+    """
+    Generate interview questions based on mastered skills.
+    """
+    try:
+        mastered_skills = request.get('mastered_skills', [])
+        questions = interview_simulator.generate_questions(mastered_skills)
+        return {"questions": questions}
+    except Exception as e:
+        logger.error(f"Interview start error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/interview/grade", tags=["Career Support"])
+async def grade_interview_answer(request: Dict[str, Any]):
+    """
+    Grade a specific interview answer.
+    """
+    try:
+        question = request.get('question', "")
+        answer = request.get('answer', "")
+        result = interview_simulator.grade_answer(question, answer)
+        return result
+    except Exception as e:
+        logger.error(f"Interview grading error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/career/predict", tags=["Career Support"])
+async def predict_career_path(request: Dict[str, Any]):
+    """
+    Predict career trajectory based on roadmap progress.
+    """
+    try:
+        roadmap_data = request.get('roadmap_data', {})
+        target_role = request.get('target_role', "Software Engineer")
+        prediction = career_predictor.predict_trajectory(roadmap_data, target_role)
+        return prediction
+    except Exception as e:
+        logger.error(f"Career prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Phase 6: Elite Hackathon Features ---
+
+@app.post("/briefing/generate", tags=["Elite Features"])
+async def generate_briefing(request: Dict[str, Any]):
+    try:
+        audio_url = audio_briefing.generate_briefing(
+            user_name=request.get("user_name", "Developer"),
+            mastered_count=request.get("mastered_count", 0),
+            total_skills=request.get("total_skills", 10),
+            next_milestone=request.get("next_milestone", "Unknown"),
+            lang=request.get("lang", "en")
+        )
+        return {"audio_url": audio_url}
+    except Exception as e:
+        logger.error(f"Briefing generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/decay/status", tags=["Elite Features"])
+async def get_decay_status(request: Dict[str, Any]):
+    try:
+        mastered_skills = request.get("mastered_skills", [])
+        daily_progress = request.get("daily_progress", [0]*5)
+        decay_map = decay_service.calculate_decay(mastered_skills)
+        load_stats = decay_service.get_neural_load_stats(daily_progress)
+        return {
+            "decay_map": decay_map,
+            "neural_load": load_stats
+        }
+    except Exception as e:
+        logger.error(f"Decay status error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/market/benchmark", tags=["Elite Features"])
+async def get_market_benchmarks(role: str, readiness: float):
+    try:
+        return benchmarking_service.get_market_rank(role, readiness)
+    except Exception as e:
+        logger.error(f"Benchmarking error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", tags=["Root"])
 async def root():

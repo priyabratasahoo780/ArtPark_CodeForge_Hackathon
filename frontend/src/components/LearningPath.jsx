@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
 import { FiChevronDown, FiCheck, FiClock, FiBookOpen, FiZap, FiTarget, FiStar, FiMap, FiAward } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import DoubtModal from './DoubtModal'
 
-export default function LearningPath({ data, onToggleSkill, completedSkillNames, onResourceClick }) {
+export default function LearningPath({ data, onToggleSkill, completedSkillNames, onResourceClick, onExportLMS }) {
   const [expandedModule, setExpandedModule] = useState(null)
   const [internalCompleted, setInternalCompleted] = useState(new Set())
 
   const modules = data?.modules || []
   const timeline = data?.timeline || {}
   const strategies = data?.strategies || []
+
+  const [activeDoubtSkill, setActiveDoubtSkill] = useState(null)
 
   // Use external state if provided, otherwise fallback to internal
   const isSkillCompleted = (module) => {
@@ -35,6 +38,18 @@ export default function LearningPath({ data, onToggleSkill, completedSkillNames,
 
   return (
     <div className="space-y-8 pb-10">
+      {/* Export Controls */}
+      {onExportLMS && (
+        <div className="flex justify-end">
+          <button 
+            onClick={onExportLMS}
+            className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-black uppercase tracking-widest hover:bg-[#00f3ff]/20 hover:border-[#00f3ff]/50 transition-all flex items-center gap-2"
+          >
+            <FiAward className="text-lg" /> Export to LMS (SCORM)
+          </button>
+        </div>
+      )}
+
       {/* Header Info - Responsive grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
@@ -204,6 +219,20 @@ export default function LearningPath({ data, onToggleSkill, completedSkillNames,
                               </div>
                             </div>
                           </div>
+                          
+                          <div className="pt-6 border-t border-white/5 flex justify-between items-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActiveDoubtSkill(module.skill_name)
+                              }}
+                              className="px-6 py-3 rounded-2xl bg-[#00f3ff]/10 border border-[#00f3ff]/20 text-[#00f3ff] text-[10px] font-black uppercase tracking-widest hover:bg-[#00f3ff]/20 transition-all flex items-center gap-2 shadow-lg shadow-[#00f3ff]/5"
+                            >
+                              <FiZap className="text-sm" /> Ask AI Doubt Solver
+                            </button>
+                            
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Contextual Assistance Available</p>
+                          </div>
                         </div>
                       </motion.div>
                     )}
@@ -214,6 +243,12 @@ export default function LearningPath({ data, onToggleSkill, completedSkillNames,
           })}
         </div>
       </div>
+      {/* Doubt Solver Modal */}
+      <DoubtModal 
+        skillName={activeDoubtSkill}
+        isOpen={!!activeDoubtSkill}
+        onClose={() => setActiveDoubtSkill(null)}
+      />
     </div>
   )
 }

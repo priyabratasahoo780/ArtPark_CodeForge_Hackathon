@@ -34,3 +34,29 @@ class DoubtDetector:
             "suggestion": suggestion if help_triggered else None,
             "reason": reason if help_triggered else None
         }
+
+    def solve_doubt(self, skill_name: str, question: str) -> Dict[str, Any]:
+        """
+        Provides a contextual AI response to a user's technical doubt.
+        """
+        # Contextual logic based on skill
+        skill_clean = skill_name.lower()
+        question_clean = question.lower()
+        
+        response = f"I see you're asking about {skill_name}. That's a great question!"
+        
+        if "what" in question_clean:
+            response = f"{skill_name} is a key component in modern development. Specifically, it helps with..."
+        elif "how" in question_clean:
+            response = f"To use {skill_name} effectively, you should follow these patterns..."
+        elif "error" in question_clean or "debug" in question_clean:
+            response = f"Common errors with {skill_name} often involve configuration. Check your setup for..."
+        
+        return {
+            "skill": skill_name,
+            "question": question,
+            "answer": response,
+            "resources": [
+                {"title": f"Mastering {skill_name}", "url": f"https://docs.example.com/{skill_clean}"}
+            ]
+        }

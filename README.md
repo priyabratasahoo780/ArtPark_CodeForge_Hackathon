@@ -644,7 +644,6 @@ For issues, questions, or suggestions:
 - [x] Voice explanations (Feature 6)
 - [x] Time saved analytics dashboard (Feature 7)
 - [ ] Integration with major LMS platforms
-- [ ] Mobile app (React Native)
 - [ ] Multi-language support (TTS supports multiple langs)
 - [ ] Real-time collaboration features
 

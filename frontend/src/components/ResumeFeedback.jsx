@@ -8,7 +8,7 @@ import {
 } from 'react-icons/hi';
 import { motion } from 'framer-motion';
 
-const ResumeFeedback = ({ feedback }) => {
+const ResumeFeedback = ({ feedback, optimizations }) => {
   if (!feedback || feedback.length === 0) {
     return (
       <motion.div
@@ -29,6 +29,45 @@ const ResumeFeedback = ({ feedback }) => {
 
   return (
     <div className="space-y-6">
+      {/* Mastery Optimizations */}
+      {optimizations && optimizations.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-card bg-[#34d399]/10 border-[#34d399]/30 p-6 sm:p-8"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-[#34d399]/20 rounded-xl flex items-center justify-center border border-[#34d399]/30">
+              <HiOutlineCheckCircle className="h-6 w-6 text-[#34d399]" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white uppercase italic tracking-wider">Mastery-Based Optimizations</h2>
+              <p className="text-[10px] font-bold text-[#34d399] uppercase tracking-widest mt-1">Verified achievements ready for your resume</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            {optimizations.map((opt, i) => (
+              <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 group hover:border-[#34d399]/50 transition-all">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[10px] font-black text-[#34d399] uppercase tracking-[0.2em]">{opt.skill}</span>
+                  <span className="text-[8px] font-bold text-gray-500 uppercase px-2 py-0.5 rounded bg-white/5">{opt.category}</span>
+                </div>
+                <p className="text-sm text-gray-200 font-medium leading-relaxed italic">"{opt.suggestion}"</p>
+                <div className="mt-4 flex justify-end">
+                  <button 
+                    onClick={() => navigator.clipboard.writeText(opt.suggestion)}
+                    className="text-[9px] font-black text-white/40 uppercase tracking-widest hover:text-[#34d399] transition-colors"
+                  >
+                    Copy to Clipboard
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Header Banner */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

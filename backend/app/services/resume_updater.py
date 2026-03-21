@@ -37,3 +37,28 @@ class ResumeUpdater:
             full_resume = original_text + enhancement
             
         return full_resume
+
+    def suggest_optimizations(self, mastered_skills: List[str], job_description: str) -> List[Dict[str, str]]:
+        """
+        Suggests high-impact bullet points for the resume based on mastered skills
+        and job description keywords.
+        """
+        suggestions = []
+        jd_lower = job_description.lower()
+        
+        for skill in mastered_skills:
+            # Contextual suggestion templates
+            if "scale" in jd_lower or "performance" in jd_lower or "latency" in jd_lower:
+                bullet = f"Optimized system performance using **{skill}**, resulting in a 25% reduction in processing latency."
+            elif "team" in jd_lower or "lead" in jd_lower or "mentor" in jd_lower:
+                bullet = f"Led the adoption of **{skill}** within the team, establishing best practices and conducting knowledge-sharing sessions."
+            else:
+                bullet = f"Leveraged **{skill}** to build robust, maintainable solutions for core business requirements."
+                
+            suggestions.append({
+                "skill": skill,
+                "suggestion": bullet,
+                "category": "High Impact Achievement"
+            })
+            
+        return suggestions

@@ -14,6 +14,8 @@ Usage:
 import io
 import base64
 import logging
+import json
+from pathlib import Path
 from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,16 @@ class VoiceExplainer:
         self.lang = lang
         self.slow = slow
         self._gTTS = _try_import_gtts()
+        
+        # Load translations
+        try:
+            translations_path = Path(__file__).parent.parent / "datasets" / "translations.json"
+            with open(translations_path, "r", encoding="utf-8") as f:
+                self.translations = json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load translations: {e}")
+            self.translations = {}
+
         if self._gTTS is None:
             logger.warning(
                 "gTTS not installed. VoiceExplainer will return text-only."
@@ -56,19 +68,6 @@ class VoiceExplainer:
     ) -> Dict:
         """
         Generate a voice explanation for the analysis.
-
-        Args:
-            reasoning_trace: The reasoning_trace dict from /onboarding/complete.
-            gap_stats:       Optional gap_analysis['statistics'] for numeric summary.
-            custom_text:     If provided, synthesize this text directly instead.
-
-        Returns:
-            {
-                "script":     str,    # The spoken text (always present)
-                "audio_b64":  str,    # Base64-encoded MP3 (empty if gTTS unavailable)
-                "audio_mime": str,    # "audio/mpeg" or ""
-                "tts_available": bool
-            }
         """
         script = custom_text if custom_text else self._build_script(reasoning_trace, gap_stats, role)
         audio_b64 = ""
@@ -76,6 +75,7 @@ class VoiceExplainer:
 
         if self._gTTS is not None:
             try:
+                # Use the instance lang (or fallback to English for synthesis if lang not supported)
                 tts = self._gTTS(text=script, lang=self.lang, slow=self.slow)
                 buf = io.BytesIO()
                 tts.write_to_fp(buf)
@@ -100,6 +100,7 @@ class VoiceExplainer:
         signals_text = (
             ", ".join(signals[:3]) if signals else "standard extraction"
         )
+        # TODO: Add translations for this if needed
         script = (
             f"Skill: {skill_name}. "
             f"Confidence score: {round(confidence * 100)} percent. "
@@ -111,6 +112,17 @@ class VoiceExplainer:
     # Private — script generation                                          #
     # ------------------------------------------------------------------ #
 
+    def _get_txt(self, key: str, **kwargs) -> str:
+        """Helper to get translated text with fallback to English."""
+        # Get language dictionary, fallback to 'en'
+        lang_dict = self.translations.get(self.lang, self.translations.get("en", {}))
+        # Get key, fallback to 'en' version if not in current lang
+        text = lang_dict.get(key, self.translations.get("en", {}).get(key, ""))
+        try:
+            return text.format(**kwargs)
+        except Exception:
+            return text
+
     def _build_script(
         self, reasoning_trace: Dict, gap_stats: Optional[Dict], role: str = "USER"
     ) -> str:
@@ -118,7 +130,7 @@ class VoiceExplainer:
         parts = []
 
         # Opening
-        parts.append("Here is your personalized onboarding analysis.")
+        parts.append(self._get_txt("opening"))
 
         # Gap stats summary
         if gap_stats:
@@ -129,79 +141,56 @@ class VoiceExplainer:
             missing = gap_stats.get("missing_count", 0)
             partial = gap_stats.get("partial_count", 0)
 
-            parts.append(
-                f"You currently have {known} out of {total} required skills. "
-                f"Your skill coverage is {coverage} percent and your readiness score is {readiness} out of 100."
-            )
+            parts.append(self._get_txt("gap_summary", known=known, total=total, coverage=coverage, readiness=readiness))
+
             if missing > 0 or partial > 0:
                 if role == "HR":
-                    parts.append(
-                        f"There are {missing} critical gaps identified. "
-                        f"This candidate requires targeted training in these areas to meet benchmark standards."
-                    )
+                    parts.append(self._get_txt("gaps_identified_hr", missing=missing))
                 else:
-                    parts.append(
-                        f"You have {missing} missing skills and {partial} skills that need improvement."
-                    )
+                    parts.append(self._get_txt("gaps_identified_user", missing=missing, partial=partial))
 
         # Role analysis
         role_info = reasoning_trace.get("role_analysis", {})
         if role_info:
             role_name = role_info.get("matched_role", "specified")
-            conf = role_info.get("confidence", 0)
+            conf = round(role_info.get("confidence", 0) * 100)
             mode = role_info.get("mode", "")
             added = role_info.get("skills_added_from_role", [])
+            
             if role == "HR":
-                parts.append(
-                    f"Our neural engine matches this profile to the {role_name} track "
-                    f"with {round(conf * 100)} percent certainty. "
-                    f"We have automatically adjusted the required skill set for this role."
-                )
+                parts.append(self._get_txt("role_match_hr", role_name=role_name, confidence=conf))
             else:
-                parts.append(
-                    f"Based on the job description, your closest role match is {role_name}, "
-                    f"with a confidence of {round(conf * 100)} percent. "
-                    f"Mode: {mode}."
-                )
+                parts.append(self._get_txt("role_match_user", role_name=role_name, confidence=conf, mode=mode))
+            
             if added and role == "USER":
-                parts.append(
-                    f"The following core skills were added from your role track: "
-                    f"{', '.join(added[:5])}."
-                )
+                parts.append(self._get_txt("role_skills_added", skills=", ".join(added[:5])))
 
         # Steps
         steps = reasoning_trace.get("steps", [])
         if steps:
-            parts.append("Here is how the analysis was performed.")
+            parts.append(self._get_txt("steps_intro"))
             for step in steps:
-                # Clean step text (remove leading numbers like "1. ")
                 clean = step.lstrip("0123456789. ")
                 parts.append(clean + ".")
 
         # Key insights
         insights = reasoning_trace.get("key_insights", [])
         if insights:
-            parts.append("Key insights from your analysis.")
+            parts.append(self._get_txt("insights_intro"))
             for insight in insights[:4]:
                 parts.append(insight + ".")
 
         # Recommendations
         recs = reasoning_trace.get("recommendations", [])
         if recs:
-            parts.append("Recommendations for your learning journey.")
+            parts.append(self._get_txt("recommendations_intro"))
             for rec in recs[:3]:
                 parts.append(rec + ".")
 
         # Closing
         if role == "HR":
-            parts.append(
-                "This concludes the candidate potential brief. "
-                "Detailed metrics are available in your dashboard."
-            )
+            parts.append(self._get_txt("closing_hr"))
         else:
-            parts.append(
-                "Your personalized learning path has been generated. "
-                "Good luck with your onboarding journey!"
-            )
+            parts.append(self._get_txt("closing_user"))
 
         return " ".join(parts)
