@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { 
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
   FiMap, FiMessageSquare, FiLogOut, FiAward,
@@ -285,6 +285,12 @@ function App() {
     setCompletedSkillNames(next)
   }
 
+  const insightsSkills = useMemo(() => {
+    const initial = analysisResults?.skills_analysis?.resume_skills || (skillsAnalysis?.skills || []);
+    const completed = Array.from(completedSkillNames).map(n => ({ name: n }));
+    return [...initial, ...completed];
+  }, [analysisResults, skillsAnalysis, completedSkillNames]);
+
   if (!auth.token) return <Login onLogin={setAuth} />
 
   return (
@@ -369,7 +375,13 @@ function App() {
              <AnimatePresence mode="wait">
                 {viewMode === 'recruiter' ? (
                    <motion.div key="recruiter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                      <RecruiterDashboard candidateData={analysisResults} learningPath={learningPath} marketBenchmark={marketBenchmark} />
+                      <RecruiterDashboard 
+                         candidateData={analysisResults} 
+                         learningPath={learningPath} 
+                         marketBenchmark={marketBenchmark} 
+                         completedSkillNames={completedSkillNames}
+                         insightsSkills={insightsSkills}
+                      />
                    </motion.div>
                 ) : (
                   <>
@@ -440,11 +452,11 @@ function App() {
                        <div className="space-y-10">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                              <DailyStreak completedCount={completedSkillNames.size} />
-                             <ResumeScoreRadar skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} gapStats={gapAnalysis?.statistics} />
+                             <ResumeScoreRadar skills={insightsSkills} gapStats={gapAnalysis?.statistics} />
                           </div>
-                          <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} />
-                          <JobMatcher skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} />
-                       </div>
+                           <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={insightsSkills} />
+                           <JobMatcher skills={insightsSkills} />
+                        </div>
                     )}
 
                     {activeTab === 'portfolio' && (

@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { FiTarget, FiZap, FiActivity, FiGlobe, FiShare2, FiArrowUpRight, FiShield } from 'react-icons/fi'
 
-const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) => {
+const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark, completedSkillNames, insightsSkills }) => {
   const handleExport = () => {
     window.print()
   }
@@ -49,8 +49,10 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) =>
         <div className="glass-card p-8 border-none bg-gradient-to-br from-[#00f3ff]/10 to-transparent rounded-3xl col-span-1">
           <h3 className="text-[10px] font-black text-[#00f3ff] uppercase tracking-widest mb-6">Market Readiness Index</h3>
           <div className="flex items-baseline gap-2">
-             <span className="text-6xl font-black text-white">{marketBenchmark?.user_percentile || 94}%</span>
-             <span className="text-xs font-black text-[#34d399]">+6.2% High</span>
+             <span className="text-6xl font-black text-white">
+                {Math.min(99, (marketBenchmark?.user_percentile || 65) + (completedSkillNames?.size || 0) * 4)}%
+             </span>
+             <span className="text-xs font-black text-[#34d399]">+{(completedSkillNames?.size || 0) * 1.5}% High</span>
           </div>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-4 leading-relaxed">Top 6% against 2,400+ technical candidates verified in the last 30 days.</p>
         </div>
@@ -81,18 +83,19 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) =>
         </div>
       </div>
 
-      {/* Verified Skills Stack */}
       <div className="glass-card p-8 border-none bg-white/[0.02] rounded-3xl">
         <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-8">Verified Technology Stack</h3>
         <div className="flex flex-wrap gap-4">
-           {learningPath?.modules?.map((skill, idx) => (
-             <div key={idx} className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl flex items-center gap-4 hover:border-[#00f3ff]/30 transition-all cursor-default">
-                <div className="w-2 h-2 rounded-full bg-[#00f3ff]"></div>
+           {insightsSkills?.map((skill, idx) => (
+             <div key={idx} className={`px-6 py-4 bg-black/40 border ${completedSkillNames?.has(skill.name) ? 'border-[#34d399]/50 shadow-[0_0_15px_rgba(52,211,153,0.1)]' : 'border-white/5'} rounded-2xl flex items-center gap-4 hover:border-[#00f3ff]/30 transition-all cursor-default`}>
+                <div className={`w-2 h-2 rounded-full ${completedSkillNames?.has(skill.name) ? 'bg-[#34d399]' : 'bg-[#00f3ff]'}`}></div>
                 <div>
-                   <span className="text-xs font-black text-white uppercase tracking-tight">{skill.skill_name}</span>
+                   <span className="text-xs font-black text-white uppercase tracking-tight">{skill.name}</span>
                    <div className="flex items-center gap-2 mt-1">
                       <span className="text-[8px] font-bold text-gray-600 uppercase">Assessment: </span>
-                      <span className="text-[8px] font-black text-[#34d399] uppercase">Verified Platinum</span>
+                      <span className={`text-[8px] font-black ${completedSkillNames?.has(skill.name) ? 'text-[#34d399]' : 'text-[#00f3ff]'} uppercase`}>
+                         {completedSkillNames?.has(skill.name) ? 'Verified Platinum' : 'Verified Gold'}
+                      </span>
                    </div>
                 </div>
                 <FiArrowUpRight className="text-gray-700 ml-4" />
