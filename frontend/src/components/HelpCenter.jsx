@@ -39,11 +39,26 @@ const HelpCenter = ({ onClose }) => {
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative z-10 w-full max-w-4xl p-8 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar"
+        className="relative z-10 w-full max-w-4xl bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
       >
+        {/* Header containing the sticky close button */}
+        <div className="absolute top-0 right-0 p-6 z-[100]">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onClose) onClose();
+            }}
+            type="button"
+            className="p-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition-all cursor-pointer pointer-events-auto shadow-lg"
+          >
+            <FiX size={24} />
+          </button>
+        </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-8">
+        {/* Scrollable Content */}
+        <div className="p-8 overflow-y-auto no-scrollbar w-full h-full relative z-10">
+          <div className="flex items-center gap-4 mb-8 pr-16">
             <div className="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
               <FiHelpCircle size={32} />
             </div>
@@ -60,7 +75,7 @@ const HelpCenter = ({ onClose }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="p-6 bg-white/5 border border-white/10 rounded-3xl group hover:bg-white/10 transition-all"
+                className="p-6 bg-white/5 border border-white/10 rounded-3xl group hover:bg-white/10 transition-all relative z-20"
               >
                 <div className="flex items-center gap-4 mb-3">
                   <div className="text-blue-400 text-xl">{f.icon}</div>
@@ -81,20 +96,11 @@ const HelpCenter = ({ onClose }) => {
                   </p>
                 </div>
              </div>
-              <div className="absolute top-0 right-0 p-4 opacity-5">
+             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <FiCpu size={120} />
              </div>
           </div>
         </div>
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onClose) onClose();
-          }}
-          className="absolute top-6 right-6 p-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition-all z-[100] cursor-pointer"
-        >
-          <FiX size={24} />
-        </button>
       </motion.div>
     </div>
   );
