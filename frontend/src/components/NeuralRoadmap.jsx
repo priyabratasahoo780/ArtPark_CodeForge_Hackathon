@@ -8,29 +8,33 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
   const height = 800
   const nodeRadius = 45
 
-  // Generate node positions based on levels
+  // Generate node positions based on dynamic layers
   const nodes = useMemo(() => {
     if (!data || !Array.isArray(data)) return []
     
+    // Distribute nodes intelligently into neural layers
     const levels = {}
-    data.forEach(item => {
-      const level = item.level || 1
-      if (!levels[level]) levels[level] = []
-      levels[level].push(item)
+    data.forEach((item, index) => {
+      // Dynamic layer assignment (max 2-3 nodes vertically for an aesthetic neural look)
+      const colIdx = Math.floor(index / 2)
+      if (!levels[colIdx]) levels[colIdx] = []
+      levels[colIdx].push({ ...item, colIdx })
     })
 
     const result = []
-    const levelKeys = Object.keys(levels).sort((a, b) => a - b)
+    const levelKeys = Object.keys(levels).map(Number).sort((a, b) => a - b)
     const levelWidth = width / (levelKeys.length + 1)
 
-    levelKeys.forEach((level, idx) => {
+    levelKeys.forEach((colIdx, idx) => {
       const x = levelWidth * (idx + 1)
-      const items = levels[level]
+      const items = levels[colIdx]
+      // Add slight vertical staggering for a more "organic neural" spread
       const levelHeight = height / (items.length + 1)
 
       items.forEach((item, i) => {
-        const y = levelHeight * (i + 1)
-        
+        let y = levelHeight * (i + 1)
+        if (items.length === 1 && idx % 2 !== 0) y += 50 // Stagger single nodes
+
         // Find decay info
         const decayInfo = decayData.find(d => d.name === item.skill_name)
         
@@ -52,19 +56,41 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
   const connections = useMemo(() => {
     const lines = []
     nodes.forEach(node => {
-      // Connect to next level nodes (simplistic branching)
-      const nextLevelNodes = nodes.filter(n => n.level === node.level + 1)
-      nextLevelNodes.forEach(next => {
-        lines.push({
-          id: `${node.skill_name}-${next.skill_name}`,
-          x1: node.x,
-          y1: node.y,
-          x2: next.x,
-          y2: next.y,
-          isActive: node.isCompleted && next.isCompleted,
-          isPending: node.isCompleted && !next.isCompleted
+      // 1. Try connecting based on exact prerequisites (if provided)
+      let explicitConnected = false
+      if (node.prerequisites && Array.isArray(node.prerequisites)) {
+         node.prerequisites.forEach(prereqName => {
+           const prereqNode = nodes.find(n => n.skill_name.toLowerCase() === prereqName.toLowerCase())
+           if (prereqNode) {
+             explicitConnected = true
+             lines.push({
+               id: `${prereqNode.skill_name}-${node.skill_name}`,
+               x1: prereqNode.x,
+               y1: prereqNode.y,
+               x2: node.x,
+               y2: node.y,
+               isActive: prereqNode.isCompleted && node.isCompleted,
+               isPending: prereqNode.isCompleted && !node.isCompleted
+             })
+           }
+         })
+      }
+
+      // 2. Dense connection fallback: Connect to nodes in the next neural layer
+      if (!explicitConnected) {
+        const nextLevelNodes = nodes.filter(n => n.colIdx === node.colIdx + 1)
+        nextLevelNodes.forEach(next => {
+          lines.push({
+            id: `${node.skill_name}-${next.skill_name}`,
+            x1: node.x,
+            y1: node.y,
+            x2: next.x,
+            y2: next.y,
+            isActive: node.isCompleted && next.isCompleted,
+            isPending: node.isCompleted && !next.isCompleted
+          })
         })
-      })
+      }
     })
     return lines
   }, [nodes])
