@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'react-icons/fi'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FiZap, FiAward, FiTarget, FiCalendar, FiStar, FiFlag } from 'react-icons/fi'
 import axios from 'axios'
 

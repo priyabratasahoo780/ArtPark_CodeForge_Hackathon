@@ -50,7 +50,7 @@ const ResumeFeedback = ({ feedback, optimizations }) => {
             {optimizations.map((opt, i) => (
               <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 group hover:border-[#34d399]/50 transition-all">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-[10px] font-black text-[#34d399] uppercase tracking-[0.2em]">{opt.skill}</span>
+                  <span className="text-[10px] font-black text-[#34d399] uppercase tracking-[0.2em]">{opt?.skill}</span>
                   <span className="text-[8px] font-bold text-gray-500 uppercase px-2 py-0.5 rounded bg-white/5">{opt.category}</span>
                 </div>
                 <p className="text-sm text-gray-200 font-medium leading-relaxed italic">"{opt.suggestion}"</p>

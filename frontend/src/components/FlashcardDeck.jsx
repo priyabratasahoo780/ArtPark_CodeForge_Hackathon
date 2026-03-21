@@ -78,7 +78,7 @@ const FlashcardDeck = ({ masteredSkills, auth }) => {
           {/* Front */}
           <div className="absolute inset-0 backface-hidden glass-card p-10 flex flex-col items-center justify-center text-center border-none bg-gradient-to-br from-white/5 to-white/[0.02] rounded-3xl shadow-2xl">
              <div className="absolute top-6 left-6 px-3 py-1 bg-[#bc13fe]/10 border border-[#bc13fe]/20 rounded-full">
-                <span className="text-[8px] font-black text-[#bc13fe] uppercase tracking-widest">{currentCard.skill}</span>
+                <span className="text-[8px] font-black text-[#bc13fe] uppercase tracking-widest">{currentCard?.skill}</span>
              </div>
              <p className="text-lg font-bold text-white leading-relaxed">{currentCard.question}</p>
              <span className="mt-8 text-[9px] font-black uppercase tracking-widest text-gray-500">Click to reveal answer</span>

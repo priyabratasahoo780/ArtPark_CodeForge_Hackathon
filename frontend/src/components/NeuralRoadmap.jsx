@@ -10,7 +10,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
 
   // Generate node positions based on levels
   const nodes = useMemo(() => {
-    if (!data) return []
+    if (!data || !Array.isArray(data)) return []
     
     const levels = {}
     data.forEach(item => {

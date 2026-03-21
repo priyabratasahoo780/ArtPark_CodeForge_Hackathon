@@ -275,7 +275,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
               {analysisResults.decayed_skills.map((skill, index) => (
                 <div key={index} className="flex-1 min-w-[200px] border border-[#ff00e5]/20 bg-[#0a0a0c]/50 rounded-xl p-3 flex flex-col gap-1">
                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-black text-white">{skill.skill}</span>
+                      <span className="text-sm font-black text-white">{skill?.skill}</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 uppercase tracking-widest">{skill.status}</span>
                    </div>
                    <span className="text-[10px] text-gray-400 font-medium">Inactive for {skill.last_used_days} days. Confidence level dropped.</span>

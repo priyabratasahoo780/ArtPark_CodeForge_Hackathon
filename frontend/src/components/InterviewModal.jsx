@@ -107,11 +107,11 @@ export default function InterviewModal({ masteredSkills, auth, onClose }) {
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-[10px] font-black text-[#bc13fe] uppercase tracking-widest">Question {activeQuestionIdx + 1} of {questions.length}</span>
                     <span className="px-3 py-1 bg-[#bc13fe]/10 text-[#bc13fe] text-[8px] font-black uppercase rounded-full border border-[#bc13fe]/20">
-                      Skill: {questions[activeQuestionIdx].skill}
+                      Skill: {questions[activeQuestionIdx]?.skill}
                     </span>
                   </div>
                   <h4 className="text-lg font-black text-white leading-tight">
-                    {questions[activeQuestionIdx].text}
+                    {questions[activeQuestionIdx]?.text}
                   </h4>
                 </div>
 

@@ -53,7 +53,7 @@ export default function ActivityFeed({ activities }) {
                     <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest shrink-0">{activity.time || 'Just now'}</span>
                   </div>
                   <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
-                    {activity.text}
+                    {activity?.text}
                   </p>
                 </div>
               </motion.div>

@@ -3,7 +3,7 @@ import {
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
   FiMap, FiMessageSquare, FiLogOut, FiAward,
   FiRefreshCw, FiClock, FiTrendingUp, FiMic, FiCast, FiFeather, FiPlay,
-  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser, FiSettings, FiHelpCircle
+  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser, FiSettings, FiHelpCircle, FiShield
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
@@ -45,7 +45,6 @@ import CodeRadar from './components/CodeRadar'
 import SquadHub from './components/SquadHub'
 import SystemGuardian from './components/SystemGuardian'
 import ExecutivePacket from './components/ExecutivePacket'
-import HelpCenter from './components/HelpCenter'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -65,6 +64,39 @@ const NavTab = ({ active, onClick, icon, label, color = '#bc13fe' }) => (
     <span className="hidden md:block">{label}</span>
   </button>
 )
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-black text-white p-10 flex flex-col items-center justify-center text-center">
+          <h1 className="text-4xl font-bold text-red-500 mb-4">CRITICAL SYSTEM FAILURE</h1>
+          <p className="text-gray-400 mb-8 max-w-md">An unhandled exception has occurred in the neural engine.</p>
+          <div className="bg-white/5 border border-red-500/30 p-4 rounded-xl text-left font-mono text-xs overflow-auto max-w-full">
+            {this.state.error?.toString()}
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-8 px-6 py-2 bg-red-500 text-white rounded-lg font-bold"
+          >
+            Reboot System
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('upload')
@@ -141,7 +173,7 @@ function App() {
   useEffect(() => {
     if (!analysisResults) return
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${API_BASE_URL.replace(/^http/, protocol)}/ws/progress/${sessionId}`
+    const wsUrl = `${API_BASE_URL.replace(/^http:/, protocol)}/ws/progress/${sessionId}`
     const ws = new WebSocket(wsUrl)
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data)
@@ -237,7 +269,8 @@ function App() {
   if (!auth.token) return <Login onLogin={setAuth} />
 
   return (
-    <div className={`min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative transition-colors duration-1000`}>
+    <ErrorBoundary>
+      <div className={`min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative transition-colors duration-1000`}>
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] blur-[120px] transition-all duration-1000" style={{ backgroundColor: `${theme.primary}15` }}></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[120px] transition-all duration-1000" style={{ backgroundColor: `${theme.secondary}15` }}></div>
@@ -245,15 +278,15 @@ function App() {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="bg-white/[0.02] backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-1000" style={{ background: `linear-gradient(to br, ${theme.primary}, ${theme.secondary})` }}>
                 <FiZap className="text-white text-xl" />
               </div>
               <h1 className="text-xl font-black uppercase italic tracking-tighter sm:block hidden">CodeForge</h1>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <div className="flex-1 items-center gap-2 overflow-x-auto no-scrollbar flex min-w-0 justify-end">
                {analysisResults && viewMode === 'candidate' && (
                  <>
                    <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" color={theme.primary} />
@@ -433,7 +466,8 @@ function App() {
           )}
         </AnimatePresence>
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }
 
