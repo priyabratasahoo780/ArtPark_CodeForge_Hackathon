@@ -346,7 +346,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
 
           <div className="space-y-4">
              <CareerPredictor 
-               roadmapData={analysisResults.learning_path?.modules} 
+               roadmapData={analysisResults.learning_path} 
                targetRole={analysisResults.target_role || "Software Engineer"} 
                auth={auth} 
              />
