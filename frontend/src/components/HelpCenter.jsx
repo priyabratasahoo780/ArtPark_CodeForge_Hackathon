@@ -41,12 +41,7 @@ const HelpCenter = ({ onClose }) => {
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         className="relative z-10 w-full max-w-4xl p-8 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar"
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 p-3 rounded-2xl bg-white/5 text-gray-400 hover:text-white transition-all z-20"
-        >
-          <FiX size={24} />
-        </button>
+
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
@@ -86,11 +81,20 @@ const HelpCenter = ({ onClose }) => {
                   </p>
                 </div>
              </div>
-             <div className="absolute top-0 right-0 p-4 opacity-5">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
                 <FiCpu size={120} />
              </div>
           </div>
         </div>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClose) onClose();
+          }}
+          className="absolute top-6 right-6 p-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition-all z-[100] cursor-pointer"
+        >
+          <FiX size={24} />
+        </button>
       </motion.div>
     </div>
   );
