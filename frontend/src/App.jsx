@@ -298,7 +298,8 @@ function App() {
               <h1 className="text-xl font-black uppercase italic tracking-tighter sm:block hidden">CodeForge</h1>
             </div>
 
-            <div className="flex-1 items-center gap-2 overflow-x-auto no-scrollbar flex min-w-0 justify-end">
+            <div className="flex-1 items-center gap-2 overflow-x-auto no-scrollbar flex min-w-0">
+               <div className="ml-auto flex-shrink-0"></div>
                {analysisResults && viewMode === 'candidate' && (
                  <>
                    <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" color={theme.primary} />
