@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { 
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
-  FiMap, FiMessageSquare, FiDownload, FiLogOut, FiAward,
-  FiRefreshCw, FiClock, FiTrendingUp, FiMic, FiCast, FiFeather, FiPlay
+  FiMap, FiMessageSquare, FiLogOut, FiAward,
+  FiRefreshCw, FiClock, FiTrendingUp, FiMic, FiCast, FiFeather, FiPlay,
+  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
@@ -15,8 +16,6 @@ import SkillsAnalysis from './components/SkillsAnalysis'
 import ResumeFeedback from './components/ResumeFeedback'
 import VoiceExplain from './components/VoiceExplain'
 import TimeSavedAnalytics from './components/TimeSavedAnalytics'
-import HRDashboard from './components/HRDashboard'
-import BenchmarkingUI from './components/CandidateBenchmark'
 import Login from './components/Login'
 import NeuralRoadmap from './components/NeuralRoadmap'
 import AchievementSystem from './components/AchievementSystem'
@@ -25,6 +24,10 @@ import CareerPredictor from './components/CareerPredictor'
 import InterviewModal from './components/InterviewModal'
 import CollaborativeCanvas from './components/CollaborativeCanvas'
 import EliteAnalytics from './components/EliteAnalytics'
+import CodingSandbox from './components/CodingSandbox'
+import FlashcardDeck from './components/FlashcardDeck'
+import GlobalTrendMap from './components/GlobalTrendMap'
+import RecruiterDashboard from './components/RecruiterDashboard'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -46,6 +49,10 @@ const NavTab = ({ active, onClick, icon, label, color = '#bc13fe' }) => (
 )
 
 function App() {
+  const [activeTab, setActiveTab] = useState('upload')
+  const [viewMode, setViewMode] = useState('candidate') // 'candidate' or 'recruiter'
+  
+  // Data
   const [resumeText, setResumeText] = useState('')
   const [jobDescriptionText, setJobDescriptionText] = useState('')
   const [targetRole, setTargetRole] = useState('')
@@ -66,93 +73,67 @@ function App() {
   const [activities, setActivities] = useState([])
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false)
   
-  // Phase 6 State
+  // Phase 6/7 State
   const [decayData, setDecayData] = useState([])
   const [loadStats, setLoadStats] = useState(null)
   const [marketBenchmark, setMarketBenchmark] = useState(null)
   const [audioBriefingUrl, setAudioBriefingUrl] = useState(null)
   const [isBriefingGenerating, setIsBriefingGenerating] = useState(false)
+  const [activeSandboxSkill, setActiveSandboxSkill] = useState(null)
   
-  // Real-time progress tracking
+  // Progress
   const [completedSkillNames, setCompletedSkillNames] = useState(new Set())
-  const [syncingProgress, setSyncingProgress] = useState(false)
   const [sessionId] = useState(`session-${Math.random().toString(36).substr(2, 9)}`)
   
-  const [activeTab, setActiveTab] = useState('upload')
   const [auth, setAuth] = useState({
     token: localStorage.getItem('token'),
     role: localStorage.getItem('role') || 'USER'
   })
-  const [syncStatus, setSyncStatus] = useState('idle')
 
-  // Auth persistence
   useEffect(() => {
     if (auth.token) {
       localStorage.setItem('token', auth.token)
       localStorage.setItem('role', auth.role)
-    } else {
-      localStorage.removeItem('token')
-      localStorage.removeItem('role')
     }
   }, [auth])
 
-  // WebSocket Collaboration
   useEffect(() => {
     if (!analysisResults) return
-
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${API_BASE_URL.replace(/^http/, protocol)}/ws/progress/${sessionId}`
     const ws = new WebSocket(wsUrl)
-
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data)
       if (message.type === 'progress_updated') {
-        const data = message.data
-        if (data.updated_gap_analysis) setGapAnalysis(data.updated_gap_analysis)
-        if (data.updated_learning_path) setLearningPath(data.updated_learning_path)
-        if (data.efficiency_metrics) setTimeSavedData(data.efficiency_metrics)
-        
-        setActivities(prev => [{
-          id: Date.now(),
-          user: message.user || 'Collaborator',
-          text: `Mastered a new skill!`,
-          type: 'progress',
-          time: 'Just now'
-        }, ...prev].slice(0, 50))
+         const data = message.data
+         if (data.updated_gap_analysis) setGapAnalysis(data.updated_gap_analysis)
+         if (data.updated_learning_path) setLearningPath(data.updated_learning_path)
       }
     }
-
     return () => ws.close()
   }, [analysisResults, sessionId])
 
-  // Phase 6 Data Fetchers
   useEffect(() => {
-    if (completedSkillNames.size > 0) {
-      fetchDecayStatus()
-    }
+    if (completedSkillNames.size > 0) fetchDecayStatus()
   }, [completedSkillNames])
 
   useEffect(() => {
-    if (analysisResults) {
-      fetchMarketBenchmark()
-    }
+    if (analysisResults) fetchMarketBenchmark()
   }, [analysisResults])
 
   const fetchDecayStatus = async () => {
     try {
       const mastered_skills = Array.from(completedSkillNames).map(name => ({
          name,
-         mastered_at: Date.now() / 1000 - (Math.random() * 86400 * 5) // Mock historical data
+         mastered_at: Date.now() / 1000 - (Math.random() * 86400 * 5)
       }))
       const response = await axios.post(`${API_BASE_URL}/decay/status`, {
         mastered_skills,
-        daily_progress: [2, 1, 0, 4, 1] // Mock velocity
+        daily_progress: [2, 1, 0, 4, 1]
       })
       setDecayData(response.data.decay_map)
       setLoadStats(response.data.neural_load)
-    } catch (err) {
-      console.error('Decay fetch error:', err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const fetchMarketBenchmark = async () => {
@@ -161,234 +142,168 @@ function App() {
       const readiness = gapAnalysis?.statistics?.readiness_score || 50
       const response = await axios.get(`${API_BASE_URL}/market/benchmark?role=${role}&readiness=${readiness}`)
       setMarketBenchmark(response.data)
-    } catch (err) {
-      console.error('Benchmark fetch error:', err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const generateBriefing = async () => {
     setIsBriefingGenerating(true)
     try {
-      const response = await axios.post(`${API_BASE_URL}/briefing/generate`, {
-        user_name: "Elite Developer",
+      const resp = await axios.post(`${API_BASE_URL}/briefing/generate`, {
+        user_name: "CodeForge Talent",
         mastered_count: completedSkillNames.size,
         total_skills: learningPath?.length || 10,
         next_milestone: learningPath?.find(m => !completedSkillNames.has(m.name))?.name || "End of path",
         lang: "en"
       })
-      setAudioBriefingUrl(`${API_BASE_URL}${response.data.audio_url}`)
-    } catch (err) {
-      console.error('Briefing error:', err)
-    } finally {
-      setIsBriefingGenerating(false)
-    }
+      setAudioBriefingUrl(`${API_BASE_URL}${resp.data.audio_url}`)
+    } catch (err) { console.error(err) }
+    finally { setIsBriefingGenerating(false) }
   }
 
   const handleAnalyze = async () => {
-    if (!resumeText || !jobDescriptionText) {
-      setError('Please provide both resume and job description.')
-      return
-    }
-
+    if (!resumeText || !jobDescriptionText) return setError('Provide both resume and JD.')
     setLoading(true)
-    setError(null)
-
     try {
-      const response = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
+      const resp = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
         resume_text: resumeText,
         job_description_text: jobDescriptionText,
         target_role: targetRole || undefined,
         timeline_days: timelineDays || undefined
-      }, { headers: { Authorization: `Bearer ${auth.token}` } })
-
-      const data = response.data
-      setAnalysisResults(data)
-      setSkillsAnalysis(data.skills_analysis)
-      setGapAnalysis(data.gap_analysis)
-      setLearningPath(data.learning_path)
-      setReasoningTrace(data.reasoning_trace)
-      setTimeSavedData(data.efficiency_metrics)
-      setGoalText(data.goal)
-      
+      })
+      setAnalysisResults(resp.data)
+      setGapAnalysis(resp.data.gap_analysis)
+      setLearningPath(resp.data.learning_path)
+      setReasoningTrace(resp.data.reasoning_trace)
       setActiveTab('results')
-    } catch (err) {
-      console.error('Analysis error:', err)
-      setError('Analysis failed. Please try again.')
-    } finally {
-      setLoading(false)
+    } catch (err) { setError('Analysis failed.') }
+    finally { setLoading(false) }
+  }
+
+  const handleToggleSkill = (name) => {
+    const next = new Set(completedSkillNames)
+    if (next.has(name)) next.delete(name)
+    else {
+      next.add(name)
+      setActiveSandboxSkill(name)
     }
+    setCompletedSkillNames(next)
   }
 
-  const handleToggleSkill = (skillName) => {
-    const newCompleted = new Set(completedSkillNames)
-    if (newCompleted.has(skillName)) newCompleted.delete(skillName)
-    else newCompleted.add(skillName)
-    setCompletedSkillNames(newCompleted)
-    
-    // Sync logic (simplified for elite demo)
-    setSyncingProgress(true)
-    setTimeout(() => setSyncingProgress(false), 800)
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('role')
-    setAuth({ token: null, role: null })
-  }
-
-  if (!auth.token) {
-    return <Login onLogin={setAuth} />
-  }
+  if (!auth.token) return <Login onLogin={setAuth} />
 
   return (
-    <div className={`min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative`}>
-      {/* Background Decorative Blurs */}
+    <div className="min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative">
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#bc13fe]/10 blur-[120px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00f3ff]/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#bc13fe]/5 blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00f3ff]/5 blur-[120px]"></div>
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header */}
         <header className="bg-white/[0.02] backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('upload')}>
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bc13fe] to-[#00f3ff] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(188,19,254,0.3)]">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
+              <div className="w-10 h-10 bg-gradient-to-br from-[#bc13fe] to-[#00f3ff] rounded-xl flex items-center justify-center">
                 <FiZap className="text-white text-xl" />
               </div>
-              <h1 className="text-xl font-black text-white uppercase italic tracking-tighter hidden sm:block">
-                CodeForge <span className="text-[#00f3ff]">Onboarding</span>
-              </h1>
+              <h1 className="text-xl font-black uppercase italic tracking-tighter sm:block hidden">CodeForge</h1>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full">
-               {analysisResults && (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+               {analysisResults && viewMode === 'candidate' && (
                  <>
                    <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" />
                    <NavTab active={activeTab === 'path'} onClick={() => setActiveTab('path')} icon={<FiMap />} label="Roadmap" />
-                   <NavTab active={activeTab === 'canvas'} onClick={() => setActiveTab('canvas')} icon={<FiFeather />} label="Canvas" color="#34d399" />
-                   <NavTab active={activeTab === 'feedback'} onClick={() => setActiveTab('feedback')} icon={<FiMessageSquare />} label="Resume" />
+                   <NavTab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<FiCode />} label="Sandbox" color="#34d399" />
+                   <NavTab active={activeTab === 'recall'} onClick={() => setActiveTab('recall')} icon={<FiBookOpen />} label="Recall" color="#00f3ff" />
+                   <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
                  </>
                )}
                <NavTab active={activeTab === 'upload'} onClick={() => setActiveTab('upload')} icon={<FiUpload />} label={analysisResults ? "New" : "Analyze"} />
-               <button onClick={handleLogout} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white shrink-0 ml-2"><FiLogOut /></button>
+               
+               {analysisResults && (
+                 <button 
+                  onClick={() => setViewMode(prev => prev === 'candidate' ? 'recruiter' : 'candidate')}
+                  className={`ml-4 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
+                 >
+                   {viewMode === 'recruiter' ? <FiUser /> : <FiEye />}
+                   {viewMode === 'recruiter' ? 'Candidate View' : 'Recruiter View'}
+                 </button>
+               )}
+               <button onClick={() => setAuth({token:null})} className="p-2.5 rounded-xl bg-white/5 text-gray-400 ml-2"><FiLogOut /></button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 flex overflow-hidden">
-            {analysisResults && activeTab !== 'upload' && (
-               <aside className="w-80 hidden xl:block p-4 border-r border-white/5 bg-black/20 overflow-y-auto no-scrollbar">
-                 <ActivityFeed activities={activities} />
-               </aside>
-            )}
-
-            <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
-               <div className="max-w-7xl mx-auto px-4 pt-8">
-                  <AnimatePresence mode="wait">
+        <main className="flex-1 overflow-y-auto no-scrollbar py-10 px-4">
+           <div className="max-w-7xl mx-auto">
+             <AnimatePresence mode="wait">
+                {viewMode === 'recruiter' ? (
+                   <motion.div key="recruiter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                      <RecruiterDashboard candidateData={analysisResults} learningPath={learningPath} marketBenchmark={marketBenchmark} />
+                   </motion.div>
+                ) : (
+                  <>
                     {activeTab === 'upload' && (
-                       <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                         <UploadSection
-                            resumeText={resumeText}
-                            jobDescriptionText={jobDescriptionText}
-                            onResumeChange={setResumeText}
-                            onJobDescriptionChange={setJobDescriptionText}
-                            targetRole={targetRole}
-                            onTargetRoleChange={setTargetRole}
-                            timelineDays={timelineDays}
-                            onTimelineChange={setTimelineDays}
-                            onAnalyze={handleAnalyze}
-                            loading={loading}
-                         />
-                       </motion.div>
+                       <UploadSection 
+                        resumeText={resumeText} onResumeChange={setResumeText} 
+                        jobDescriptionText={jobDescriptionText} onJobDescriptionChange={setJobDescriptionText} 
+                        targetRole={targetRole} onTargetRoleChange={setTargetRole}
+                        timelineDays={timelineDays} onTimelineChange={setTimelineDays}
+                        onAnalyze={handleAnalyze} loading={loading}
+                       />
                     )}
 
                     {activeTab === 'results' && analysisResults && (
-                      <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-10">
+                      <div className="space-y-10">
                         <AchievementSystem completedCount={completedSkillNames.size} />
-                        
-                        {/* Phase 6 Elite Analytics */}
                         <EliteAnalytics decayData={decayData} loadStats={loadStats} marketBenchmark={marketBenchmark} />
-
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                            <CareerPredictor roadmapData={learningPath} targetRole={targetRole || analysisResults.target_role} auth={auth} />
-                           
-                           {/* AI Podcast Briefing */}
                            <div className="glass-card p-8 border-none bg-gradient-to-br from-[#bc13fe]/5 to-transparent rounded-3xl flex flex-col justify-between">
                               <div>
-                                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2">
-                                  <FiCast className="text-[#bc13fe]" /> AI Audio Briefing
-                                </h3>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">A custom narrrative of your onboarding journey, status, and market positioning.</p>
-                                
-                                {audioBriefingUrl && (
-                                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 bg-black/40 p-4 rounded-xl border border-white/5 flex items-center gap-4">
-                                      <div className="w-10 h-10 rounded-full bg-[#bc13fe] flex items-center justify-center text-white cursor-pointer hover:scale-110 transition-all">
-                                         <FiPlay />
-                                      </div>
-                                      <audio controls src={audioBriefingUrl} className="flex-1 sm:block hidden h-8" />
-                                      <div className="flex-1 sm:hidden">
-                                         <span className="text-[10px] font-black uppercase tracking-widest">Briefing Ready</span>
-                                      </div>
-                                   </motion.div>
-                                )}
+                                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast className="text-[#bc13fe]" /> Onboarding Podcast</h3>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">{audioBriefingUrl ? 'Audio generated successfully' : 'Generate an AI summary of your progress'}</p>
+                                {audioBriefingUrl && <audio controls src={audioBriefingUrl} className="mt-8 w-full h-8" />}
                               </div>
-                              
-                              <button 
-                                onClick={generateBriefing}
-                                disabled={isBriefingGenerating}
-                                className="mt-8 w-full py-4 rounded-2xl bg-[#bc13fe] text-white text-xs font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(188,19,254,0.3)] transition-all flex items-center justify-center gap-3"
-                              >
-                                {isBriefingGenerating ? <FiRefreshCw className="animate-spin" /> : <FiMic />}
-                                {isBriefingGenerating ? 'Generating Studio Audio...' : 'Generate Onboarding Podcast'}
+                              <button onClick={generateBriefing} disabled={isBriefingGenerating} className="mt-8 w-full py-4 rounded-2xl bg-[#bc13fe] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3">
+                                {isBriefingGenerating ? <FiRefreshCw className="animate-spin" /> : <FiMic />} {isBriefingGenerating ? 'Generating...' : 'Start Podcast'}
                               </button>
                            </div>
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                            <VoiceExplain reasoningTrace={reasoningTrace} gapStats={gapAnalysis?.statistics} auth={auth} />
-                           <div className="glass-card p-8 border-none bg-gradient-to-br from-[#00f3ff]/5 to-transparent rounded-3xl flex flex-col justify-between">
-                             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                               <FiMic className="text-[#00f3ff]" /> Technical Mock Interview
-                             </h3>
-                             <button onClick={() => setIsInterviewModalOpen(true)} className="mt-8 py-4 rounded-2xl bg-[#00f3ff] text-black text-xs font-black uppercase tracking-widest">Start Simulation</button>
+                           <div className="glass-card p-8 border-none bg-[#00f3ff]/5 rounded-3xl flex flex-col justify-between">
+                             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2"><FiMic className="text-[#00f3ff]" /> Technical Interview</h3>
+                             <button onClick={() => setIsInterviewModalOpen(true)} className="mt-8 py-4 rounded-2xl bg-[#00f3ff] text-black text-[10px] font-black uppercase tracking-widest">Begin Session</button>
                            </div>
                         </div>
-                      </motion.div>
+                      </div>
                     )}
 
                     {activeTab === 'path' && learningPath && (
-                       <motion.div key="path" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                       <div>
                          <div className="flex justify-end mb-6">
-                            <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-2xl">
-                               <button onClick={() => setPathViewMode('list')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${pathViewMode === 'list' ? 'bg-[#00f3ff] text-black' : 'text-gray-500'}`}>List</button>
-                               <button onClick={() => setPathViewMode('neural')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${pathViewMode === 'neural' ? 'bg-[#bc13fe] text-white' : 'text-gray-500'}`}>Neural</button>
-                            </div>
+                            <button onClick={() => setPathViewMode(pathViewMode === 'neural' ? 'list' : 'neural')} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400">Toggle View ({pathViewMode})</button>
                          </div>
-                         {pathViewMode === 'neural' ? (
-                           <NeuralRoadmap data={learningPath} completedSkillNames={completedSkillNames} decayData={decayData} />
-                         ) : (
-                           <LearningPath data={learningPath} onToggleSkill={handleToggleSkill} completedSkillNames={completedSkillNames} />
-                         )}
-                       </motion.div>
+                         {pathViewMode === 'neural' ? <NeuralRoadmap data={learningPath} completedSkillNames={completedSkillNames} decayData={decayData} /> : <LearningPath data={learningPath} onToggleSkill={handleToggleSkill} completedSkillNames={completedSkillNames} />}
+                       </div>
                     )}
 
-                    {activeTab === 'canvas' && (
-                       <motion.div key="canvas" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                         <CollaborativeCanvas sessionId={sessionId} auth={auth} />
-                       </motion.div>
+                    {activeTab === 'sandbox' && (
+                       <CodingSandbox activeSkill={activeSandboxSkill} auth={auth} />
                     )}
 
-                    {activeTab === 'feedback' && resumeFeedback && (
-                      <motion.div key="feedback" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <ResumeFeedback feedback={resumeFeedback} optimizations={resumeOptimizations} />
-                      </motion.div>
+                    {activeTab === 'recall' && (
+                       <FlashcardDeck masteredSkills={Array.from(completedSkillNames)} auth={auth} />
                     )}
-                  </AnimatePresence>
-               </div>
-            </div>
-          </div>
+
+                    {activeTab === 'ecosystem' && (
+                       <GlobalTrendMap />
+                    )}
+                  </>
+                )}
+             </AnimatePresence>
+           </div>
         </main>
 
         <AnimatePresence>

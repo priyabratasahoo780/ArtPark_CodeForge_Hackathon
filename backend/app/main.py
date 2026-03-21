@@ -32,6 +32,7 @@ from app.services.career_predictor import CareerPredictor
 from app.services.audio_briefing_generator import AudioBriefingGenerator
 from app.services.decay_service import DecayService
 from app.services.benchmarking_service import BenchmarkingService
+from app.services.ecosystem_services import PairProgrammerService, FlashcardGenerator, EcosystemService
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -141,6 +142,9 @@ career_predictor = CareerPredictor()
 audio_briefing = AudioBriefingGenerator("app/datasets/translations.json")
 decay_service = DecayService()
 benchmarking_service = BenchmarkingService()
+pair_programmer = PairProgrammerService()
+flashcard_generator = FlashcardGenerator()
+ecosystem_service = EcosystemService()
 role_matcher = RoleMatcher()
 voice_explainer = VoiceExplainer()
 time_analytics = TimeAnalytics()
@@ -1421,6 +1425,33 @@ async def get_market_benchmarks(role: str, readiness: float):
         return benchmarking_service.get_market_rank(role, readiness)
     except Exception as e:
         logger.error(f"Benchmarking error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Phase 7: Mastery Metaverse & Adaptive Ecosystem ---
+
+@app.get("/ecosystem/trends", tags=["Ecosystem"])
+async def get_trends():
+    try:
+        return ecosystem_service.get_market_trends()
+    except Exception as e:
+        logger.error(f"Trends error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/learning/flashcards", tags=["Ecosystem"])
+async def get_flashcards(data: Dict[str, Any]):
+    try:
+        skills = data.get("skills", [])
+        return flashcard_generator.generate_cards(skills)
+    except Exception as e:
+        logger.error(f"Flashcard error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/sandbox/hint", tags=["Ecosystem"])
+async def get_sandbox_hint(skill: Optional[str] = "General"):
+    try:
+        return {"hint": pair_programmer.get_hint(skill)}
+    except Exception as e:
+        logger.error(f"Sandbox hint error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", tags=["Root"])
