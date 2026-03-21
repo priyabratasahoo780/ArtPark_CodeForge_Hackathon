@@ -16,3 +16,4 @@ python-dotenv==1.0.0
 cors==1.0.1
 pyjwt>=2.8.0
 passlib>=1.7.4
+supabase>=2.3.0

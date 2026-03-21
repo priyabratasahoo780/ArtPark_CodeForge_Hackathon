@@ -38,6 +38,14 @@ import SalaryPredictor from './components/SalaryPredictor'
 import JobMatcher from './components/JobMatcher'
 import DailyStreak from './components/DailyStreak'
 import ResumeScoreRadar from './components/ResumeScoreRadar'
+import UIVision from './components/UIVision'
+import SkillGalaxy from './components/SkillGalaxy'
+import PitchGenerator from './components/PitchGenerator'
+import CodeRadar from './components/CodeRadar'
+import SquadHub from './components/SquadHub'
+import SystemGuardian from './components/SystemGuardian'
+import ExecutivePacket from './components/ExecutivePacket'
+import HelpCenter from './components/HelpCenter'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -255,6 +263,9 @@ function App() {
                    <NavTab active={activeTab === 'portfolio'} onClick={() => setActiveTab('portfolio')} icon={<FiAward />} label="Portfolio" color="#f59e0b" />
                    <NavTab active={activeTab === 'future'} onClick={() => setActiveTab('future')} icon={<FiTrendingUp />} label="2030" color="#3b82f6" />
                    <NavTab active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<FiTarget />} label="Insights" color="#00f3ff" />
+                   <NavTab active={activeTab === 'alpha'} onClick={() => setActiveTab('alpha')} icon={<FiZap />} label="Alpha" color="#bc13fe" />
+                   <NavTab active={activeTab === 'elite'} onClick={() => setActiveTab('elite')} icon={<FiShield />} label="Elite" color="#10b981" />
+                   <NavTab active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} icon={<FiHelpCircle />} label="Help" color="#94a3b8" />
                    <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
                    <NavTab active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<FiActivity />} label="Health" color="#34d399" />
                  </>
@@ -372,6 +383,33 @@ function App() {
 
                     {activeTab === 'future' && (
                        <FutureMap activeRole={targetRole || analysisResults?.target_role} />
+                    )}
+
+                    {activeTab === 'alpha' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                          <UIVision />
+                          <PitchGenerator masteredSkills={Array.from(completedSkillNames)} />
+                        </div>
+                        <SkillGalaxy masteredSkills={Array.from(completedSkillNames)} />
+                        <CodeRadar />
+                      </motion.div>
+                    )}
+
+                    {activeTab === 'elite' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                          <SquadHub masteredSkills={Array.from(completedSkillNames)} />
+                          <ExecutivePacket resumeData={resumeText} masteredSkills={Array.from(completedSkillNames)} gapStats={gapAnalysis?.statistics} />
+                        </div>
+                        <SystemGuardian />
+                      </motion.div>
+                    )}
+
+                    {activeTab === 'settings' && (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
+                        <HelpCenter />
+                      </motion.div>
                     )}
 
                     {activeTab === 'status' && (

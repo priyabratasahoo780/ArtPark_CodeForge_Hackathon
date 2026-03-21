@@ -18,6 +18,7 @@ class UserLogin(BaseModel):
     password: str
 
 class UserInDB(UserBase):
+    id: Optional[str] = None
     hashed_password: str
 
 class UserResponse(UserBase):

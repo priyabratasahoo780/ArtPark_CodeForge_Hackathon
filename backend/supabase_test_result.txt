@@ -1,0 +1,4 @@
+Connecting to: https://ogwuwggqudvasgygxbmy.supabase.co
+Testing Anon Client...
+
+❌ Connection failed: {'message': 'infinite recursion detected in policy for relation "users"', 'code': '42P17', 'hint': None, 'details': None}

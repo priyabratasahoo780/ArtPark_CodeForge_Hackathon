@@ -35,9 +35,15 @@ from app.services.benchmarking_service import BenchmarkingService
 from app.services.ecosystem_services import PairProgrammerService, FlashcardGenerator, EcosystemService
 from app.services.dominance_services import PortfolioService, FutureProjectionService, ValidationService
 from app.services.power_services import SalaryPredictorService, JobMatcherService, StreakService, ResumeScoreService
+from app.services.vision_services import (
+    VisionService, SkillGalaxyService, PitchGeneratorService, CodeRadarService,
+    VisionRequest, PitchRequest, CodeAnalysisRequest
+)
+from app.services.system_services import SystemService, SquadService, PacketService
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
-from app.models.user import RoleEnum
+from app.services.supabase_service import supabase_service
+from app.models.user import RoleEnum, UserInDB
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -154,6 +160,14 @@ job_matcher = JobMatcherService()
 streak_service = StreakService()
 resume_scorer = ResumeScoreService()
 role_matcher = RoleMatcher()
+
+vision_service = VisionService()
+galaxy_service = SkillGalaxyService()
+pitch_service = PitchGeneratorService()
+code_radar = CodeRadarService()
+system_service = SystemService()
+squad_service = SquadService()
+packet_service = PacketService()
 
 resume_benchmarker = ResumeBenchmarker(
     skill_extractor=skill_extractor,
@@ -580,6 +594,9 @@ async def extract_resume_skills(request: Resume):
         
         result = skill_extractor.extract_from_resume(request.text)
         
+        # Optional: Save to Supabase if session/user_id could be identified
+        # For now, we return analysis and save during full onboarding
+        
         return ResumeAnalysis(
             skills=[SkillInfo(**skill) for skill in result['skills']],
             total_skills_count=result['total_skills_count'],
@@ -837,6 +854,30 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             gap_analysis=gap_analysis,
             learning_path=learning_path
         )
+
+        # --- Supabase Persistence ---
+        try:
+            # 1. Save Resume
+            supabase_service.save_resume(current_user.id, request.resume_text)
+            
+            # 2. Sync Skill Metadata and User Skills
+            all_skills = [s['name'] for s in gap_analysis.get('known_skills', [])] + \
+                         [s['name'] for s in gap_analysis.get('missing_skills', [])]
+            supabase_service.ensure_skills_exist(all_skills)
+            
+            for skill in gap_analysis.get('known_skills', []):
+                supabase_service.update_user_skill(current_user.id, skill['name'], 'Mastered', 1.0)
+            
+            for skill in gap_analysis.get('missing_skills', []):
+                supabase_service.update_user_skill(current_user.id, skill['name'], 'Identified', 0.0)
+
+            # 3. Save Learning Path
+            supabase_service.save_learning_path(current_user.id, learning_path)
+            
+            logger.info(f"Successfully persisted onboarding data for user {current_user.email}")
+        except Exception as db_err:
+            logger.error(f"Supabase persistence error: {str(db_err)}")
+            # Don't fail the request if DB fails for now (hackathon resilience)
         
         reasoning_trace = _build_reasoning_trace(gap_analysis, learning_path, role_match, hybrid_result)
 
@@ -1100,6 +1141,17 @@ async def update_progress(request: ProgressUpdateRequest, current_user=Depends(R
             gap_analysis=updated_gap_analysis,
             learning_path=updated_learning_path
         )
+
+        # --- Supabase Persistence ---
+        try:
+            # Update newly completed skills
+            for skill_name in request.completed_skills:
+                supabase_service.update_user_skill(current_user.id, skill_name, 'Mastered', 1.0)
+            
+            # Update learning path if changed
+            supabase_service.save_learning_path(current_user.id, updated_learning_path)
+        except Exception as db_err:
+            logger.error(f"Supabase progress update error: {str(db_err)}")
 
         # Step 5h: New Reasoning Trace
         # Step 5h: New Reasoning Trace
@@ -1499,21 +1551,81 @@ async def match_jobs(data: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/streak/data", tags=["Extreme Dominance"])
-async def get_streak(completed_count: int = 0):
+async def get_streak_data(completed_count: int, current_user: UserInDB = Depends(auth_service.get_current_user)):
     try:
         return streak_service.get_streak_data(completed_count)
     except Exception as e:
-        logger.error(f"Streak error: {str(e)}")
+        logger.error(f"Streak data error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/resume/score", tags=["Extreme Dominance"])
-async def score_resume(data: Dict[str, Any]):
+async def get_resume_score(data: Dict[str, Any], current_user: UserInDB = Depends(auth_service.get_current_user)):
     try:
         skills = data.get("skills", [])
         gap_stats = data.get("gap_stats", {})
-        return resume_scorer.score_resume(skills, gap_stats)
+        return resume_scorer.calculate_score(skills, gap_stats)
     except Exception as e:
         logger.error(f"Resume score error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Phase 11 Endpoints
+@app.post("/vision/process", tags=["Multi-Modal Intel"])
+async def process_vision(request: VisionRequest, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return vision_service.process_ui_image(request)
+    except Exception as e:
+        logger.error(f"Vision process error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/galaxy/data", tags=["Multi-Modal Intel"])
+async def get_galaxy_data(skills: str, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return galaxy_service.get_galaxy_data(skills.split(","))
+    except Exception as e:
+        logger.error(f"Galaxy data error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/pitch/generate", tags=["Multi-Modal Intel"])
+async def generate_pitch(request: PitchRequest, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return pitch_service.generate_pitch(request)
+    except Exception as e:
+        logger.error(f"Pitch generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/code/analyze", tags=["Multi-Modal Intel"])
+async def analyze_code(request: CodeAnalysisRequest, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return code_radar.analyze_code(request)
+    except Exception as e:
+        logger.error(f"Code analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Phase 12: Alpha Squad Sync & Ultimate Integration ---
+
+@app.get("/system/health", tags=["Extreme Dominance"])
+async def get_system_health(current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return system_service.check_health()
+    except Exception as e:
+        logger.error(f"System health error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/squad/stats", tags=["Extreme Dominance"])
+async def get_squad_stats(skills: str, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        skill_list = skills.split(",") if skills else []
+        return squad_service.get_stats(skill_list)
+    except Exception as e:
+        logger.error(f"Squad stats error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/packet/generate", tags=["Extreme Dominance"])
+async def generate_career_packet(data: Dict, current_user: UserInDB = Depends(auth_service.get_current_user)):
+    try:
+        return packet_service.generate_packet(data)
+    except Exception as e:
+        logger.error(f"Career packet error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", tags=["Root"])
