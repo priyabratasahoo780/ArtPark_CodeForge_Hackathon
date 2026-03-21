@@ -73,5 +73,10 @@
     "email": "chetanpatelcp1177@gmail.com",
     "role": "USER",
     "hashed_password": "$pbkdf2-sha256$29000$k3Ju7f2/F2LsXcv53/u/dw$A4.zJrQDF.pflNPua9mPCf0How/HB3aMjnj.L8i/TqA"
+  },
+  "test_fqr3l1@example.com": {
+    "email": "test_fqr3l1@example.com",
+    "role": "USER",
+    "hashed_password": "$pbkdf2-sha256$29000$YQyBkNJ6T8nZO4cQYswZYw$XR8Qi11EHEt0aCAAGhCD5GppegcC4GmRBwbHa.UEFsA"
   }
 }
