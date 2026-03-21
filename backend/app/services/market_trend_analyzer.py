@@ -1,4 +1,7 @@
 from typing import List, Dict
+import json
+import re
+from app.services.llm_service import llm_service
 
 TRENDING_BY_DOMAIN = {
     "Frontend": ["Next.js", "TypeScript", "React", "Tailwind CSS", "GraphQL", "WebAssembly"],
@@ -18,10 +21,32 @@ class MarketTrendAnalyzer:
         if not current_skills:
             return {"missing_trending_skills": TRENDING_BY_DOMAIN.get(domain, TRENDING_BY_DOMAIN["Full Stack"])[:3]}
             
+        prompt = f"""
+        You are an expert tech recruiter and market analyst.
+        The user is in the '{domain}' domain.
+        Their current skills are: {', '.join(current_skills)}
+        
+        Based on the latest industry trends, identify exactly 4 highly demanded, trending skills 
+        in their domain that they do NOT currently have.
+        
+        Return ONLY a JSON array of 4 strings. Example:
+        ["Kubernetes", "GraphQL", "Rust", "WebAssembly"]
+        """
+        
         current_skills_lower = {s.lower() for s in current_skills}
+        domain_trends = TRENDING_BY_DOMAIN.get(domain, TRENDING_BY_DOMAIN.get("Full Stack", []))
+        fallback_missing = [skill for skill in domain_trends if skill.lower() not in current_skills_lower][:4]
         
-        domain_trends = TRENDING_BY_DOMAIN.get(domain, TRENDING_BY_DOMAIN["Full Stack"])
+        fallback_json = json.dumps(fallback_missing)
         
-        missing = [skill for skill in domain_trends if skill.lower() not in current_skills_lower]
+        llm_response = llm_service.generate(prompt, fallback_json)
         
-        return {"missing_trending_skills": missing[:4]}
+        try:
+            clean_json = re.sub(r'```json|```', '', llm_response).strip()
+            data = json.loads(clean_json)
+            if isinstance(data, list):
+                return {"missing_trending_skills": data[:4]}
+        except:
+            pass
+            
+        return {"missing_trending_skills": fallback_missing}

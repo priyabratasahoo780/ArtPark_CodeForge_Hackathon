@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import random
+import json
+import re
+from app.services.llm_service import llm_service
 
 class VisionRequest(BaseModel):
     image_data: str  # Base64 or URL
@@ -70,12 +73,39 @@ class SkillGalaxyService:
 
 class PitchGeneratorService:
     def generate_pitch(self, request: PitchRequest) -> PitchResponse:
-        skills_str = ", ".join(request.skills[:3])
-        return PitchResponse(
-            short_pitch=f"Expert {request.job_target} with a deep mastery in {skills_str}. Driven by data and clean architecture.",
-            long_pitch=f"I am a highly motivated {request.job_target} specializing in {skills_str}. My trajectory at CodeForge has proven my ability to rapidly adapt to complex stacks and deliver high-impact features with a focus on 'Extreme Dominance' and scalability.",
-            audio_script=f"Hello, I'm a specialized {request.job_target}. My technical foundation in {skills_str} allows me to bridge the gap between complex requirements and production-ready solutions. I'm ready to bring my AI-accelerated workflow to your team."
-        )
+        skills_str = ", ".join(request.skills)
+        prompt = f"""
+        You are an expert career coach. Write a professional pitch for a candidate.
+        Target Role: {request.job_target}
+        Key Skills: {skills_str}
+        
+        Return ONLY a JSON object with strictly these keys:
+        "short_pitch" (1-2 sentences)
+        "long_pitch" (a paragraph)
+        "audio_script" (a conversational 3-sentence script)
+        """
+        
+        fallback_json = json.dumps({
+            "short_pitch": f"Expert {request.job_target} with a deep mastery in {skills_str}. Driven by data and clean architecture.",
+            "long_pitch": f"I am a highly motivated {request.job_target} specializing in {skills_str}. My trajectory at CodeForge has proven my ability to rapidly adapt to complex stacks and deliver high-impact features...",
+            "audio_script": f"Hello, I'm a specialized {request.job_target}. My technical foundation in {skills_str} allows me to bridge the gap between complex requirements and production-ready solutions."
+        })
+        
+        llm_response = llm_service.generate(prompt, fallback_json)
+        
+        try:
+            clean_json = re.sub(r'```json|```', '', llm_response).strip()
+            data = json.loads(clean_json)
+            return PitchResponse(
+                short_pitch=data.get("short_pitch", ""),
+                long_pitch=data.get("long_pitch", ""),
+                audio_script=data.get("audio_script", "")
+            )
+        except:
+            pass
+            
+        data = json.loads(fallback_json)
+        return PitchResponse(**data)
 
 class CodeRadarService:
     def analyze_code(self, request: CodeAnalysisRequest) -> CodeAnalysisResponse:

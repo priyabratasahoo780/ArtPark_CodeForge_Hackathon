@@ -2,10 +2,6 @@ fastapi==0.104.1
 uvicorn==0.24.0
 pydantic==2.4.2
 python-multipart==0.0.6
-fastapi==0.104.1
-uvicorn==0.24.0
-pydantic==2.4.2
-python-multipart==0.0.6
 sentence-transformers==2.2.2
 numpy==1.24.3
 pandas==2.1.1
@@ -17,3 +13,4 @@ cors==1.0.1
 pyjwt>=2.8.0
 passlib>=1.7.4
 supabase>=2.3.0
+google-generativeai>=0.8.0
