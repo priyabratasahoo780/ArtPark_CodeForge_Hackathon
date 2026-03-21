@@ -453,7 +453,7 @@ function App() {
 
                     {activeTab === 'settings' && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
-                        <HelpCenter />
+                        <HelpCenter onClose={() => setActiveTab('results')} />
                       </motion.div>
                     )}
 

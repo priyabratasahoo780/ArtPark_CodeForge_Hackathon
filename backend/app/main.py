@@ -250,8 +250,10 @@ async def analyze_multiple_resumes(request: MultiOnboardingRequest):
             name = request.candidate_names[i] if request.candidate_names and i < len(request.candidate_names) else f"Candidate {i+1}"
             
             # Analyze each resume
-            skills = skill_extractor.extract_skills_from_text(resume_text)
-            jd_skills = skill_extractor.extract_skills_from_text(request.job_description_text)
+            skills_result = skill_extractor.extract_from_resume(resume_text)
+            skills = skills_result.get('skills', [])
+            jd_result = skill_extractor.extract_from_job_description(request.job_description_text)
+            jd_skills = jd_result.get('required_skills', [])
             role_match = role_matcher.match_role(request.job_description_text)
             gaps = gap_analyzer.analyze_gaps(skills, jd_skills, role_match.get('role', 'General'))
             path = learning_path_generator.generate_learning_path(gaps['missing_skills'] + gaps['partial_skills'], skills)
