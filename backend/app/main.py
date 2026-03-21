@@ -56,6 +56,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from fastapi.staticfiles import StaticFiles
+import os
+
+os.makedirs("static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,

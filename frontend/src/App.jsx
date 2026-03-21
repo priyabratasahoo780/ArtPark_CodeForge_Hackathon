@@ -221,11 +221,12 @@ function App() {
   const generateBriefing = async () => {
     setIsBriefingGenerating(true)
     try {
+      const pendingModule = learningPath?.modules?.find(m => !completedSkillNames.has(m.skill_name))
       const resp = await axios.post(`${API_BASE_URL}/briefing/generate`, {
         user_name: "CodeForge Talent",
         mastered_count: completedSkillNames.size,
-        total_skills: learningPath?.length || 10,
-        next_milestone: learningPath?.find(m => !completedSkillNames.has(m.name))?.name || "End of path",
+        total_skills: learningPath?.modules?.length || 10,
+        next_milestone: pendingModule ? pendingModule.skill_name : "End of path",
         lang: "en"
       }, authHeaders())
       setAudioBriefingUrl(`${API_BASE_URL}${resp.data.audio_url}`)
