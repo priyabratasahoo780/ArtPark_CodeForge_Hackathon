@@ -33,6 +33,7 @@ from app.services.audio_briefing_generator import AudioBriefingGenerator
 from app.services.decay_service import DecayService
 from app.services.benchmarking_service import BenchmarkingService
 from app.services.ecosystem_services import PairProgrammerService, FlashcardGenerator, EcosystemService
+from app.services.dominance_services import PortfolioService, FutureProjectionService, ValidationService
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -145,6 +146,9 @@ benchmarking_service = BenchmarkingService()
 pair_programmer = PairProgrammerService()
 flashcard_generator = FlashcardGenerator()
 ecosystem_service = EcosystemService()
+portfolio_service = PortfolioService()
+future_projections = FutureProjectionService()
+validation_service = ValidationService()
 role_matcher = RoleMatcher()
 voice_explainer = VoiceExplainer()
 time_analytics = TimeAnalytics()
@@ -1452,6 +1456,36 @@ async def get_sandbox_hint(skill: Optional[str] = "General"):
         return {"hint": pair_programmer.get_hint(skill)}
     except Exception as e:
         logger.error(f"Sandbox hint error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- Phase 9: Extreme Dominance & System Validation ---
+
+@app.post("/portfolio/generate", tags=["Extreme Dominance"])
+async def generate_portfolio(request: Dict[str, Any]):
+    try:
+        return portfolio_service.generate_portfolio(
+            user_name=request.get("user_name", "Developer"),
+            mastered_skills=request.get("mastered_skills", []),
+            target_role=request.get("target_role", "Software Engineer")
+        )
+    except Exception as e:
+        logger.error(f"Portfolio error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/projections/2030", tags=["Extreme Dominance"])
+async def get_projections(role: str):
+    try:
+        return future_projections.get_2030_projections(role)
+    except Exception as e:
+        logger.error(f"Projection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health/full", tags=["System Verification"])
+async def get_full_health():
+    try:
+        return validation_service.run_full_validation()
+    except Exception as e:
+        logger.error(f"Health check error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", tags=["Root"])

@@ -31,6 +31,9 @@ import RecruiterDashboard from './components/RecruiterDashboard'
 import HelpCenter from './components/HelpCenter'
 import SettingsModal from './components/SettingsModal'
 import FlowTimer from './components/FlowTimer'
+import TechnicalPortfolio from './components/TechnicalPortfolio'
+import FutureMap from './components/FutureMap'
+import SystemStatus from './components/SystemStatus'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -236,7 +239,10 @@ function App() {
                    <NavTab active={activeTab === 'path'} onClick={() => setActiveTab('path')} icon={<FiMap />} label="Roadmap" color={theme.primary} />
                    <NavTab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<FiCode />} label="Sandbox" color="#34d399" />
                    <NavTab active={activeTab === 'recall'} onClick={() => setActiveTab('recall')} icon={<FiBookOpen />} label="Recall" color={theme.secondary} />
+                   <NavTab active={activeTab === 'portfolio'} onClick={() => setActiveTab('portfolio')} icon={<FiAward />} label="Portfolio" color="#f59e0b" />
+                   <NavTab active={activeTab === 'future'} onClick={() => setActiveTab('future')} icon={<FiTrendingUp />} label="2030" color="#3b82f6" />
                    <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
+                   <NavTab active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<FiActivity />} label="Health" color="#34d399" />
                  </>
                )}
                
@@ -329,6 +335,22 @@ function App() {
 
                     {activeTab === 'ecosystem' && (
                        <GlobalTrendMap />
+                    )}
+
+                    {activeTab === 'portfolio' && (
+                       <TechnicalPortfolio 
+                        user_name={analysisResults?.candidate_name || "Developer"} 
+                        mastered_skills={Array.from(completedSkillNames)} 
+                        target_role={targetRole || analysisResults?.target_role} 
+                       />
+                    )}
+
+                    {activeTab === 'future' && (
+                       <FutureMap activeRole={targetRole || analysisResults?.target_role} />
+                    )}
+
+                    {activeTab === 'status' && (
+                       <SystemStatus />
                     )}
                   </>
                 )}
