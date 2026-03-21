@@ -1,654 +1,484 @@
-# 🚀 AI-Adaptive Onboarding Engine (2026 Edition)
+<div align="center">
 
-**Personalized Learning Pathways for New Hires**
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=CodeForge%20AI&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI-Powered%20Adaptive%20Career%20Intelligence%20Platform&descAlignY=60&descSize=18" />
 
-A sophisticated AI-powered system that analyzes resumes and job descriptions to create personalized, adaptive learning paths for employee onboarding. Uses NLP-based skill extraction, intelligent gap analysis, and dependency-based course sequencing.
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org)
+[![Gemini](https://img.shields.io/badge/Gemini%202.0%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Python](https://img.shields.io/badge/Python_3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-19.2%2B-61dafb)](https://react.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](#license)
+<br/>
+
+> **CodeForge AI** surgically compares your resume against any job description using Google Gemini 2.0 Flash,
+> identifies your exact skill gaps, and builds a **personalized, dependency-ordered learning roadmap** — not a generic one-size-fits-all curriculum.
 
 ---
 
-## 🎯 Key Features
+### ⚡ Built for the ArtPark × IISc CodeForge Hackathon
 
-### ✨ Core Capabilities
-- **📄 Intelligent Resume Parsing**: Extract skills, experience levels, and expertise areas using NLP
-- **💼 Job Requirement Analysis**: Analyze job descriptions and identify required skills
-- **🔍 Skill Gap Detection**: Identify known, partial, and missing skills with confidence scoring
-- **🛣️ Adaptive Learning Path**: Generate intelligent learning sequences based on prerequisites and priorities
-- **💡 Explainability**: Transparent reasoning for each recommendation with detailed traces
-- **🎯 Priority Scoring**: Rank skills by importance, difficulty, and learning time
+</div>
 
-### 🧠 Advanced Features
-- **Dependency Graph Analysis**: Understanding skill prerequisites and learning order
-- **Personalized Roadmaps**: Customized learning modules with time estimates
-- **Resource Recommendations**: Curated learning resources for each skill (Feature 4)
-- **Progress Tracking**: Monitor learning completion and milestones (Feature 5)
-- **🎤 Voice Explanation**: Convert reasoning traces into speech (Feature 6)
-- **⏱️ Time Saved Analytics**: Compare traditional vs adaptive learning efficiency (Feature 7)
-- **🏆 Multi-Resume Benchmarking**: Rank multiple candidates against a single JD (Feature 8)
-- **Role-Based Learning**: Tailor path to specific developer roles (Feature 3)
-- **Confidence Scoring**: Multi-signal skill expertise measurement (Feature 2)
-- **Adaptive Re-evaluation**: Recalculate roadmap after user progress (Feature 5)
+---
 
-### 🎨 User Interface
-- **Modern React Frontend**: Clean, intuitive interface with Tailwind CSS
-- **Real-time Analysis**: Instant feedback on resume and job uploads
-- **Interactive Visualizations**: Skill gaps, gap analysis, and learning paths
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Download Reports**: Export detailed analysis as JSON
+## 📺 Live Demo
+
+```
+Frontend  →  http://localhost:3000
+Backend   →  http://localhost:8000
+API Docs  →  http://localhost:8000/docs
+```
+
+---
+
+## ✨ Feature Showcase
+
+<details>
+<summary><b>🔍 01 · Deep Resume × JD Analysis</b></summary>
+<br/>
+
+**What it does:**
+Paste your raw resume text and a job description. Gemini 2.0 Flash surgically extracts all skills from both documents, categorises them by domain, and assigns proficiency levels.
+
+**How to use:**
+1. Navigate to the **Upload** tab (home screen)
+2. Paste your resume in the left field
+3. Paste the job description in the right field
+4. Set your **Target Role** and optional deadline
+5. Click **Initiate Deep Analysis**
+
+**Why it matters:**  
+Eliminates hours of manual gap-finding. The AI cross-references 150+ skill nodes in its internal taxonomy against both documents in under 3 seconds.
+
+</details>
+
+---
+
+<details>
+<summary><b>📊 02 · Results Dashboard</b></summary>
+<br/>
+
+**What it does:**
+Displays a comprehensive breakdown across three panels:
+- ✅ **Known Skills** — skills you already have
+- ⚠️ **Partial Skills** — skills you have but need to deepen
+- ❌ **Missing Skills** — skills the role requires that you lack
+
+**How to use:**
+After analysis completes, click the **Results** tab in the left sidebar. Each skill card shows category, gap score (1–3), and confidence level.
+
+**Why it matters:**  
+Gives you a precise, prioritised snapshot of your competitive position for the role — not a vague percentage.
+
+</details>
+
+---
+
+<details>
+<summary><b>🗺️ 03 · Neural Roadmap (Adaptive Learning Path)</b></summary>
+<br/>
+
+**What it does:**
+Generates a **Directed Acyclic Graph (DAG)** of your learning path using topological sort. Each node is a skill, curved lines show prerequisite dependencies, and glow colours indicate status (mastered / in progress / locked).
+
+**How to use:**
+1. Click the **Roadmap** tab
+2. Toggle between **Neural View** and **List View** using the top buttons
+3. Click a skill node to mark it as complete — the roadmap updates in real-time
+4. Check off nodes progressively to recalculate your path
+
+**Why it matters:**  
+Guarantees you never learn Topic B before Topic A. Prerequisite ordering is computed from `skill_graph.json` — a curated DAG of 150+ real engineering skills.
+
+</details>
+
+---
+
+<details>
+<summary><b>💻 04 · Coding Sandbox + AI Pair Programmer</b></summary>
+<br/>
+
+**What it does:**
+An embedded coding environment with a **Flow Timer** (Pomodoro-style focus sessions) and an AI pair programmer that gives context-aware hints based on the skill you're currently practicing.
+
+**How to use:**
+1. Click **Sandbox** in the sidebar
+2. Select a skill from your roadmap to practice
+3. Write code in the editor
+4. Press the 🤖 **Hint** button for an AI nudge specific to that skill
+
+**Why it matters:**  
+Practice beats passive reading. The AI pair programmer surfaces framework-specific tips (e.g. `useEffect` patterns for React, `Depends` injection for FastAPI) without giving away full answers.
+
+</details>
+
+---
+
+<details>
+<summary><b>🃏 05 · Active Recall Flashcards</b></summary>
+<br/>
+
+**What it does:**
+Automatically generates question-and-answer flashcard pairs for your known skills. Cards are flip-animated and grouped by skill category.
+
+**How to use:**
+1. Click **Recall** in the sidebar
+2. Click a card to flip it and reveal the answer
+3. Use ← → arrows to navigate between cards
+4. Cards are auto-generated from your resume skills — no setup needed
+
+**Why it matters:**  
+Spaced repetition and active recall are scientifically the most efficient knowledge-retention strategies. This turns your profile into a self-quizzing engine.
+
+</details>
+
+---
+
+<details>
+<summary><b>🏆 06 · Technical Portfolio Generator</b></summary>
+<br/>
+
+**What it does:**
+Auto-generates a **Verified Technical Portfolio** with:
+- Mastery badge tier (Neural Explorer → Elite Coder → etc.)
+- Auto-written project case studies based on your skills
+- Performance benchmarks and contribution metrics
+
+**How to use:**
+1. Click **Portfolio** in the sidebar
+2. Your portfolio is generated immediately from your resume skills
+3. As you complete more roadmap nodes, the portfolio upgrades automatically
+
+**Why it matters:**  
+Gives you a shareable proof of competence that exists _beyond_ your resume — powered by verifiable skill data.
+
+</details>
+
+---
+
+<details>
+<summary><b>🔮 07 · 2030 Future Skill Map</b></summary>
+<br/>
+
+**What it does:**
+Projects which skills in your profile will be **high demand**, **stable**, or **deprecated** by 2030 based on industry trajectory data.
+
+**How to use:**
+1. Click **2030** in the sidebar
+2. Review your skills sorted into quadrants: Invest / Hold / Watch / Deprecate
+3. Use this to prioritise which gaps to close first
+
+**Why it matters:**  
+Stops you from investing 100 hours in a technology that will be automated away in 3 years.
+
+</details>
+
+---
+
+<details>
+<summary><b>📈 08 · Insights Dashboard (4 Panels)</b></summary>
+<br/>
+
+**What it does:**
+
+| Panel | Description |
+|---|---|
+| 🔥 **Learning Momentum** | 28-day activity heatmap, XP points, streak counter, rank progression |
+| 🎯 **6-Axis Readiness Radar** | Spider chart across Coverage, Depth, Breadth, Relevance, Velocity, Confidence |
+| 💰 **Salary Predictor** | 3-tier salary range (entry/optimised/expert), market percentile, top-paying skill chips |
+| 💼 **AI Job Matcher** | 5 live-matched open roles with per-skill match/miss badges and animated match bars |
+
+**How to use:**
+1. Click **Insights** in the sidebar
+2. All 4 panels auto-populate from your resume skills immediately after analysis
+3. Streaks update as you complete roadmap nodes
+
+**Why it matters:**  
+Converts your raw skill data into actionable career intelligence — salary negotiation data, percentile standing, and matched job opportunities — in one unified view.
+
+</details>
+
+---
+
+<details>
+<summary><b>⚡ 09 · Alpha Lab (Experimental)</b></summary>
+<br/>
+
+**What it does:**
+- **UI Vision** — AI-generated UI concept mockups for your portfolio
+- **Pitch Generator** — 60-second elevator pitch for interviews
+- **Skill Galaxy** — 3D orbital visualization of your skill ecosystem
+- **Code Radar** — Code quality pattern analysis
+
+**How to use:**  
+Click **Alpha** in the sidebar. These features work with your current skill set and do not require additional input.
+
+</details>
+
+---
+
+<details>
+<summary><b>🛡️ 10 · Elite Tier Features</b></summary>
+<br/>
+
+**What it does:**
+- **Squad Hub** — Simulate team composition for technical leadership roles
+- **Executive Packet** — One-click executive-formatted resume summary
+- **System Guardian** — Real-time health monitoring for all backend microservices
+
+**How to use:**  
+Click **Elite** in the sidebar. Executive Packet uses your resume data to generate a formatted output instantly.
+
+</details>
+
+---
+
+<details>
+<summary><b>🌐 11 · Global Ecosystem Map</b></summary>
+<br/>
+
+**What it does:**
+Live heatmap showing which skills are trending across global tech hubs (San Francisco, Bengaluru, London, Tokyo) and a global readiness average index.
+
+**How to use:**  
+Click **Ecosystem** in the sidebar to see the live market intelligence view.
+
+</details>
+
+---
+
+<details>
+<summary><b>👤 12 · Recruiter View</b></summary>
+<br/>
+
+**What it does:**
+Toggles the entire interface from candidate view to recruiter view — a simplified, high-signal dashboard showing only match score, top skills, and readiness percentage.
+
+**How to use:**
+Click the **Recruiter View** button at the bottom of the left sidebar. Click **Candidate View** to return.
+
+**Why it matters:**  
+You can simulate what a recruiter sees when they look at your profile and optimise accordingly.
+
+</details>
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+```bash
+Python 3.11+   Node.js 18+   npm 9+   Git
+```
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/priyabratasahoo780/Resume-generater.git
+cd ArtPark_CodeForge_Hackathon
+```
+
+### 2. Backend Setup
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Linux/macOS
+
+pip install -r requirements.txt
+```
+
+Create `.env` in the `backend/` folder:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+SECRET_KEY=your_jwt_secret_key
+```
+
+Start the backend:
+
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend runs at **http://localhost:3000**
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-AI-Adaptive Onboarding Engine
-│
-├── Backend (Python FastAPI)
-│   ├── Services
-│   │   ├── skill_extractor.py       # NLP-based skill extraction (Feature 2)
-│   │   ├── gap_analyzer.py          # Skill gap analysis & scoring (Feature 2)
-│   │   ├── learning_path_generator.py # Adaptive path generation (Feature 1, 4)
-│   │   ├── dependency_resolver.py   # Prerequisite management (Feature 1)
-│   │   ├── role_matcher.py          # Role-based skill matching (Feature 3)
-│   │   ├── voice_explainer.py       # gTTS & Web Speech synthesis (Feature 6)
-│   │   ├── time_analytics.py        # Efficiency saved metrics (Feature 7)
-│   │   └── resume_benchmarker.py    # Multi-candidate ranking (Feature 8)
-│   ├── Datasets
-│   │   └── skills_taxonomy.json     # Skill database & prerequisites
-│   └── API Routes
-│       └── main.py                   # FastAPI endpoints
-│
-├── Frontend (React + Tailwind CSS)
-│   ├── Components
-│   │   ├── UploadSection            # Resume/Job upload
-│   │   ├── SkillsAnalysis           # Skills breakdown
-│   │   ├── GapAnalysis              # Gap visualization
-│   │   ├── LearningPath             # Module sequencing
-│   │   ├── LoadingSpinner           # Loading state
-│   │   ├── ErrorAlert               # Error handling
-│   │   ├── VoiceExplain             # 🎤 Speech synthesis UI (Feature 6)
-│   │   ├── TimeSavedAnalytics       # ⏱️ Stats/Savings card (Feature 7)
-│   │   └── CandidateBenchmark       # 🏆 Leaderboard UI (Feature 8)
-│   └── App.jsx                       # Main application
-│
-└── Documentation
-    ├── README.md                     # This file
-    ├── SETUP.md                      # Setup guide
-    └── API.md                        # API documentation
+User Input (Resume + Job Description)
+         │
+         ▼
+   [Gemini 2.0 Flash] ←─ SkillExtractor
+         │
+    ┌────┴────┐
+    ▼         ▼
+Resume      JD Skills
+Skills
+    │         │
+    └────┬────┘
+         ▼
+  [SkillGapAnalyzer]  ← fuzzy match + level comparison
+         │
+   known / partial / missing
+         │
+         ▼
+  [DependencyResolver] ← skill_graph.json (DAG)
+         │
+  topological sort → prerequisite order
+         │
+         ▼
+  [LearningPathGenerator] ← time estimates + modules
+         │
+         ▼
+  [CourseRecommender] ← course_dataset.json
+         │
+         ▼
+  React Frontend: NeuralRoadmap + Portfolio + Insights
 ```
 
 ---
 
-## 📋 Prerequisites
+## 🛠️ Tech Stack
 
-### System Requirements
-- **OS**: Windows, macOS, or Linux
-- **Node.js**: v18+
-- **Python**: v3.9+
-- **RAM**: 4GB minimum
-- **Disk**: 2GB free space
-
-### Required Software
-- Git
-- npm or yarn
-- pip or conda
-- Docker (optional, for containerization)
+| Layer | Technology |
+|---|---|
+| **LLM** | Google Gemini 2.0 Flash |
+| **Backend** | FastAPI + Uvicorn |
+| **Frontend** | React 18 + Vite |
+| **Animations** | Framer Motion |
+| **Icons** | React Icons (Feather) |
+| **HTTP** | Axios |
+| **Auth** | JWT (python-jose) |
+| **AI Client** | google-generativeai |
 
 ---
 
-## 🚀 Quick Start
+## 📡 API Reference
 
-### 1️⃣ Clone Repository
-
-```bash
-git clone https://github.com/codeforge/onboarding-engine.git
-cd onboarding-engine
-```
-
-### 2️⃣ Setup Backend (Python)
-
-```bash
-# Navigate to backend directory
-cd backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend server
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-Backend will be available at: **http://localhost:8000**
-
-API Documentation: **http://localhost:8000/docs**
-
-### 3️⃣ Setup Frontend (React)
-
-```bash
-# In a new terminal, navigate to frontend directory
-cd frontend
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-Frontend will be available at: **http://localhost:5173**
-
-### 4️⃣ Access Application
-
-Open your browser and navigate to **http://localhost:5173**
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/analyze` | Full resume × JD analysis |
+| `GET` | `/streak/data` | Streak + XP + heatmap |
+| `POST` | `/resume/score` | 6-axis readiness radar |
+| `POST` | `/salary/predict` | Salary range prediction |
+| `POST` | `/jobs/match` | AI job matching |
+| `POST` | `/portfolio/generate` | Portfolio generation |
+| `POST` | `/learning/flashcards` | Flashcard generation |
+| `POST` | `/roadmap/generate` | AI roadmap generation |
+| `GET`  | `/docs` | Interactive Swagger UI |
 
 ---
 
-## 💻 Usage Guide
+## 🧩 Algorithms
 
-### Step 1: Upload Resume
-
-1. Use the **Resume** section to either:
-   - Upload a `.txt`, `.pdf`, or `.docx` file
-   - Paste resume text directly
-   - Click "Load Sample Resume" for demo data
-
-### Step 2: Upload Job Description
-
-1. Use the **Job Description** section to either:
-   - Upload a job description file
-   - Paste text directly
-   - Click "Load Sample Job Description" for demo data
-
-### Step 3: Analyze
-
-1. Click **"Analyze & Generate Learning Path"** button
-2. Wait for the AI to process (typically 2-5 seconds)
-
-### Step 4: Review Results
-
-Navigate between tabs to view:
-- **📊 Results**: Summary and methodology
-- **🎯 Skills**: Your skills vs. job requirements
-- **⚠️ Gaps**: Skill gap analysis with reasoning
-- **🛣️ Learning Path**: Personalized learning modules
-
-### Step 5: Download Report
-
-1. Click **"Download"** button to save results as JSON
-2. Import into your learning management system (LMS)
-
----
-
-## 📊 Output Format
-
-### Analysis Results
-
-```json
-{
-  "skills_analysis": {
-    "resume_skills": {
-      "skills": [...],
-      "skill_categories": {...}
-    },
-    "job_requirements": {
-      "required_skills": [...],
-      "nice_to_have_skills": [...]
-    }
-  },
-  "gap_analysis": {
-    "known_skills": [...],
-    "partial_skills": [...],
-    "missing_skills": [...],
-    "statistics": {
-      "coverage_percentage": 65.5,
-      "readiness_score": 72.0
-    }
-  },
-  "learning_path": {
-    "modules": [
-      {
-        "skill_name": "JavaScript",
-        "level": "Intermediate",
-        "time_estimate_hours": 15,
-        "learning_objectives": [...],
-        "assessment_criteria": [...],
-        "resources": [...]
-      }
-    ],
-    "timeline": {
-      "total_hours": 120,
-      "estimated_weeks": 6,
-      "estimated_months": 1.5
-    }
-  },
-  "reasoning_trace": {
-    "approach": "...",
-    "key_insights": [...],
-    "recommendations": [...]
-  }
-}
-```
-
----
-
-## 🔧 API Endpoints
-
-### Authentication
-No authentication required for demo version.
-
-### Main Endpoints
-
-#### 1. **Complete Onboarding Analysis**
-```
-POST /onboarding/complete
-Content-Type: application/json
-
-{
-  "resume_text": "...",
-  "job_description_text": "..."
-}
-
-Returns: Complete analysis with all components
-```
-
-#### 2. **Extract Resume Skills**
-```
-POST /extract/resume
-Content-Type: application/json
-
-{
-  "text": "..."
-}
-
-Returns: Extracted skills with levels
-```
-
-#### 3. **Extract Job Requirements**
-```
-POST /extract/job-description
-Content-Type: application/json
-
-{
-  "text": "..."
-}
-
-Returns: Required and nice-to-have skills
-```
-
-#### 4. **Analyze Skill Gaps**
-```
-POST /analyze/gaps
-Content-Type: application/json
-
-{
-  "resume_text": "...",
-  "job_description_text": "..."
-}
-
-Returns: Gap analysis with categorization
-```
-
-#### 5. **Generate Learning Path**
-```
-POST /generate/learning-path
-Content-Type: application/json
-
-{
-  "resume_text": "...",
-  "job_description_text": "..."
-}
-
-Returns: Learning path with modules and timeline
-```
-
-#### 7. **Update Progress**
-```
-POST /update-progress
-Accepts completed skills and returns an updated roadmap.
-```
-
-#### 8. **Voice Explanation**
-```
-POST /explain/voice
-Full reasoning trace to base64 MP3 and text script.
-```
-
-#### 9. **Candidate Benchmarking**
-```
-POST /benchmark/candidates
-Rank multiple candidates (2–20) against a single job description.
-```
-
-#### 10. **Time Saved Analytics**
-```
-POST /analytics/time-saved
-Compare traditional vs adaptive learning durations.
-```
-
-### Documentation
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
----
-
-## 🏅 Algorithm Details
-
-### Step 1: Skill Extraction
-- Parses resume/job description text
-- Matches against skill taxonomy database
-- Applies pattern matching and fuzzy matching
-- Assigns confidence scores
-
-### Step 2: Experience Level Inference
-- Analyzes context around skill mentions
-- Categorizes as Beginner, Intermediate, or Advanced
-- Uses keyword analysis (e.g., "expert", "years of")
-
-### Step 3: Gap Scoring
-- Compares resume skills against job requirements
-- Calculates gap score: `required_level - current_level`
-- Ranges from -3 (significant overskill) to +3 (critical gap)
-
-### Step 4: Dependency Mapping
-- Identifies prerequisite relationships
-- Builds directed acyclic graph (DAG)
-- Ensures logical learning sequence
-
-### Step 5: Path Optimization
-- Performs topological sort on skill dependencies
-- Ranks by gap score (critical gaps first)
-- Groups related skills
-- Estimates learning time per module
-
-### Step 6: Readiness Scoring
-```
-readiness_score = (known_skills / total_required * 100) + 
-                  (partial_skills / total_required * 50)
-```
-
----
-
-## 📁 Project Structure
-
-```
-onboarding-engine/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                 # FastAPI application
-│   │   ├── services/
-│   │   │   ├── skill_extractor.py
-│   │   │   ├── gap_analyzer.py
-│   │   │   └── learning_path_generator.py
-│   │   ├── models/
-│   │   ├── utils/
-│   │   ├── routes/
-│   │   └── datasets/
-│   │       └── skills_taxonomy.json
-│   ├── requirements.txt
-│   └── README.md
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── UploadSection.jsx
-│   │   │   ├── SkillsAnalysis.jsx
-│   │   │   ├── GapAnalysis.jsx
-│   │   │   ├── LearningPath.jsx
-│   │   │   ├── LoadingSpinner.jsx
-│   │   │   └── ErrorAlert.jsx
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── postcss.config.js
-│
-├── README.md               # This file
-├── SETUP.md                # Detailed setup guide
-├── API.md                  # API documentation
-└── docker-compose.yml      # Docker setup
-```
-
----
-
-## 🐳 Docker Deployment
-
-### Build and Run with Docker
-
-```bash
-# Build docker image
-docker-compose build
-
-# Run containers
-docker-compose up -d
-
-# Access application
-# Frontend: http://localhost:3000
-# Backend: http://localhost:8000
-# API Docs: http://localhost:8000/docs
-```
-
----
-
-## 🔐 Security Considerations
-
-### Current Implementation
-- No authentication required (demo version)
-- Text-based input only (no file upload to server)
-- All processing on local machine
-
-### Production Recommendations
-- Implement OAuth 2.0 authentication
-- Add rate limiting
-- Encrypt sensitive data
-- Use HTTPS
-- Add input validation and sanitization
-- Implement access control
-- Monitor API usage
-
----
-
-## 📈 Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| Avg. Analysis Time | 2-5 seconds |
-| Max Resume Size | 100KB |
-| Max Job Description Size | 100KB |
-| Skills Database | 500+ skills |
-| Supported Skill Categories | 15+ categories |
-| Accuracy (Skill Detection) | ~95% |
-
----
-
-## 🛠️ Customization
-
-### Add New Skills
-
-Edit `backend/app/datasets/skills_taxonomy.json`:
-
-```json
-{
-  "skills": {
-    "new_category": {
-      "SkillName": {
-        "category": "Skill Category",
-        "level": "intermediate",
-        "prerequisites": ["Prerequisite Skill"],
-        "description": "Skill description"
-      }
-    }
-  }
-}
-```
-
-### Modify Learning Time Estimates
-
-Edit `backend/app/services/learning_path_generator.py`:
+### Adaptive Pathing (Graph-Based Topological Sort)
 
 ```python
-LEARNING_TIME_ESTIMATES = {
-    'Beginner': {'short': 2, 'medium': 5, 'long': 10},
-    'Intermediate': {'short': 5, 'medium': 15, 'long': 30},
-    'Advanced': {'short': 10, 'medium': 30, 'long': 60}
-}
+def resolve(target_skills, known_skills):
+    # 1. For each target skill → look up prerequisites in DAG
+    # 2. Recursively inject missing prerequisites
+    # 3. Topological sort guarantees A before B
+    # 4. Filter out already-known skills
+    # 5. Return ordered list → LearningPathGenerator wraps into modules
 ```
 
-### Customize UI Theme
+### Skill Extraction Pipeline
 
-Edit `frontend/tailwind.config.js`:
-
-```js
-theme: {
-  extend: {
-    colors: {
-      primary: '#6366f1',
-      secondary: '#8b5cf6',
-    }
-  }
-}
+```
+Raw Text → Gemini Prompt → JSON response
+       → markdown strip (```json...```)
+       → json.loads()
+       → SkillGapAnalyzer
+       → fuzzy category match
+       → gap severity scoring
 ```
 
 ---
 
-## 🧪 Testing
+## 📂 Project Structure
 
-### Backend Tests
-```bash
-cd backend
-pytest tests/
 ```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Backend Won't Start
-```bash
-# Check if port 8000 is in use
-lsof -i :8000
-
-# Kill existing process
-kill -9 <PID>
-
-# Try different port
-uvicorn app.main:app --port 8001
-```
-
-### Frontend Won't Load
-```bash
-# Clear node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-
-# Clear cache
-npm cache clean --force
-
-# Restart dev server
-npm run dev
-```
-
-### API Connection Error
-```bash
-# Verify backend is running
-curl http://localhost:8000/health
-
-# Check CORS settings in backend/app/main.py
-# Ensure frontend URL is in allowed origins
+ArtPark_CodeForge_Hackathon/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                  # FastAPI app + all endpoints
+│   │   ├── services/
+│   │   │   ├── skill_extractor.py   # Gemini API integration
+│   │   │   ├── gap_analyzer.py      # Skill gap logic
+│   │   │   ├── learning_path_generator.py
+│   │   │   ├── dominance_services.py  # Portfolio + badges
+│   │   │   └── ecosystem_services.py  # Flashcards + sandbox
+│   │   └── data/
+│   │       ├── skill_graph.json     # Dependency DAG
+│   │       ├── skills_taxonomy.json # 150+ skill taxonomy
+│   │       └── course_dataset.json  # Curated course links
+│   └── requirements.txt
+└── frontend/
+    ├── src/
+    │   ├── App.jsx                  # Main app + routing
+    │   └── components/
+    │       ├── NeuralRoadmap.jsx
+    │       ├── TechnicalPortfolio.jsx
+    │       ├── FlashcardDeck.jsx
+    │       ├── DailyStreak.jsx
+    │       ├── ResumeScoreRadar.jsx
+    │       ├── SalaryPredictor.jsx
+    │       ├── JobMatcher.jsx
+    │       └── ... (25+ components)
+    └── vite.config.js
 ```
 
 ---
 
-## 📚 Resources
+## 📊 Datasets Used
 
-### Documentation
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS](https://tailwindcss.com/)
-
-### Skills Taxonomy
-- [O*NET Database](https://www.onetcenter.org/)
-- [LinkedIn Skills](https://www.linkedin.com/jobs/collections/recommended-in-skills/)
-
-### NLP Libraries
-- [spaCy](https://spacy.io/)
-- [Hugging Face Transformers](https://huggingface.co/transformers/)
+| Dataset | Purpose |
+|---|---|
+| Internal `skill_graph.json` | 150+ skill prerequisite DAG |
+| Internal `skills_taxonomy.json` | Skill categorisation + normalisation |
+| Internal `course_dataset.json` | Curated learning resources per skill |
+| [Kaggle Resume Dataset](https://www.kaggle.com/datasets/snehaanbhawal/resume-dataset/data) | Resume parsing testing |
+| [O*NET Database](https://www.onetcenter.org/db_releases.html) | Occupational skill taxonomy alignment |
+| [Kaggle Jobs & JD Dataset](https://www.kaggle.com/datasets/kshitizregmi/jobs-and-job-description) | JD skill extraction benchmarking |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
+```bash
+# 1. Fork the repo
+# 2. Create a feature branch
+git checkout -b feat/your-feature-name
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+# 3. Commit your changes
+git commit -m "feat: add amazing feature"
 
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see LICENSE file for details.
+# 4. Push and open a PR
+git push origin feat/your-feature-name
+```
 
 ---
 
-## 👥 Team
+<div align="center">
 
-Built for **CodeForge Hackathon 2026**
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" />
 
-**Contributors:**
-- System Architecture & Backend: AI System Architect
-- Frontend Development: Full-Stack Developer
-- ML & NLP: Machine Learning Engineer
+**Built with ⚡ by Team CodeForge · ArtPark × IISc Hackathon 2026**
 
----
+[![GitHub](https://img.shields.io/badge/GitHub-priyabratasahoo780-181717?style=for-the-badge&logo=github)](https://github.com/priyabratasahoo780/Resume-generater)
 
-## 📞 Support
-
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Email: support@onboarding-engine.dev
-- Documentation: See `SETUP.md` and `API.md`
-
----
-
-## 🎯 Future Roadmap
-
-- [x] Video resource generation (via course recommendations)
-- [x] Interactive quizzes and assessments criteria (Feature 4)
-- [x] Community course recommendations dataset (Feature 4)
-- [x] Multi-candidate benchmarking (Feature 8)
-- [x] Voice explanations (Feature 6)
-- [x] Time saved analytics dashboard (Feature 7)
-- [ ] Integration with major LMS platforms
-- [ ] Multi-language support (TTS supports multiple langs)
-- [ ] Real-time collaboration features
-
----
-
-**Made with ❤️ for better employee onboarding**
-
-Last Updated: March 20, 2026 | Version: 1.1.0
+</div>
