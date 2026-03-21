@@ -1,201 +1,130 @@
 import json
-import re
-from typing import List, Dict, Set
-from pathlib import Path
 import logging
-
-from app.services.confidence_scorer import ConfidenceScorer
+import os
+import google.generativeai as genai
+from typing import List, Dict, Set, Optional
 
 logger = logging.getLogger(__name__)
 
 class SkillExtractor:
     """
-    Extracts skills from resume and job descriptions using pattern matching and NLP.
+    Extracts skills from resume and job descriptions using Gemini AI for robust, dynamic interpretation.
     """
     
-    def __init__(self, taxonomy_path: str = None):
-        """Initialize skill extractor with taxonomy."""
-        if taxonomy_path is None:
-            current_dir = Path(__file__).parent.parent / "datasets" / "skills_taxonomy.json"
+    def __init__(self, taxonomy_path: Optional[str] = None):
+        """Initialize skill extractor with Gemini API."""
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            logger.warning("GEMINI_API_KEY not found in environment! Skill Extraction will fail.")
         else:
-            current_dir = Path(taxonomy_path)
+            genai.configure(api_key=api_key)
+            
+        self.model = genai.GenerativeModel(
+            model_name="gemini-2.5-flash",
+            generation_config={"response_mime_type": "application/json"}
+        )
 
-        with open(current_dir, 'r') as f:
-            self.taxonomy = json.load(f)
-
-        # Build skill index for faster lookup
-        self.all_skills = self._build_skill_index()
-
-        # Confidence scorer (rule-based, explainable)
-        self.confidence_scorer = ConfidenceScorer()
-        
-    def _build_skill_index(self) -> Dict[str, Dict]:
-        """Build a flat index of all skills for quick lookup."""
-        skills = {}
-        for category, category_skills in self.taxonomy['skills'].items():
-            for skill_name, skill_data in category_skills.items():
-                skills[skill_name.lower()] = {
-                    'name': skill_name,
-                    'category': skill_data.get('category'),
-                    'prerequisites': skill_data.get('prerequisites', []),
-                    'description': skill_data.get('description', '')
-                }
-        return skills
-    
-    def extract_skills_from_text(self, text: str, resume_text: str = None) -> List[Dict]:
-        """
-        Extract skills from text (resume or job description).
-
-        Args:
-            text:        The text to scan for skills (can be same as resume_text).
-            resume_text: Full resume text for confidence scoring context.
-                         If None, uses `text` as context.
-
-        Returns:
-            List of detected skills with metadata and confidence scores.
-        """
-        if not text:
-            return []
-
-        score_context = resume_text if resume_text is not None else text
-        text_lower = text.lower()
-        extracted = []
-        seen = set()
-
-        # Direct skill matching
-        for skill_lower, skill_data in self.all_skills.items():
-            if self._skill_appears_in_text(text_lower, skill_lower, skill_data['name']):
-                if skill_lower not in seen:
-                    extracted.append({
-                        'name': skill_data['name'],
-                        'category': skill_data['category'],
-                        'prerequisites': skill_data['prerequisites'],
-                        '_match_type': 'exact',  # sentinel for scorer
-                    })
-                    seen.add(skill_lower)
-
-        # Fuzzy matching for partial matches
-        fuzzy_matches = self._fuzzy_skill_matching(text_lower, seen)
-        extracted.extend(fuzzy_matches)
-
-        # Apply confidence scoring to all extracted skills
-        self.confidence_scorer.score_batch(extracted, score_context)
-
-        return extracted
-    
-    def _skill_appears_in_text(self, text: str, skill_lower: str, skill_name: str) -> bool:
-        """Check if skill appears in text with word boundaries."""
-        # Convert to word pattern for word boundary matching
-        pattern = r'\b' + re.escape(skill_lower) + r'\b'
-        return bool(re.search(pattern, text, re.IGNORECASE))
-    
-    def _fuzzy_skill_matching(self, text: str, seen: Set) -> List[Dict]:
-        """
-        Perform fuzzy matching for related skills or acronyms.
-        Marks matches with '_match_type': 'fuzzy' for the scorer.
-        """
-        fuzzy_matches = []
-
-        acronyms = {
-            'ml': 'Machine Learning',
-            'ai': 'Machine Learning',
-            'nlp': 'Deep Learning',
-            'oop': 'Programming Languages',
-            'rest': 'Backend Knowledge',
-            'http': 'Backend Knowledge',
-        }
-
-        for acronym, category in acronyms.items():
-            if acronym in text and acronym not in seen:
-                pattern = r'\b' + acronym + r'\b'
-                if re.search(pattern, text, re.IGNORECASE):
-                    for skill_lower, skill_data in self.all_skills.items():
-                        if category.lower() in skill_data['category'].lower():
-                            fuzzy_matches.append({
-                                'name': skill_data['name'],
-                                'category': skill_data['category'],
-                                'prerequisites': skill_data['prerequisites'],
-                                '_match_type': 'fuzzy',  # sentinel for scorer
-                            })
-                            break
-                    seen.add(acronym)
-
-        return fuzzy_matches
-    
-    def infer_skill_level(self, text: str, skill_name: str) -> str:
-        """
-        Infer proficiency level (Beginner, Intermediate, Advanced) from context.
-        """
-        text_lower = text.lower()
-        skill_context = self._extract_context_around_skill(text_lower, skill_name.lower())
-        
-        advanced_keywords = ['expert', 'mastery', 'architect', 'lead', 'principal', 'senior', '10+', '5+ years']
-        intermediate_keywords = ['proficient', 'strong', '2-3 years', 'professional', 'production']
-        
-        if any(keyword in skill_context for keyword in advanced_keywords):
-            return 'Advanced'
-        elif any(keyword in skill_context for keyword in intermediate_keywords):
-            return 'Intermediate'
-        else:
-            return 'Beginner'
-    
-    def _extract_context_around_skill(self, text: str, skill: str, context_size: int = 100) -> str:
-        """Extract surrounding context around skill mention."""
-        pattern = r'\b' + re.escape(skill) + r'\b'
-        match = re.search(pattern, text, re.IGNORECASE)
-        
-        if match:
-            start = max(0, match.start() - context_size)
-            end = min(len(text), match.end() + context_size)
-            return text[start:end]
-        return ""
-    
     def extract_from_resume(self, resume_text: str) -> Dict:
         """
-        Extract comprehensive information from resume.
-        Skills are returned with confidence scores and explainability signals.
+        Extract comprehensive information from resume using LLM.
         """
-        # Pass resume_text as scoring context so confidence uses full resume
-        skills = self.extract_skills_from_text(resume_text, resume_text=resume_text)
+        prompt = f"""
+        Analyze the following resume text and extract all technical and soft skills.
+        Return a JSON object strictly matching this schema:
+        {{
+            "skills": [
+                {{
+                    "name": "Skill Name (e.g., React, Node.js, AWS)",
+                    "category": "Broad category (e.g., Frontend Framework, Runtime, Cloud Platform)",
+                    "level": "Beginner | Intermediate | Advanced",
+                    "prerequisites": ["List", "of", "basic", "dependencies"],
+                    "confidence": 0.95
+                }}
+            ]
+        }}
 
-        # Add experience levels
-        for skill in skills:
-            skill['level'] = self.infer_skill_level(resume_text, skill['name'])
+        Resume Text:
+        {resume_text}
+        """
 
-        return {
-            'skills': skills,
-            'total_skills_count': len(skills),
-            'skill_categories': self._categorize_skills(skills)
-        }
-    
+        try:
+            response = self.model.generate_content(prompt)
+            data = json.loads(response.text)
+            skills = data.get('skills', [])
+            
+            # Ensure proper structure
+            for s in skills:
+                if 'confidence' not in s: s['confidence'] = 0.9
+                if 'prerequisites' not in s: s['prerequisites'] = []
+                if 'level' not in s: s['level'] = 'Intermediate'
+
+            return {
+                'skills': skills,
+                'total_skills_count': len(skills),
+                'skill_categories': self._categorize_skills(skills)
+            }
+        except Exception as e:
+            logger.error(f"LLM Resume Extraction failed: {e}")
+            return {'skills': [], 'total_skills_count': 0, 'skill_categories': {}}
+
     def extract_from_job_description(self, job_desc_text: str) -> Dict:
         """
-        Extract requirements from job description.
+        Extract requirements from job description using LLM.
         """
-        skills = self.extract_skills_from_text(job_desc_text)
-        
-        # Prioritize required skills (usually mentioned first or with "required")
-        required_pattern = r'\b(required|must have|essential|mandatory)\b'
-        nice_to_have_pattern = r'\b(nice to have|preferred|bonus|optional)\b'
-        
-        required = []
-        nice_to_have = []
-        
-        for i, skill in enumerate(skills):
-            # Simple heuristic: skills mentioned in first half are more likely required
-            if i < len(skills) * 0.4:
-                required.append(skill)
-            else:
-                nice_to_have.append(skill)
-        
-        return {
-            'required_skills': required,
-            'nice_to_have_skills': nice_to_have,
-            'total_required': len(required),
-            'total_nice_to_have': len(nice_to_have),
-            'skill_categories': self._categorize_skills(skills)
-        }
-    
+        prompt = f"""
+        Analyze the following job description text. Extract and separate the 'required' skills from the 'nice-to-have' skills.
+        Return a JSON object strictly matching this schema:
+        {{
+            "required_skills": [
+                {{
+                    "name": "Skill Name",
+                    "category": "Broad category",
+                    "level": "Intermediate",
+                    "prerequisites": []
+                }}
+            ],
+            "nice_to_have_skills": [
+                {{
+                    "name": "Skill Name",
+                    "category": "Broad category",
+                    "level": "Intermediate",
+                    "prerequisites": []
+                }}
+            ]
+        }}
+
+        Job Description Text:
+        {job_desc_text}
+        """
+
+        try:
+            response = self.model.generate_content(prompt)
+            data = json.loads(response.text)
+            
+            required = data.get('required_skills', [])
+            nice_to_have = data.get('nice_to_have_skills', [])
+
+            for s in required + nice_to_have:
+                if 'prerequisites' not in s: s['prerequisites'] = []
+                if 'level' not in s: s['level'] = 'Intermediate'
+
+            return {
+                'required_skills': required,
+                'nice_to_have_skills': nice_to_have,
+                'total_required': len(required),
+                'total_nice_to_have': len(nice_to_have),
+                'skill_categories': self._categorize_skills(required + nice_to_have)
+            }
+        except Exception as e:
+            logger.error(f"LLM JD Extraction failed: {e}")
+            return {
+                'required_skills': [],
+                'nice_to_have_skills': [],
+                'total_required': 0,
+                'total_nice_to_have': 0,
+                'skill_categories': {}
+            }
+
     def _categorize_skills(self, skills: List[Dict]) -> Dict[str, List]:
         """Group skills by category."""
         categories = {}
