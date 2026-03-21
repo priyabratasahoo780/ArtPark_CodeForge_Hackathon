@@ -34,6 +34,7 @@ from app.services.decay_service import DecayService
 from app.services.benchmarking_service import BenchmarkingService
 from app.services.ecosystem_services import PairProgrammerService, FlashcardGenerator, EcosystemService
 from app.services.dominance_services import PortfolioService, FutureProjectionService, ValidationService
+from app.services.power_services import SalaryPredictorService, JobMatcherService, StreakService, ResumeScoreService
 from app.routes import auth
 from app.services.auth_service import auth_service, RoleChecker
 from app.models.user import RoleEnum
@@ -126,7 +127,6 @@ learning_path_generator = LearningPathGenerator()
 dependency_resolver = DependencyResolver()
 voice_explainer = VoiceExplainer("app/datasets/translations.json")
 time_analytics = TimeAnalytics()
-resume_benchmarker = ResumeBenchmarker()
 feedback_generator = ResumeFeedbackGenerator()
 domain_classifier = DomainClassifier()
 learning_style_analyzer = LearningStyleAnalyzer()
@@ -149,27 +149,17 @@ ecosystem_service = EcosystemService()
 portfolio_service = PortfolioService()
 future_projections = FutureProjectionService()
 validation_service = ValidationService()
+salary_predictor = SalaryPredictorService()
+job_matcher = JobMatcherService()
+streak_service = StreakService()
+resume_scorer = ResumeScoreService()
 role_matcher = RoleMatcher()
-voice_explainer = VoiceExplainer()
-time_analytics = TimeAnalytics()
-lms_integrator = LMSIntegrator()
-interview_simulator = InterviewSimulator()
-career_predictor = CareerPredictor()
+
 resume_benchmarker = ResumeBenchmarker(
     skill_extractor=skill_extractor,
     gap_analyzer=gap_analyzer,
     role_matcher=role_matcher,
 )
-feedback_generator = ResumeFeedbackGenerator()
-domain_classifier = DomainClassifier()
-learning_style_analyzer = LearningStyleAnalyzer()
-burnout_detector = BurnoutDetector()
-career_path_predictor = CareerPathPredictor()
-market_trend_analyzer = MarketTrendAnalyzer()
-learning_efficiency_calculator = LearningEfficiencyCalculator()
-doubt_detector = DoubtDetector()
-skill_decay_detector = SkillDecayDetector()
-resume_updater = ResumeUpdater()
 
 # ==================== Pydantic Models ====================
 
@@ -1486,6 +1476,44 @@ async def get_full_health():
         return validation_service.run_full_validation()
     except Exception as e:
         logger.error(f"Health check error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/salary/predict", tags=["Extreme Dominance"])
+async def predict_salary(data: Dict[str, Any]):
+    try:
+        role = data.get("role", "Software Engineer")
+        skills = data.get("skills", [])
+        exp = data.get("experience_years", 3)
+        return salary_predictor.predict(role, skills, exp)
+    except Exception as e:
+        logger.error(f"Salary prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/jobs/match", tags=["Extreme Dominance"])
+async def match_jobs(data: Dict[str, Any]):
+    try:
+        skills = data.get("skills", [])
+        return job_matcher.match_jobs(skills)
+    except Exception as e:
+        logger.error(f"Job match error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/streak/data", tags=["Extreme Dominance"])
+async def get_streak(completed_count: int = 0):
+    try:
+        return streak_service.get_streak_data(completed_count)
+    except Exception as e:
+        logger.error(f"Streak error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/resume/score", tags=["Extreme Dominance"])
+async def score_resume(data: Dict[str, Any]):
+    try:
+        skills = data.get("skills", [])
+        gap_stats = data.get("gap_stats", {})
+        return resume_scorer.score_resume(skills, gap_stats)
+    except Exception as e:
+        logger.error(f"Resume score error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/", tags=["Root"])

@@ -34,6 +34,10 @@ import FlowTimer from './components/FlowTimer'
 import TechnicalPortfolio from './components/TechnicalPortfolio'
 import FutureMap from './components/FutureMap'
 import SystemStatus from './components/SystemStatus'
+import SalaryPredictor from './components/SalaryPredictor'
+import JobMatcher from './components/JobMatcher'
+import DailyStreak from './components/DailyStreak'
+import ResumeScoreRadar from './components/ResumeScoreRadar'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -114,6 +118,11 @@ function App() {
     role: localStorage.getItem('role') || 'USER'
   })
 
+  // Helper to build auth headers for every request
+  const authHeaders = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` }
+  })
+
   useEffect(() => {
     if (auth.token) {
       localStorage.setItem('token', auth.token)
@@ -154,7 +163,7 @@ function App() {
       const response = await axios.post(`${API_BASE_URL}/decay/status`, {
         mastered_skills,
         daily_progress: [2, 1, 0, 4, 1]
-      })
+      }, authHeaders())
       setDecayData(response.data.decay_map)
       setLoadStats(response.data.neural_load)
     } catch (err) { console.error(err) }
@@ -164,7 +173,7 @@ function App() {
     try {
       const role = targetRole || analysisResults.target_role || "Software Engineer"
       const readiness = gapAnalysis?.statistics?.readiness_score || 50
-      const response = await axios.get(`${API_BASE_URL}/market/benchmark?role=${role}&readiness=${readiness}`)
+      const response = await axios.get(`${API_BASE_URL}/market/benchmark?role=${role}&readiness=${readiness}`, authHeaders())
       setMarketBenchmark(response.data)
     } catch (err) { console.error(err) }
   }
@@ -178,28 +187,32 @@ function App() {
         total_skills: learningPath?.length || 10,
         next_milestone: learningPath?.find(m => !completedSkillNames.has(m.name))?.name || "End of path",
         lang: "en"
-      })
+      }, authHeaders())
       setAudioBriefingUrl(`${API_BASE_URL}${resp.data.audio_url}`)
     } catch (err) { console.error(err) }
     finally { setIsBriefingGenerating(false) }
   }
 
   const handleAnalyze = async () => {
-    if (!resumeText || !jobDescriptionText) return setError('Provide both resume and JD.')
+    if (!resumeText || !jobDescriptionText) return setError('Please provide both resume and job description.')
     setLoading(true)
+    setError(null)
     try {
       const resp = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
         resume_text: resumeText,
         job_description_text: jobDescriptionText,
         target_role: targetRole || undefined,
         timeline_days: timelineDays || undefined
-      })
+      }, authHeaders())
       setAnalysisResults(resp.data)
       setGapAnalysis(resp.data.gap_analysis)
       setLearningPath(resp.data.learning_path)
       setReasoningTrace(resp.data.reasoning_trace)
       setActiveTab('results')
-    } catch (err) { setError('Analysis failed.') }
+    } catch (err) {
+      const detail = err?.response?.data?.detail
+      setError(detail ? `Analysis error: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}` : 'Analysis failed. Make sure both servers are running.')
+    }
     finally { setLoading(false) }
   }
 
@@ -241,6 +254,7 @@ function App() {
                    <NavTab active={activeTab === 'recall'} onClick={() => setActiveTab('recall')} icon={<FiBookOpen />} label="Recall" color={theme.secondary} />
                    <NavTab active={activeTab === 'portfolio'} onClick={() => setActiveTab('portfolio')} icon={<FiAward />} label="Portfolio" color="#f59e0b" />
                    <NavTab active={activeTab === 'future'} onClick={() => setActiveTab('future')} icon={<FiTrendingUp />} label="2030" color="#3b82f6" />
+                   <NavTab active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<FiTarget />} label="Insights" color="#00f3ff" />
                    <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
                    <NavTab active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<FiActivity />} label="Health" color="#34d399" />
                  </>
@@ -335,6 +349,17 @@ function App() {
 
                     {activeTab === 'ecosystem' && (
                        <GlobalTrendMap />
+                    )}
+
+                    {activeTab === 'insights' && (
+                       <div className="space-y-10">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                             <DailyStreak completedCount={completedSkillNames.size} />
+                             <ResumeScoreRadar skills={skillsAnalysis?.skills} gapStats={gapAnalysis?.statistics} />
+                          </div>
+                          <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={skillsAnalysis?.skills} />
+                          <JobMatcher skills={skillsAnalysis?.skills} />
+                       </div>
                     )}
 
                     {activeTab === 'portfolio' && (
