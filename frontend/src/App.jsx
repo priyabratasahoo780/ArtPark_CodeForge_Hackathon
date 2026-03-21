@@ -197,7 +197,7 @@ function App() {
   }, [analysisResults, sessionId, settings.websockets])
 
   useEffect(() => {
-    if (completedSkillNames.size > 0) fetchDecayStatus()
+    fetchDecayStatus()
   }, [completedSkillNames])
 
   useEffect(() => {
@@ -210,9 +210,10 @@ function App() {
          name,
          mastered_at: Date.now() / 1000 - (Math.random() * 86400 * 5)
       }))
+      const daily_progress = [0, 0, 0, 0, completedSkillNames.size]
       const response = await axios.post(`${API_BASE_URL}/decay/status`, {
         mastered_skills,
-        daily_progress: [2, 1, 0, 4, 1]
+        daily_progress
       }, authHeaders())
       setDecayData(response.data.decay_map)
       setLoadStats(response.data.neural_load)

@@ -24,5 +24,6 @@ class BenchmarkingService:
             "market_avg_readiness": benchmark["readiness"],
             "user_percentile": round(float(percentile), 1),
             "status": "Elite" if percentile > 90.0 else ("Competitive" if percentile > 60.0 else "Rising Star"),
-            "market_demand": random.choice(["Very High", "High", "Steady"])
+            "market_demand": random.choice(["Very High", "High", "Steady"]),
+            "market_trend": random.choice(["+14% YoY", "+22% YoY", "+5% YoY", "+8% YoY", "+18% YoY"])
         }

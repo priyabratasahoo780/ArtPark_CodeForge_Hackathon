@@ -45,7 +45,7 @@ const EliteAnalytics = ({ decayData, loadStats, marketBenchmark }) => {
               </div>
               <div>
                 <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Stability Index</span>
-                <p className="text-lg font-black text-[#34d399]">9.4/10</p>
+                <p className="text-lg font-black text-[#34d399]">{loadStats?.stability_index || '10.0'}/10</p>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@ const EliteAnalytics = ({ decayData, loadStats, marketBenchmark }) => {
             {[
                { label: 'Demand', value: marketBenchmark?.market_demand || 'High' },
                { label: 'Avg Readiness', value: `${marketBenchmark?.market_avg_readiness || 0}%` },
-               { label: 'Trend', value: '+14% YoY', color: '#34d399' }
+               { label: 'Trend', value: marketBenchmark?.market_trend || '+14% YoY', color: '#34d399' }
             ].map((s, i) => (
               <div key={i} className="bg-white/5 p-3 rounded-xl border border-white/5">
                 <span className="text-[8px] font-black text-gray-500 uppercase block">{s.label}</span>

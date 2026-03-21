@@ -44,8 +44,11 @@ class DecayService:
         # High velocity in short time = high load/burnout risk
         load_score = min(100.0, float(avg_velocity * 20.0))
         
+        stability_index = max(0.0, 10.0 - (float(load_score) / 10.0))
+        
         return {
             "load_score": round(float(load_score), 1),
             "efficiency": round(100.0 - (float(load_score) * 0.3), 1),
+            "stability_index": round(float(stability_index), 1),
             "risk_level": "High" if load_score > 80.0 else ("Moderate" if load_score > 50.0 else "Optimal")
         }
