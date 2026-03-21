@@ -3,6 +3,10 @@ import { motion } from 'framer-motion'
 import { FiTarget, FiZap, FiActivity, FiGlobe, FiShare2, FiArrowUpRight, FiShield } from 'react-icons/fi'
 
 const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) => {
+  const handleExport = () => {
+    window.print()
+  }
+
   return (
     <div className="space-y-10">
       {/* Header Profile Section */}
@@ -35,7 +39,7 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) =>
           </div>
         </div>
 
-        <button className="px-8 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all flex items-center gap-3">
+        <button onClick={handleExport} className="px-8 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all flex items-center gap-3 print:hidden">
            <FiShare2 /> Export Talent Report
         </button>
       </div>

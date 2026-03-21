@@ -82,7 +82,7 @@ export default function AchievementSystem({ completedCount }) {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Ready for high-fidelity export</p>
             </div>
           </div>
-          <button className="px-6 py-2.5 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#00f3ff] transition-all">
+          <button onClick={() => window.print()} className="px-6 py-2.5 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#00f3ff] transition-all print:hidden">
             Download
           </button>
         </motion.div>
