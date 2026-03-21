@@ -32,13 +32,13 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
         const y = levelHeight * (i + 1)
         
         // Find decay info
-        const decayInfo = decayData.find(d => d.name === item.name)
+        const decayInfo = decayData.find(d => d.name === item.skill_name)
         
         result.push({
           ...item,
           x,
           y,
-          isCompleted: completedSkillNames.has(item.name),
+          isCompleted: completedSkillNames.has(item.skill_name),
           decayStatus: decayInfo?.status || 'mastered',
           retention: decayInfo?.retention || 100
         })
@@ -56,7 +56,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
       const nextLevelNodes = nodes.filter(n => n.level === node.level + 1)
       nextLevelNodes.forEach(next => {
         lines.push({
-          id: `${node.name}-${next.name}`,
+          id: `${node.skill_name}-${next.skill_name}`,
           x1: node.x,
           y1: node.y,
           x2: next.x,
@@ -105,7 +105,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
         {/* Nodes */}
         {nodes.map((node, i) => (
           <motion.g 
-            key={node.name}
+            key={node.skill_name}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: i * 0.05, type: 'spring' }}
@@ -176,7 +176,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
               textAnchor="middle"
               className="fill-gray-400 text-[10px] font-black uppercase tracking-widest"
             >
-              {node.name.length > 15 ? node.name.slice(0, 12) + '...' : node.name}
+              {node.skill_name?.length > 15 ? node.skill_name.slice(0, 12) + '...' : node.skill_name}
             </text>
             
             {node.isCompleted && node.decayStatus !== 'mastered' && (

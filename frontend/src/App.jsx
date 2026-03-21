@@ -359,7 +359,7 @@ function App() {
                         <AchievementSystem completedCount={completedSkillNames.size} />
                         <EliteAnalytics decayData={decayData} loadStats={loadStats} marketBenchmark={marketBenchmark} />
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                           <CareerPredictor roadmapData={learningPath} targetRole={targetRole || analysisResults.target_role} auth={auth} />
+                           <CareerPredictor roadmapData={learningPath?.modules} targetRole={targetRole || analysisResults.target_role} auth={auth} />
                            <div className="glass-card p-8 border-none flex flex-col justify-between transition-all duration-1000" style={{ backgroundColor: `${theme.primary}05` }}>
                               <div>
                                 <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast style={{ color: theme.primary }} /> Onboarding Podcast</h3>
@@ -386,7 +386,7 @@ function App() {
                          <div className="flex justify-end mb-6">
                             <button onClick={() => setPathViewMode(pathViewMode === 'neural' ? 'list' : 'neural')} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400">Toggle View ({pathViewMode})</button>
                          </div>
-                         {pathViewMode === 'neural' ? <NeuralRoadmap data={learningPath} completedSkillNames={completedSkillNames} decayData={decayData} /> : <LearningPath data={learningPath} onToggleSkill={handleToggleSkill} completedSkillNames={completedSkillNames} />}
+                         {pathViewMode === 'neural' ? <NeuralRoadmap data={learningPath?.modules} completedSkillNames={completedSkillNames} decayData={decayData} /> : <LearningPath data={learningPath} onToggleSkill={handleToggleSkill} completedSkillNames={completedSkillNames} />}
                        </div>
                     )}
 

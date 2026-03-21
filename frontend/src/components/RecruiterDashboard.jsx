@@ -81,11 +81,11 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark }) =>
       <div className="glass-card p-8 border-none bg-white/[0.02] rounded-3xl">
         <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-8">Verified Technology Stack</h3>
         <div className="flex flex-wrap gap-4">
-           {learningPath?.map((skill, idx) => (
+           {learningPath?.modules?.map((skill, idx) => (
              <div key={idx} className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl flex items-center gap-4 hover:border-[#00f3ff]/30 transition-all cursor-default">
                 <div className="w-2 h-2 rounded-full bg-[#00f3ff]"></div>
                 <div>
-                   <span className="text-xs font-black text-white uppercase tracking-tight">{skill.name}</span>
+                   <span className="text-xs font-black text-white uppercase tracking-tight">{skill.skill_name}</span>
                    <div className="flex items-center gap-2 mt-1">
                       <span className="text-[8px] font-bold text-gray-600 uppercase">Assessment: </span>
                       <span className="text-[8px] font-black text-[#34d399] uppercase">Verified Platinum</span>
