@@ -3,7 +3,7 @@ import {
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
   FiMap, FiMessageSquare, FiLogOut, FiAward,
   FiRefreshCw, FiClock, FiTrendingUp, FiMic, FiCast, FiFeather, FiPlay,
-  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser
+  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser, FiSettings, FiHelpCircle
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
@@ -28,6 +28,9 @@ import CodingSandbox from './components/CodingSandbox'
 import FlashcardDeck from './components/FlashcardDeck'
 import GlobalTrendMap from './components/GlobalTrendMap'
 import RecruiterDashboard from './components/RecruiterDashboard'
+import HelpCenter from './components/HelpCenter'
+import SettingsModal from './components/SettingsModal'
+import FlowTimer from './components/FlowTimer'
 
 const API_BASE_URL = 'http://localhost:8000'
 
@@ -52,6 +55,24 @@ function App() {
   const [activeTab, setActiveTab] = useState('upload')
   const [viewMode, setViewMode] = useState('candidate') // 'candidate' or 'recruiter'
   
+  // Phase 8 State
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [settings, setSettings] = useState({
+    theme: 'midnight',
+    audio: true,
+    notifications: true,
+    websockets: true
+  })
+
+  // Theme Config
+  const themeColors = {
+    midnight: { primary: '#bc13fe', secondary: '#00f3ff' },
+    solar: { primary: '#f59e0b', secondary: '#ef4444' },
+    deepspace: { primary: '#3b82f6', secondary: '#1e293b' }
+  }
+  const theme = themeColors[settings.theme] || themeColors.midnight
+
   // Data
   const [resumeText, setResumeText] = useState('')
   const [jobDescriptionText, setJobDescriptionText] = useState('')
@@ -192,17 +213,17 @@ function App() {
   if (!auth.token) return <Login onLogin={setAuth} />
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative">
+    <div className={`min-h-screen bg-[#0a0a0c] text-white overflow-x-hidden relative transition-colors duration-1000`}>
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#bc13fe]/5 blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#00f3ff]/5 blur-[120px]"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] blur-[120px] transition-all duration-1000" style={{ backgroundColor: `${theme.primary}15` }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[120px] transition-all duration-1000" style={{ backgroundColor: `${theme.secondary}15` }}></div>
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="bg-white/[0.02] backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bc13fe] to-[#00f3ff] rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-1000" style={{ background: `linear-gradient(to br, ${theme.primary}, ${theme.secondary})` }}>
                 <FiZap className="text-white text-xl" />
               </div>
               <h1 className="text-xl font-black uppercase italic tracking-tighter sm:block hidden">CodeForge</h1>
@@ -211,19 +232,23 @@ function App() {
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                {analysisResults && viewMode === 'candidate' && (
                  <>
-                   <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" />
-                   <NavTab active={activeTab === 'path'} onClick={() => setActiveTab('path')} icon={<FiMap />} label="Roadmap" />
+                   <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" color={theme.primary} />
+                   <NavTab active={activeTab === 'path'} onClick={() => setActiveTab('path')} icon={<FiMap />} label="Roadmap" color={theme.primary} />
                    <NavTab active={activeTab === 'sandbox'} onClick={() => setActiveTab('sandbox')} icon={<FiCode />} label="Sandbox" color="#34d399" />
-                   <NavTab active={activeTab === 'recall'} onClick={() => setActiveTab('recall')} icon={<FiBookOpen />} label="Recall" color="#00f3ff" />
+                   <NavTab active={activeTab === 'recall'} onClick={() => setActiveTab('recall')} icon={<FiBookOpen />} label="Recall" color={theme.secondary} />
                    <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
                  </>
                )}
-               <NavTab active={activeTab === 'upload'} onClick={() => setActiveTab('upload')} icon={<FiUpload />} label={analysisResults ? "New" : "Analyze"} />
                
+               <div className="flex items-center gap-1 border-l border-white/10 ml-4 pl-4">
+                  <button onClick={() => setIsHelpOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all"><FiHelpCircle /></button>
+                  <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all"><FiSettings /></button>
+               </div>
+
                {analysisResults && (
                  <button 
                   onClick={() => setViewMode(prev => prev === 'candidate' ? 'recruiter' : 'candidate')}
-                  className={`ml-4 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
+                  className={`ml-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
                  >
                    {viewMode === 'recruiter' ? <FiUser /> : <FiEye />}
                    {viewMode === 'recruiter' ? 'Candidate View' : 'Recruiter View'}
@@ -259,13 +284,13 @@ function App() {
                         <EliteAnalytics decayData={decayData} loadStats={loadStats} marketBenchmark={marketBenchmark} />
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                            <CareerPredictor roadmapData={learningPath} targetRole={targetRole || analysisResults.target_role} auth={auth} />
-                           <div className="glass-card p-8 border-none bg-gradient-to-br from-[#bc13fe]/5 to-transparent rounded-3xl flex flex-col justify-between">
+                           <div className="glass-card p-8 border-none flex flex-col justify-between transition-all duration-1000" style={{ backgroundColor: `${theme.primary}05` }}>
                               <div>
-                                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast className="text-[#bc13fe]" /> Onboarding Podcast</h3>
+                                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast style={{ color: theme.primary }} /> Onboarding Podcast</h3>
                                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">{audioBriefingUrl ? 'Audio generated successfully' : 'Generate an AI summary of your progress'}</p>
                                 {audioBriefingUrl && <audio controls src={audioBriefingUrl} className="mt-8 w-full h-8" />}
                               </div>
-                              <button onClick={generateBriefing} disabled={isBriefingGenerating} className="mt-8 w-full py-4 rounded-2xl bg-[#bc13fe] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3">
+                              <button onClick={generateBriefing} disabled={isBriefingGenerating} className="mt-8 w-full py-4 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-1000" style={{ backgroundColor: theme.primary }}>
                                 {isBriefingGenerating ? <FiRefreshCw className="animate-spin" /> : <FiMic />} {isBriefingGenerating ? 'Generating...' : 'Start Podcast'}
                               </button>
                            </div>
@@ -290,7 +315,12 @@ function App() {
                     )}
 
                     {activeTab === 'sandbox' && (
-                       <CodingSandbox activeSkill={activeSandboxSkill} auth={auth} />
+                       <div className="space-y-8">
+                          <div className="flex justify-end pr-4">
+                             <FlowTimer />
+                          </div>
+                          <CodingSandbox activeSkill={activeSandboxSkill} auth={auth} />
+                       </div>
                     )}
 
                     {activeTab === 'recall' && (
@@ -309,6 +339,12 @@ function App() {
         <AnimatePresence>
           {isInterviewModalOpen && (
             <InterviewModal masteredSkills={Array.from(completedSkillNames)} auth={auth} onClose={() => setIsInterviewModalOpen(false)} />
+          )}
+          {isHelpOpen && (
+            <HelpCenter onClose={() => setIsHelpOpen(false)} />
+          )}
+          {isSettingsOpen && (
+            <SettingsModal settings={settings} setSettings={setSettings} onClose={() => setIsSettingsOpen(false)} />
           )}
         </AnimatePresence>
       </div>
