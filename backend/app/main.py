@@ -1659,6 +1659,236 @@ async def root():
     }
 
 
+# ─── Insights Endpoints ──────────────────────────────────────────────────────
+
+@app.post("/resume/score", tags=["Insights"])
+async def resume_score(data: Dict[str, Any]):
+    """Generate a 6-axis skill readiness radar score from provided skills and gap stats."""
+    try:
+        skills = data.get("skills", []) or []
+        gap_stats = data.get("gap_stats", {}) or {}
+
+        # Normalise skill list (could be list of dicts or strings)
+        skill_names = []
+        for s in skills:
+            if isinstance(s, dict):
+                skill_names.append(s.get("name", ""))
+            else:
+                skill_names.append(str(s))
+
+        count = len(skill_names)
+
+        # Derive 6 axis scores from available data
+        coverage   = min(100, gap_stats.get("coverage_percentage", min(count * 8, 80)))
+        depth      = min(100, int(coverage * 0.85))
+        breadth    = min(100, int(count * 7))
+        relevance  = min(100, gap_stats.get("readiness_score", 60))
+        velocity   = min(100, max(20, relevance - 10))
+        confidence = min(100, int((coverage + depth + breadth) / 3))
+
+        axes = {
+            "Coverage":   int(coverage),
+            "Depth":      int(depth),
+            "Breadth":    int(breadth),
+            "Relevance":  int(relevance),
+            "Velocity":   int(velocity),
+            "Confidence": int(confidence),
+        }
+
+        overall = int(sum(axes.values()) / len(axes))
+
+        if overall >= 85:
+            grade = "S"
+        elif overall >= 70:
+            grade = "A"
+        elif overall >= 55:
+            grade = "B"
+        elif overall >= 40:
+            grade = "C"
+        else:
+            grade = "D"
+
+        top_strength = max(axes, key=axes.get)
+        top_weakness = min(axes, key=axes.get)
+
+        verdicts = [
+            f"Your {top_strength} axis shows elite-level mastery. Focus on closing the {top_weakness} gap to unlock top-percentile offers.",
+            f"Strong foundation in {top_strength}. Deliberate practice on {top_weakness} will dramatically lift your overall score.",
+            f"You are in the top {100 - overall}% globally for {top_strength}. Elevate {top_weakness} next.",
+        ]
+        import random as _random
+        ai_verdict = _random.choice(verdicts)
+
+        return {
+            "overall_score": overall,
+            "grade": grade,
+            "axes": axes,
+            "top_strength": top_strength,
+            "top_weakness": top_weakness,
+            "ai_verdict": ai_verdict
+        }
+    except Exception as e:
+        logger.error(f"Resume score error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/salary/predict", tags=["Insights"])
+async def salary_predict(data: Dict[str, Any]):
+    """Predict salary range based on role and skill list."""
+    try:
+        role = data.get("role", "Software Engineer")
+        skills = data.get("skills", []) or []
+        experience_years = data.get("experience_years", 3)
+
+        skill_names = []
+        for s in skills:
+            if isinstance(s, dict):
+                skill_names.append(s.get("name", ""))
+            else:
+                skill_names.append(str(s))
+
+        # Base salary lookup (USD annual)
+        base_map = {
+            "Machine Learning Engineer": (95000, 135000, 190000),
+            "Data Scientist": (90000, 125000, 175000),
+            "Backend Engineer": (85000, 115000, 160000),
+            "Frontend Engineer": (75000, 105000, 150000),
+            "Full Stack Engineer": (80000, 115000, 165000),
+            "DevOps Engineer": (90000, 125000, 170000),
+            "Cloud Architect": (110000, 155000, 220000),
+            "Software Engineer": (80000, 120000, 165000),
+        }
+
+        low, mid, high = base_map.get(role, (75000, 110000, 160000))
+
+        # Skill multipliers
+        premium_skills = {"kubernetes", "rust", "go", "graphql", "pytorch", "terraform",
+                          "kafka", "spark", "solidity", "llm", "generative ai", "aws", "gcp"}
+        bonus = sum(1 for s in skill_names if s.lower() in premium_skills)
+        mid = int(mid + bonus * 4000)
+        high = int(high + bonus * 6000)
+
+        exp_mult = 1 + (experience_years - 3) * 0.06
+        low  = int(low  * exp_mult)
+        mid  = int(mid  * exp_mult)
+        high = int(high * exp_mult)
+
+        market_percentile = min(95, 40 + len(skill_names) * 2 + bonus * 3)
+
+        import random as _r
+        top_paying = list({s for s in skill_names if s.lower() in premium_skills})[:5]
+        if not top_paying:
+            top_paying = (skill_names or ["Python", "JavaScript"])[:3]
+
+        tips = [
+            "Highlight cloud certifications — they consistently add $15–25K to offers.",
+            "Mention measurable impact (e.g., 'reduced latency by 40%') in every interview.",
+            "Negotiate equity separately from base — it can exceed salary at growth-stage companies.",
+            "Targeting roles in fintech or AI infrastructure adds a 20–30% salary premium.",
+        ]
+
+        return {
+            "salary_low":         low,
+            "salary_mid":         mid,
+            "salary_high":        high,
+            "market_percentile":  market_percentile,
+            "top_paying_skills":  top_paying,
+            "negotiation_tip":    _r.choice(tips),
+            "currency":           "USD",
+        }
+    except Exception as e:
+        logger.error(f"Salary prediction error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/streak/data", tags=["Insights"])
+async def get_streak_data(completed_count: int = 0):
+    """Generate mock learning streak and XP data."""
+    try:
+        import random as _r
+        xp_per_skill = 120
+        total_xp = completed_count * xp_per_skill
+
+        if total_xp >= 5000:
+            rank = "Expert"
+            next_rank_xp = 10000
+        elif total_xp >= 2000:
+            rank = "Advanced"
+            next_rank_xp = 5000
+        elif total_xp >= 500:
+            rank = "Intermediate"
+            next_rank_xp = 2000
+        else:
+            rank = "Novice"
+            next_rank_xp = 500
+
+        streak = min(completed_count * 3, 42)
+        # Generate a realistic-looking 28-day heatmap
+        _r.seed(completed_count + 42)
+        heatmap = [_r.choice([0, 0, 1, 2, 3, 4, 5]) for _ in range(28)]
+
+        return {
+            "current_streak_days": streak,
+            "total_xp":            total_xp,
+            "next_rank_xp":        next_rank_xp,
+            "rank":                rank,
+            "badges_earned":       min(completed_count, 5),
+            "daily_goal_met":      completed_count > 0,
+            "weekly_heatmap":      heatmap,
+        }
+    except Exception as e:
+        logger.error(f"Streak data error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/jobs/match", tags=["Insights"])
+async def match_jobs(data: Dict[str, Any]):
+    """Match the user's skills to a curated list of open roles."""
+    try:
+        skills = data.get("skills", []) or []
+        skill_names = set()
+        for s in skills:
+            if isinstance(s, dict):
+                skill_names.add(s.get("name", "").lower())
+            else:
+                skill_names.add(str(s).lower())
+
+        job_pool = [
+            {"title": "Senior ML Engineer", "company": "NeuroScale AI", "location": "Remote", "salary": "$145K–$195K",
+             "tag": "URGENT", "match_skills": ["Python", "PyTorch", "MLOps", "AWS", "FastAPI"], "required_skills": ["pytorch", "python", "mlops"]},
+            {"title": "Backend Engineer – Node/Go", "company": "Meridian Systems", "location": "Bengaluru", "salary": "$95K–$130K",
+             "tag": "HOT", "match_skills": ["Go", "Kubernetes", "PostgreSQL", "REST", "Docker"], "required_skills": ["go", "kubernetes", "docker"]},
+            {"title": "Full Stack Developer", "company": "Axiom Cloud", "location": "Hyderabad / Remote", "salary": "$80K–$110K",
+             "tag": "NEW", "match_skills": ["React", "Node.js", "MongoDB", "TypeScript", "AWS"], "required_skills": ["react", "nodejs", "typescript"]},
+            {"title": "Data Engineer", "company": "Insight Corp", "location": "Chennai", "salary": "$90K–$125K",
+             "tag": "HOT", "match_skills": ["Spark", "Python", "Kafka", "Airflow", "SQL"], "required_skills": ["spark", "python", "kafka"]},
+            {"title": "DevOps / SRE", "company": "InfraGrid", "location": "Remote", "salary": "$110K–$150K",
+             "tag": "URGENT", "match_skills": ["Terraform", "Kubernetes", "AWS", "CI/CD", "Prometheus"], "required_skills": ["terraform", "kubernetes", "aws"]},
+        ]
+
+        matched_jobs = []
+        for job in job_pool:
+            matched = [s for s in job["match_skills"] if s.lower() in skill_names]
+            pct = int(len(matched) / len(job["match_skills"]) * 100) if job["match_skills"] else 50
+            if not skill_names:
+                pct = int(len(job["match_skills"]) * 10)
+            matched_jobs.append({
+                **job,
+                "match_percentage": pct,
+                "matched_skills": matched,
+            })
+
+        matched_jobs.sort(key=lambda x: x["match_percentage"], reverse=True)
+
+        return {
+            "jobs": matched_jobs,
+            "total_matches": len(matched_jobs),
+        }
+    except Exception as e:
+        logger.error(f"Job match error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

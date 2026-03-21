@@ -666,7 +666,7 @@ git push origin feat/your-feature
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" />
 
-**Built with ⚡ by Team CodeForge · ArtPark × IISc Hackathon 2026**
+**Built with ⚡ by Team Invisible.Coding × IISc Hackathon 2026**
 
 [![GitHub](https://img.shields.io/badge/GitHub-priyabratasahoo780-181717?style=for-the-badge&logo=github)](https://github.com/priyabratasahoo780/Resume-generater)
 

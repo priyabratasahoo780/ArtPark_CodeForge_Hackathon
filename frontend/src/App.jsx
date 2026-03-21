@@ -440,10 +440,10 @@ function App() {
                        <div className="space-y-10">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                              <DailyStreak completedCount={completedSkillNames.size} />
-                             <ResumeScoreRadar skills={skillsAnalysis?.skills} gapStats={gapAnalysis?.statistics} />
+                             <ResumeScoreRadar skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} gapStats={gapAnalysis?.statistics} />
                           </div>
-                          <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={skillsAnalysis?.skills} />
-                          <JobMatcher skills={skillsAnalysis?.skills} />
+                          <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} />
+                          <JobMatcher skills={analysisResults?.skills_analysis?.resume_skills || skillsAnalysis?.skills} />
                        </div>
                     )}
 
