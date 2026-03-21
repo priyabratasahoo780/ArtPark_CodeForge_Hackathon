@@ -5,8 +5,13 @@ from pydantic import BaseModel
 from typing import List, Dict, Optional, Any
 import logging
 import json
+import asyncio
 from pathlib import Path
 import io
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 from app.services.skill_extractor import SkillExtractor
 from app.services.gap_analyzer import SkillGapAnalyzer

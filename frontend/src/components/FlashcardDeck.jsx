@@ -12,9 +12,7 @@ const FlashcardDeck = ({ masteredSkills, auth }) => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (masteredSkills.length > 0) {
-      fetchCards()
-    }
+    fetchCards()
   }, [masteredSkills])
 
   const fetchCards = async () => {

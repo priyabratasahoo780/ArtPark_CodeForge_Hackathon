@@ -10,9 +10,7 @@ const TechnicalPortfolio = ({ user_name, mastered_skills, target_role }) => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (mastered_skills.length > 0) {
-      fetchPortfolio()
-    }
+    fetchPortfolio()
   }, [mastered_skills])
 
   const fetchPortfolio = async () => {

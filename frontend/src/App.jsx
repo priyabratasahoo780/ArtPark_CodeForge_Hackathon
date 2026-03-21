@@ -51,17 +51,17 @@ const API_BASE_URL = 'http://localhost:8000'
 const NavTab = ({ active, onClick, icon, label, color = '#bc13fe' }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shrink-0 whitespace-nowrap ${
+    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 whitespace-nowrap md:w-full md:justify-start ${
       active 
-        ? `text-white shadow-[0_0_20px_rgba(0,0,0,0.4)] scale-105` 
+        ? `text-white shadow-[0_0_20px_rgba(0,0,0,0.4)]` 
         : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
     }`}
     style={{ 
       background: active ? `linear-gradient(to right, ${color}, #00f3ff)` : 'transparent'
     }}
   >
-    <span className="text-base">{icon}</span>
-    <span className="hidden md:block">{label}</span>
+    <span className="text-lg">{icon}</span>
+    <span className="block">{label}</span>
   </button>
 )
 
@@ -204,6 +204,13 @@ function App() {
     if (analysisResults) fetchMarketBenchmark()
   }, [analysisResults])
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 10000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
+
   const fetchDecayStatus = async () => {
     try {
       const mastered_skills = Array.from(completedSkillNames).map(name => ({
@@ -288,18 +295,23 @@ function App() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] blur-[120px] transition-all duration-1000" style={{ backgroundColor: `${theme.secondary}15` }}></div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <header className="bg-white/[0.02] backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-1000" style={{ background: `linear-gradient(to br, ${theme.primary}, ${theme.secondary})` }}>
-                <FiZap className="text-white text-xl" />
+      <div className="relative z-10 flex flex-col md:flex-row h-screen overflow-hidden">
+        <aside className="bg-white/[0.02] backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/10 flex flex-col w-full md:w-64 h-auto md:h-screen shrink-0 z-50">
+           <div className="p-4 md:p-6 flex items-center justify-between md:justify-start gap-4 border-b border-white/10">
+              <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => { setActiveTab('upload'); setViewMode('candidate'); }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-1000" style={{ background: `linear-gradient(to br, ${theme.primary}, ${theme.secondary})` }}>
+                  <FiZap className="text-white text-xl" />
+                </div>
+                <h1 className="text-xl font-black uppercase italic tracking-tighter">CodeForge</h1>
               </div>
-              <h1 className="text-xl font-black uppercase italic tracking-tighter sm:block hidden">CodeForge</h1>
-            </div>
+              <div className="flex items-center gap-2 md:hidden">
+                 <button onClick={() => setIsHelpOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white"><FiHelpCircle /></button>
+                 <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white"><FiSettings /></button>
+                 <button onClick={() => setAuth({token:null})} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white"><FiLogOut /></button>
+              </div>
+           </div>
 
-            <div className="flex-1 items-center gap-2 overflow-x-auto no-scrollbar flex min-w-0">
-               <div className="ml-auto flex-shrink-0"></div>
+           <div className="flex-1 overflow-x-auto md:overflow-y-auto no-scrollbar p-3 md:p-4 flex md:flex-col gap-2 items-center md:items-stretch">
                {analysisResults && viewMode === 'candidate' && (
                  <>
                    <NavTab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<FiActivity />} label="Results" color={theme.primary} />
@@ -311,33 +323,49 @@ function App() {
                    <NavTab active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<FiTarget />} label="Insights" color="#00f3ff" />
                    <NavTab active={activeTab === 'alpha'} onClick={() => setActiveTab('alpha')} icon={<FiZap />} label="Alpha" color="#bc13fe" />
                    <NavTab active={activeTab === 'elite'} onClick={() => setActiveTab('elite')} icon={<FiShield />} label="Elite" color="#10b981" />
-                   <NavTab active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} icon={<FiHelpCircle />} label="Help" color="#94a3b8" />
                    <NavTab active={activeTab === 'ecosystem'} onClick={() => setActiveTab('ecosystem')} icon={<FiGlobe />} label="Ecosystem" color="#ff00e5" />
                    <NavTab active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<FiActivity />} label="Health" color="#34d399" />
                  </>
                )}
-               
-               <div className="flex items-center gap-1 border-l border-white/10 ml-4 pl-4">
-                  <button onClick={() => setIsHelpOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all"><FiHelpCircle /></button>
-                  <button onClick={() => setIsSettingsOpen(true)} className="p-2.5 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all"><FiSettings /></button>
-               </div>
+           </div>
 
-               {analysisResults && (
+           <div className="hidden md:flex flex-col gap-2 p-4 border-t border-white/10">
+              <button onClick={() => setIsHelpOpen(true)} className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all flex items-center gap-3 w-full font-black text-[10px] uppercase tracking-widest"><FiHelpCircle /> Help Center</button>
+              <button onClick={() => setIsSettingsOpen(true)} className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all flex items-center gap-3 w-full font-black text-[10px] uppercase tracking-widest"><FiSettings /> Settings</button>
+              {analysisResults && (
                  <button 
                   onClick={() => setViewMode(prev => prev === 'candidate' ? 'recruiter' : 'candidate')}
-                  className={`ml-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
+                  className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all w-full flex items-center justify-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
                  >
                    {viewMode === 'recruiter' ? <FiUser /> : <FiEye />}
                    {viewMode === 'recruiter' ? 'Candidate View' : 'Recruiter View'}
                  </button>
-               )}
-               <button onClick={() => setAuth({token:null})} className="p-2.5 rounded-xl bg-white/5 text-gray-400 ml-2"><FiLogOut /></button>
-            </div>
-          </div>
-        </header>
+              )}
+              <button onClick={() => setAuth({token:null})} className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-red-400 border border-red-500/10 hover:border-red-500/30 transition-all flex items-center justify-center gap-3 w-full font-black text-[10px] uppercase tracking-widest mt-2"><FiLogOut /> Logout</button>
+           </div>
+        </aside>
 
-        <main className="flex-1 overflow-y-auto no-scrollbar py-10 px-4">
+        <main className="flex-1 overflow-y-auto no-scrollbar py-8 px-4 h-full relative z-0">
            <div className="max-w-7xl mx-auto">
+             <AnimatePresence>
+               {error && (
+                 <motion.div
+                   initial={{ opacity: 0, height: 0 }}
+                   animate={{ opacity: 1, height: 'auto' }}
+                   exit={{ opacity: 0, height: 0 }}
+                   className="mb-8"
+                 >
+                   <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center justify-between gap-4">
+                     <div className="flex items-center gap-3">
+                       <FiAlertCircle className="text-red-500 text-xl shrink-0" />
+                       <p className="text-xs font-black uppercase tracking-widest text-red-500">{error}</p>
+                     </div>
+                     <button onClick={() => setError(null)} className="text-gray-500 hover:text-white transition-all text-lg">×</button>
+                   </div>
+                 </motion.div>
+               )}
+             </AnimatePresence>
+
              <AnimatePresence mode="wait">
                 {viewMode === 'recruiter' ? (
                    <motion.div key="recruiter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
@@ -401,7 +429,7 @@ function App() {
                     )}
 
                     {activeTab === 'recall' && (
-                       <FlashcardDeck masteredSkills={Array.from(completedSkillNames)} auth={auth} />
+                       <FlashcardDeck masteredSkills={Array.from(new Set([...(analysisResults?.skills_analysis?.resume_skills?.map(s => s.name) || []), ...completedSkillNames]))} auth={auth} />
                     )}
 
                     {activeTab === 'ecosystem' && (
@@ -422,7 +450,7 @@ function App() {
                     {activeTab === 'portfolio' && (
                        <TechnicalPortfolio 
                         user_name={analysisResults?.candidate_name || "Developer"} 
-                        mastered_skills={Array.from(completedSkillNames)} 
+                        mastered_skills={Array.from(new Set([...(analysisResults?.skills_analysis?.resume_skills?.map(s => s.name) || []), ...completedSkillNames]))} 
                         target_role={targetRole || analysisResults?.target_role} 
                        />
                     )}

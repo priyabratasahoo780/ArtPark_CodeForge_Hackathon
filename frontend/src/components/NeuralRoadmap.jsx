@@ -15,7 +15,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
     // Distribute nodes intelligently into neural layers
     const levels = {}
     data.forEach((item, index) => {
-      // Dynamic layer assignment (max 2-3 nodes vertically for an aesthetic neural look)
+      // Dynamic layer assignment (max 2 nodes vertically for an aesthetic neural look)
       const colIdx = Math.floor(index / 2)
       if (!levels[colIdx]) levels[colIdx] = []
       levels[colIdx].push({ ...item, colIdx })
@@ -28,7 +28,6 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
     levelKeys.forEach((colIdx, idx) => {
       const x = levelWidth * (idx + 1)
       const items = levels[colIdx]
-      // Add slight vertical staggering for a more "organic neural" spread
       const levelHeight = height / (items.length + 1)
 
       items.forEach((item, i) => {
@@ -42,7 +41,7 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
           ...item,
           x,
           y,
-          isCompleted: completedSkillNames.has(item.skill_name),
+          isCompleted: Boolean(completedSkillNames && completedSkillNames.has(item.skill_name)),
           decayStatus: decayInfo?.status || 'mastered',
           retention: decayInfo?.retention || 100
         })
@@ -56,44 +55,36 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
   const connections = useMemo(() => {
     const lines = []
     nodes.forEach(node => {
-      // 1. Try connecting based on exact prerequisites (if provided)
-      let explicitConnected = false
-      if (node.prerequisites && Array.isArray(node.prerequisites)) {
-         node.prerequisites.forEach(prereqName => {
-           const prereqNode = nodes.find(n => n.skill_name.toLowerCase() === prereqName.toLowerCase())
-           if (prereqNode) {
-             explicitConnected = true
-             lines.push({
-               id: `${prereqNode.skill_name}-${node.skill_name}`,
-               x1: prereqNode.x,
-               y1: prereqNode.y,
-               x2: node.x,
-               y2: node.y,
-               isActive: prereqNode.isCompleted && node.isCompleted,
-               isPending: prereqNode.isCompleted && !node.isCompleted
-             })
-           }
-         })
-      }
-
-      // 2. Dense connection fallback: Connect to nodes in the next neural layer
-      if (!explicitConnected) {
-        const nextLevelNodes = nodes.filter(n => n.colIdx === node.colIdx + 1)
-        nextLevelNodes.forEach(next => {
-          lines.push({
-            id: `${node.skill_name}-${next.skill_name}`,
-            x1: node.x,
-            y1: node.y,
-            x2: next.x,
-            y2: next.y,
-            isActive: node.isCompleted && next.isCompleted,
-            isPending: node.isCompleted && !next.isCompleted
-          })
+      // Connect to nodes in the next neural layer
+      const nextLevelNodes = nodes.filter(n => n.colIdx === node.colIdx + 1)
+      nextLevelNodes.forEach(next => {
+        lines.push({
+          id: `${node.skill_name}-${next.skill_name}`,
+          x1: node.x,
+          y1: node.y,
+          x2: next.x,
+          y2: next.y,
+          isActive: node.isCompleted && next.isCompleted,
+          isPending: node.isCompleted && !next.isCompleted
         })
-      }
+      })
     })
     return lines
   }, [nodes])
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full aspect-[5/4] bg-white/[0.02] rounded-3xl border border-white/5 flex items-center justify-center flex-col gap-4">
+        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+          <FiAlertCircle className="text-gray-500 text-2xl" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-black text-white uppercase tracking-widest">No Roadmap Data</p>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2 px-10">Run a deep analysis to generate your neural career map</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative w-full aspect-[5/4] bg-white/[0.02] rounded-3xl border border-white/5 overflow-hidden group">
@@ -106,135 +97,119 @@ const NeuralRoadmap = ({ data, completedSkillNames, decayData = [] }) => {
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full relative z-10 p-10">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="15" result="blur" />
+            <feGaussianBlur stdDeviation="5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
+          <linearGradient id="line-gradient-active" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#ec4899" stopOpacity="0.8" />
+          </linearGradient>
+          <linearGradient id="line-gradient-pending" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4b5563" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#9ca3af" stopOpacity="0.1" />
+          </linearGradient>
         </defs>
 
-        {/* Connection Lines */}
-        {connections.map(line => (
-          <motion.line
-            key={line.id}
-            x1={line.x1}
-            y1={line.y1}
-            x2={line.x2}
-            y2={line.y2}
-            stroke={line.isActive ? '#00f3ff' : (line.isPending ? '#bc13fe' : 'rgba(255,255,255,0.05)')}
-            strokeWidth={line.isActive ? 4 : 2}
-            strokeDasharray={line.isActive ? '0' : '8,8'}
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1 }}
-          />
-        ))}
-
-        {/* Nodes */}
-        {nodes.map((node, i) => (
-          <motion.g 
-            key={node.skill_name}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: i * 0.05, type: 'spring' }}
-            className="cursor-pointer"
-          >
-            {/* Decay Halo */}
-            {node.isCompleted && node.decayStatus !== 'mastered' && (
-              <motion.circle
-                cx={node.x}
-                cy={node.y}
-                r={nodeRadius + 15}
+        {/* Neural Connections */}
+        {connections.map((conn) => {
+          const midX = (conn.x1 + conn.x2) / 2
+          const path = `M ${conn.x1} ${conn.y1} C ${midX} ${conn.y1}, ${midX} ${conn.y2}, ${conn.x2} ${conn.y2}`
+          
+          return (
+            <g key={conn.id}>
+              <motion.path
+                d={path}
+                stroke={conn.isActive ? "url(#line-gradient-active)" : "url(#line-gradient-pending)"}
+                strokeWidth={conn.isActive ? "3" : "1.5"}
                 fill="none"
-                stroke={node.decayStatus === 'fading' ? '#f59e0b' : '#ef4444'}
-                strokeWidth="2"
-                strokeDasharray="4,4"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="opacity-40"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
               />
-            )}
+            </g>
+          )
+        })}
 
-            {/* Main Node Circle */}
-            <circle
-              cx={node.x}
-              cy={node.y}
-              r={nodeRadius}
-              fill={node.isCompleted ? '#00f3ff' : 'rgba(255,255,255,0.03)'}
-              stroke={node.isCompleted ? '#00f3ff' : 'rgba(255,255,255,0.1)'}
-              strokeWidth="2"
-              filter={node.isCompleted ? 'url(#glow)' : 'none'}
-              className="transition-all duration-500"
-            />
-            
-            {/* Progress Ring for Mastered Skills */}
-            {node.isCompleted && (
+        {/* Neural Nodes */}
+        {nodes.map((node, index) => {
+          const categoryColors = {
+            "Programming Language": ["#3b82f6", "#60a5fa"],
+            "Frontend": ["#ec4899", "#f472b6"],
+            "Backend": ["#8b5cf6", "#a78bfa"],
+            "Database": ["#10b981", "#34d399"],
+            "Cloud": ["#f59e0b", "#fbbf24"],
+            "DevOps": ["#ef4444", "#f87171"],
+            "Other": ["#6b7280", "#9ca3af"]
+          }
+          const [primaryColor, secondaryColor] = categoryColors[node.category] || categoryColors["Other"]
+
+          return (
+            <motion.g
+              key={node.skill_name + index}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.1, duration: 0.5, type: 'spring' }}
+              className="cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+            >
+              {/* Node Circle */}
               <circle
                 cx={node.x}
                 cy={node.y}
-                r={nodeRadius - 5}
-                fill="none"
-                stroke="white"
-                strokeWidth="1"
-                className="opacity-20"
+                r={nodeRadius}
+                fill="#0f172a"
+                stroke={node.isCompleted ? primaryColor : "#334155"}
+                strokeWidth="2.5"
+                className="transition-colors duration-300"
               />
-            )}
 
-            {/* Icon/Symbol Area */}
-            <foreignObject
-              x={node.x - 20}
-              y={node.y - 20}
-              width="40"
-              height="40"
-              className="pointer-events-none"
-            >
-              <div className="flex items-center justify-center w-full h-full">
-                {node.isCompleted ? (
-                   <FiZap className="text-white text-xl" />
-                ) : (
-                   <FiTarget className="text-gray-500 text-xl" />
-                )}
-              </div>
-            </foreignObject>
+              <defs>
+                <linearGradient id={`grad-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={primaryColor} stopOpacity={node.isCompleted ? 0.3 : 0.1} />
+                  <stop offset="100%" stopColor={secondaryColor} stopOpacity={node.isCompleted ? 0.1 : 0.05} />
+                </linearGradient>
+              </defs>
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r={nodeRadius - 2}
+                fill={`url(#grad-${index})`}
+              />
 
-            {/* Title & Tooltip info */}
-            <text
-              x={node.x}
-              y={node.y + nodeRadius + 25}
-              textAnchor="middle"
-              className="fill-gray-400 text-[10px] font-black uppercase tracking-widest"
-            >
-              {node.skill_name?.length > 15 ? node.skill_name.slice(0, 12) + '...' : node.skill_name}
-            </text>
-            
-            {node.isCompleted && node.decayStatus !== 'mastered' && (
+              {/* Category Label */}
               <text
                 x={node.x}
-                y={node.y + nodeRadius + 38}
+                y={node.y - 8}
                 textAnchor="middle"
-                className={`text-[8px] font-black uppercase ${node.decayStatus === 'fading' ? 'fill-amber-500' : 'fill-red-500'}`}
+                className="text-[8px] font-black uppercase tracking-tighter fill-white/40"
               >
-                {node.decayStatus === 'fading' ? 'Retention Fading' : 'Needs Refresh'}
+                {node.category.substring(0, 5)}
               </text>
-            )}
-          </motion.g>
-        ))}
+
+              {/* Skill Name */}
+              <text
+                x={node.x}
+                y={node.y + 10}
+                textAnchor="middle"
+                className="text-[11px] font-bold fill-white"
+              >
+                {node.skill_name?.length > 12 ? node.skill_name.slice(0, 10) + '..' : node.skill_name}
+              </text>
+
+              {/* Icon */}
+              <g transform={`translate(${node.x - 10}, ${node.y - 30})`}>
+                {node.isCompleted ? <FiZap size={20} color={primaryColor} /> : <FiTarget size={20} color="#334155" />}
+              </g>
+            </motion.g>
+          )
+        })}
       </svg>
 
       {/* Side Legend */}
       <div className="absolute top-8 right-8 space-y-3 pointer-events-none">
          <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5">
-            <div className="w-3 h-3 rounded-full bg-[#00f3ff] shadow-[0_0_10px_#00f3ff]"></div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#00f3ff]">Mastered</span>
-         </div>
-         <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5">
-            <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b] opacity-40"></div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Decaying</span>
-         </div>
-      </div>
-
-      <div className="absolute bottom-8 left-8 flex items-center gap-4">
-         <div className="bg-black/60 px-5 py-2.5 rounded-full border border-white/10 flex items-center gap-3">
-            <FiInfo className="text-[#bc13fe]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 italic">Neural Hierarchy View</span>
+            <div className="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_10px_#8b5cf6]"></div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Neural Path</span>
          </div>
       </div>
     </div>

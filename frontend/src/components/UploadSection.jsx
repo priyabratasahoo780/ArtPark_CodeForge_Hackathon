@@ -1,6 +1,6 @@
-import React from 'react'
-import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget } from 'react-icons/fi'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget, FiAlertCircle } from 'react-icons/fi'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function UploadSection({
   resumeText,
@@ -14,6 +14,19 @@ export default function UploadSection({
   onAnalyze,
   loading
 }) {
+  const [attempted, setAttempted] = useState(false)
+
+  const hasResume = resumeText && resumeText.trim().length > 0
+  const hasJob = jobDescriptionText && jobDescriptionText.trim().length > 0
+
+  const handleClick = () => {
+    if (!hasResume || !hasJob) {
+      setAttempted(true)
+      return
+    }
+    setAttempted(false)
+    onAnalyze()
+  }
   const handleResumeFileUpload = (e) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -76,10 +89,26 @@ export default function UploadSection({
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Manual Data Entry</p>
             <textarea
               value={resumeText}
-              onChange={(e) => onResumeChange(e.target.value)}
+              onChange={(e) => { onResumeChange(e.target.value); if (e.target.value.trim()) setAttempted(false) }}
               placeholder="Paste raw resume text for neural analysis..."
-              className="w-full h-48 p-4 bg-[#0a0a0c] border border-white/10 rounded-2xl focus:border-[#bc13fe] focus:ring-1 focus:ring-[#bc13fe]/30 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner"
+              className={`w-full h-48 p-4 bg-[#0a0a0c] border rounded-2xl focus:ring-1 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner ${
+                attempted && !hasResume
+                  ? 'border-red-500/70 focus:border-red-500 focus:ring-red-500/30 animate-pulse'
+                  : 'border-white/10 focus:border-[#bc13fe] focus:ring-[#bc13fe]/30'
+              }`}
             />
+            <AnimatePresence>
+              {attempted && !hasResume && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1 text-[9px] font-black text-red-400 uppercase tracking-widest mt-1 ml-1"
+                >
+                  <FiAlertCircle /> Resume data required
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="text-right text-[10px] font-black text-[#bc13fe] uppercase tracking-widest opacity-40">
@@ -118,10 +147,26 @@ export default function UploadSection({
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Specification Matrix</p>
             <textarea
               value={jobDescriptionText}
-              onChange={(e) => onJobDescriptionChange(e.target.value)}
+              onChange={(e) => { onJobDescriptionChange(e.target.value); if (e.target.value.trim()) setAttempted(false) }}
               placeholder="Paste requirements to generate adaptation path..."
-              className="w-full h-48 p-4 bg-[#0a0a0c] border border-white/10 rounded-2xl focus:border-[#00f3ff] focus:ring-1 focus:ring-[#00f3ff]/30 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner"
+              className={`w-full h-48 p-4 bg-[#0a0a0c] border rounded-2xl focus:ring-1 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner ${
+                attempted && !hasJob
+                  ? 'border-red-500/70 focus:border-red-500 focus:ring-red-500/30 animate-pulse'
+                  : 'border-white/10 focus:border-[#00f3ff] focus:ring-[#00f3ff]/30'
+              }`}
             />
+            <AnimatePresence>
+              {attempted && !hasJob && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1 text-[9px] font-black text-red-400 uppercase tracking-widest mt-1 ml-1"
+                >
+                  <FiAlertCircle /> Job description required
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="text-right text-[10px] font-black text-[#00f3ff] uppercase tracking-widest opacity-40">
@@ -168,16 +213,16 @@ export default function UploadSection({
       </motion.div>
 
       {/* Analyze Button */}
-      <div className="flex justify-center py-4">
+      <div className="flex flex-col items-center gap-3 py-4">
         <motion.button
-          whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(188,19,254,0.4)" }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onAnalyze}
-          disabled={loading || !resumeText.trim() || !jobDescriptionText.trim()}
-          className={`group flex items-center gap-3 bg-gradient-to-r from-[#bc13fe] to-[#8a2be2] text-white text-base font-black px-12 py-5 rounded-2xl uppercase tracking-widest shadow-[0_0_20px_rgba(188,19,254,0.2)] transition-all ${
-            loading || !resumeText.trim() || !jobDescriptionText.trim()
-              ? 'opacity-30 cursor-not-allowed grayscale'
-              : 'hover:glow-purple'
+          whileHover={{ scale: loading ? 1 : 1.05, boxShadow: loading ? 'none' : '0 0 30px rgba(188,19,254,0.4)' }}
+          whileTap={{ scale: loading ? 1 : 0.95 }}
+          onClick={handleClick}
+          disabled={loading}
+          className={`group flex items-center gap-3 text-white text-base font-black px-12 py-5 rounded-2xl uppercase tracking-widest transition-all ${
+            loading
+              ? 'bg-gradient-to-r from-[#bc13fe]/60 to-[#8a2be2]/60 cursor-wait'
+              : 'bg-gradient-to-r from-[#bc13fe] to-[#8a2be2] shadow-[0_0_20px_rgba(188,19,254,0.3)] hover:shadow-[0_0_40px_rgba(188,19,254,0.5)] cursor-pointer'
           }`}
         >
           {loading ? (
@@ -185,7 +230,7 @@ export default function UploadSection({
               <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
                 <FiZap />
               </motion.div>
-              <span>Synthesizing...</span>
+              <span>Synthesizing Neural Map...</span>
             </>
           ) : (
             <>
@@ -194,6 +239,19 @@ export default function UploadSection({
             </>
           )}
         </motion.button>
+
+        <AnimatePresence>
+          {attempted && (!hasResume || !hasJob) && (
+            <motion.p
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2 text-[10px] font-black text-red-400 uppercase tracking-widest"
+            >
+              <FiAlertCircle /> Fill in the highlighted fields above to proceed
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Sample Templates */}
