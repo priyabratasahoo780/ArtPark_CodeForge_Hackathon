@@ -105,12 +105,22 @@ function App() {
   // Phase 8 State
   const [isHelpOpen, setIsHelpOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [settings, setSettings] = useState({
-    theme: 'midnight',
-    audio: true,
-    notifications: true,
-    websockets: true
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('codeforge_settings')
+      if (saved) return JSON.parse(saved)
+    } catch (e) { console.error('Error loading settings', e) }
+    return {
+      theme: 'midnight',
+      audio: true,
+      notifications: true,
+      websockets: true
+    }
   })
+
+  useEffect(() => {
+    localStorage.setItem('codeforge_settings', JSON.stringify(settings))
+  }, [settings])
 
   // Theme Config
   const themeColors = {
@@ -171,7 +181,7 @@ function App() {
   }, [auth])
 
   useEffect(() => {
-    if (!analysisResults) return
+    if (!analysisResults || !settings.websockets) return
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${API_BASE_URL.replace(/^http:/, protocol)}/ws/progress/${sessionId}`
     const ws = new WebSocket(wsUrl)
@@ -184,7 +194,7 @@ function App() {
       }
     }
     return () => ws.close()
-  }, [analysisResults, sessionId])
+  }, [analysisResults, sessionId, settings.websockets])
 
   useEffect(() => {
     if (completedSkillNames.size > 0) fetchDecayStatus()
