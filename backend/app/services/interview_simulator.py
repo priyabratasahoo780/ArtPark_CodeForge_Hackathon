@@ -25,25 +25,44 @@ class InterviewSimulator:
 
     def generate_questions(self, mastered_skills, count=3):
         """
-        Generate a set of interview questions based on the user's mastered skills.
+        Generate a set of interview questions using the LLM.
         """
-        all_potential_questions = []
-        for skill in mastered_skills:
-            # Simple lookup, could be enhanced with LLM
-            skill_str = str(skill)
-            if skill_str in self.question_bank:
-                all_potential_questions.extend([{"skill": skill_str, "text": q} for q in self.question_bank[skill_str]])
-            else:
-                # Default generic question if skill not in bank
-                all_potential_questions.append({
-                    "skill": skill, 
-                    "text": f"Explain the core architectural patterns you would use when building a scalable system with {skill}."
-                })
-        
-        if not all_potential_questions:
-            return []
+        if not mastered_skills or len(mastered_skills) == 0:
+            mastered_skills = ["Software Engineering", "System Design", "Problem Solving"]
             
-        return random.sample(all_potential_questions, min(len(all_potential_questions), count))
+        skills_str = ", ".join(map(str, mastered_skills[:3]))
+        prompt = f"""
+        You are an expert technical interviewer. The candidate has mastered: {skills_str}.
+        Generate exactly {count} challenging technical interview questions based on these skills.
+        
+        Return ONLY a JSON array of objects with 'skill' and 'text'. Example:
+        [
+          {{"skill": "React", "text": "Explain the Virtual DOM..."}}
+        ]
+        """
+        
+        fallback_json = json.dumps([
+            {"skill": str(s), "text": f"Explain the core architectural patterns you would use with {s}."}
+            for s in mastered_skills[:count]
+        ])
+        
+        llm_response = llm_service.generate(prompt, fallback_json)
+        
+        try:
+            clean_json = re.sub(r'```json|```', '', llm_response).strip()
+            # Simple robust json array extraction
+            start_idx = clean_json.find('[')
+            end_idx = clean_json.rfind(']') + 1
+            if start_idx != -1 and end_idx != -1:
+                clean_json = clean_json[start_idx:end_idx]
+            
+            data = json.loads(clean_json)
+            if isinstance(data, list) and len(data) > 0:
+                return data[:count]
+        except Exception:
+            pass
+            
+        return json.loads(fallback_json)
 
     def grade_answer(self, question, answer):
         """
