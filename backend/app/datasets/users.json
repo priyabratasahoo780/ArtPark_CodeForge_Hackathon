@@ -38,5 +38,15 @@
     "email": "priyabrata.sahoo.g@gmail.com",
     "role": "HR",
     "hashed_password": "$pbkdf2-sha256$29000$BACA8H5vjfH./z/nXOtd6w$GrTvIbUvcsDeGv0J.Jd.wjN4L6op9IRuM7eeNrP8.Eo"
+  },
+  "test_lk8erx@example.com": {
+    "email": "test_lk8erx@example.com",
+    "role": "USER",
+    "hashed_password": "$pbkdf2-sha256$29000$7z2HMGZszdm7dy6FkHJOqQ$TzOLsdDAVFl6tbhXdCPSIZuQmvGfcAydmRivs6fwrhA"
+  },
+  "test_6rlf4i@example.com": {
+    "email": "test_6rlf4i@example.com",
+    "role": "USER",
+    "hashed_password": "$pbkdf2-sha256$29000$oHQu5bx3jtFa692bM4YQwg$F32yLwpJSl6KTBjTnVGa1W.8sw5V5Ufuc/kr0dKVzxE"
   }
 }
