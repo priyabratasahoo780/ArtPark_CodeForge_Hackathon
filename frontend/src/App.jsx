@@ -387,7 +387,7 @@ function App() {
                  </>
                )}
 
-                {analysisResults && viewMode === 'recruiter' && (auth.role === 'HR' || auth.role === 'MANAGER') && (
+                {viewMode === 'recruiter' && (auth.role === 'HR' || auth.role === 'MANAGER') && (
                   <>
                     <NavTab active={activeTab === 'recruiter'} onClick={() => setActiveTab('recruiter')} icon={<FiTrendingUp />} label="Leaderboard" color="#00f3ff" />
                     <NavTab active={activeTab === 'talent'} onClick={() => setActiveTab('talent')} icon={<FiUsers />} label="Talent Pool" color="#bc13fe" />
