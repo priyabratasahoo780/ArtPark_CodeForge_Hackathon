@@ -2,13 +2,77 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { FiTarget, FiZap, FiActivity, FiGlobe, FiShare2, FiArrowUpRight, FiShield } from 'react-icons/fi'
 
-const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark, completedSkillNames, insightsSkills }) => {
+const RecruiterDashboard = ({ 
+  candidateData, 
+  learningPath, 
+  marketBenchmark, 
+  completedSkillNames, 
+  insightsSkills,
+  batchResults = [],
+  onSelectCandidate,
+  selectedIndex = 0
+}) => {
   const handleExport = () => {
     window.print()
   }
 
   return (
     <div className="space-y-6 sm:space-y-8 lg:space-y-10 px-0">
+      
+      {/* ── Hiring Leaderboard (Batch View) ── */}
+      {batchResults.length > 1 && (
+        <div className="glass-card p-6 border-white/10 bg-white/[0.02] rounded-3xl">
+          <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6">Hiring Leaderboard ({batchResults.length} Candidates)</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="pb-4 text-[9px] font-black text-white uppercase tracking-widest">Candidate</th>
+                  <th className="pb-4 text-[9px] font-black text-white uppercase tracking-widest">Readiness</th>
+                  <th className="pb-4 text-[9px] font-black text-white uppercase tracking-widest text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {batchResults.map((res, idx) => {
+                  const score = res.gap_analysis?.statistics?.readiness_score || 0
+                  return (
+                    <tr key={idx} className={`group hover:bg-white/[0.02] transition-colors ${selectedIndex === idx ? 'bg-white/[0.05]' : ''}`}>
+                      <td className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${selectedIndex === idx ? 'bg-[#bc13fe] text-white' : 'bg-white/5 text-gray-400'}`}>
+                            {res.candidate_name?.[0] || 'C'}
+                          </div>
+                          <span className="text-xs font-bold text-white uppercase tracking-tight">{res.candidate_name}</span>
+                        </div>
+                      </td>
+                      <td className="py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 max-w-[100px] h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-[#bc13fe] to-[#00f3ff]" style={{ width: `${score}%` }}></div>
+                          </div>
+                          <span className="text-[10px] font-black text-[#00f3ff]">{score}%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 text-center">
+                        <button 
+                          onClick={() => onSelectCandidate(idx)}
+                          className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
+                            selectedIndex === idx 
+                              ? 'bg-white text-black' 
+                              : 'border border-white/10 text-gray-400 hover:text-white hover:border-white/30'
+                          }`}
+                        >
+                          {selectedIndex === idx ? 'Viewing' : 'Inspect'}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ── Header Profile Section ── */}
       <div className="relative bg-white/5 p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl lg:rounded-[3rem] border border-white/10 overflow-hidden">
@@ -31,8 +95,8 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark, comp
             </div>
             <div className="min-w-0">
               <h2 className="text-base sm:text-xl lg:text-3xl font-black text-white tracking-tighter uppercase italic leading-tight truncate">
-                Elite Candidate
-                <span className="text-gray-600 ml-2 sm:ml-4 font-normal not-italic opacity-40 text-sm sm:text-base lg:text-xl">#CODE-4492</span>
+                {candidateData?.candidate_name || 'Elite Candidate'}
+                <span className="text-gray-600 ml-2 sm:ml-4 font-normal not-italic opacity-40 text-sm sm:text-base lg:text-xl">#{candidateData?.candidate_id || 'CODE-4492'}</span>
               </h2>
               <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-4">
                 <div className="flex items-center gap-1.5">

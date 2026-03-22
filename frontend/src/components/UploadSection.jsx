@@ -15,7 +15,9 @@ export default function UploadSection({
   timelineDays,
   onTimelineChange,
   onAnalyze,
-  loading
+  loading,
+  isHR = false,
+  onMultiResumesChange
 }) {
   const [attempted, setAttempted] = useState(false)
   const [resumeUploading, setResumeUploading] = useState(false)
@@ -64,9 +66,43 @@ export default function UploadSection({
     }
   }
 
-  const handleResumeFileUpload = (e) => {
-    const file = e.target.files?.[0]
-    if (file) extractTextFromFile(file, setResumeUploading, setResumeFileName, setResumeUploadError, onResumeChange)
+  const handleResumeFileUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    if (!isHR) {
+      // Single file mode
+      extractTextFromFile(files[0], setResumeUploading, setResumeFileName, setResumeUploadError, onResumeChange)
+    } else {
+      // Multi file mode for HR
+      setResumeUploading(true)
+      setResumeUploadError(null)
+      setResumeFileName(`${files.length} resumes selected`)
+      
+      try {
+        const results = await Promise.all(files.map(async (file) => {
+          const formData = new FormData()
+          formData.append('file', file)
+          const resp = await axios.post(`${API_BASE_URL}/extract/text`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 60000,
+          })
+          return { name: file.name, text: resp.data?.text || '' }
+        }))
+        
+        const validResults = results.filter(r => r.text.trim().length > 0)
+        if (validResults.length > 0) {
+          onMultiResumesChange(validResults)
+          setAttempted(false)
+        } else {
+          setResumeUploadError('No readable text found in any of the files.')
+        }
+      } catch (err) {
+        setResumeUploadError('Error extracting some resumes. Please try again.')
+      } finally {
+        setResumeUploading(false)
+      }
+    }
     e.target.value = ''
   }
 
@@ -112,6 +148,7 @@ export default function UploadSection({
                   onChange={handleResumeFileUpload}
                   accept=".txt,.pdf"
                   disabled={resumeUploading}
+                  multiple={isHR}
                 />
               </label>
               <AnimatePresence>
@@ -127,7 +164,7 @@ export default function UploadSection({
             <textarea
               value={resumeText}
               onChange={(e) => { onResumeChange(e.target.value); if (e.target.value.trim()) { setAttempted(false); setResumeFileName(null) } }}
-              placeholder="Paste raw resume text for neural analysis..."
+              placeholder={isHR ? "Paste multiple resumes or upload files above..." : "Paste raw resume text for neural analysis..."}
               className={`w-full h-48 p-4 bg-[#0a0a0c] border rounded-2xl focus:ring-1 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner ${
                 attempted && !hasResume
                   ? 'border-red-500/70 focus:border-red-500 focus:ring-red-500/30 animate-pulse'
@@ -283,12 +320,12 @@ export default function UploadSection({
               <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
                 <FiZap />
               </motion.div>
-              <span>Synthesizing Neural Map...</span>
+              <span>{isHR ? 'Orchestrating Batch Sync...' : 'Synthesizing Neural Map...'}</span>
             </>
           ) : (
             <>
               <FiZap className="text-xl group-hover:animate-pulse" />
-              <span>Initiate Deep Analysis</span>
+              <span>{isHR ? 'Initiate Batch Analysis' : 'Initiate Deep Analysis'}</span>
             </>
           )}
         </motion.button>
@@ -308,27 +345,29 @@ export default function UploadSection({
       </div>
 
       {/* Sample Templates */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card border-white/5 bg-white/[0.01] p-6 text-center"
-      >
-        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">Baseline Templates</h3>
-        <div className="flex flex-wrap justify-center gap-6">
-          <button
-            onClick={() => { onResumeChange(`JOHN DOE\nFull-Stack Dev\nSkills: React, Node, Python`); setResumeFileName(null) }}
-            className="text-[10px] font-black text-[#bc13fe] hover:text-white uppercase tracking-widest border-b border-[#bc13fe]/30 hover:border-white transition-all pb-1"
-          >
-            Load Tech Resume
-          </button>
-          <button
-            onClick={() => { onJobDescriptionChange(`ROLE: FULL STACK\nREQ: Node, React, AWS`); setJobFileName(null) }}
-            className="text-[10px] font-black text-[#00f3ff] hover:text-white uppercase tracking-widest border-b border-[#00f3ff]/30 hover:border-white transition-all pb-1"
-          >
-            Load Standard JD
-          </button>
-        </div>
-      </motion.div>
+      {!isHR && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card border-white/5 bg-white/[0.01] p-6 text-center"
+        >
+          <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">Baseline Templates</h3>
+          <div className="flex flex-wrap justify-center gap-6">
+            <button
+              onClick={() => { onResumeChange(`JOHN DOE\nFull-Stack Dev\nSkills: React, Node, Python`); setResumeFileName(null) }}
+              className="text-[10px] font-black text-[#bc13fe] hover:text-white uppercase tracking-widest border-b border-[#bc13fe]/30 hover:border-white transition-all pb-1"
+            >
+              Load Tech Resume
+            </button>
+            <button
+              onClick={() => { onJobDescriptionChange(`ROLE: FULL STACK\nREQ: Node, React, AWS`); setJobFileName(null) }}
+              className="text-[10px] font-black text-[#00f3ff] hover:text-white uppercase tracking-widest border-b border-[#00f3ff]/30 hover:border-white transition-all pb-1"
+            >
+              Load Standard JD
+            </button>
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }

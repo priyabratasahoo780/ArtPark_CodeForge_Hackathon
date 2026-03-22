@@ -146,6 +146,9 @@ function App() {
   const [timelineDays, setTimelineDays] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [batchResumes, setBatchResumes] = useState([]) // [{ name, text }]
+  const [batchResults, setBatchResults] = useState([])
+  const [selectedCandidateIndex, setSelectedCandidateIndex] = useState(0)
   
   // Results
   const [analysisResults, setAnalysisResults] = useState(null)
@@ -269,21 +272,54 @@ function App() {
   }
 
   const handleAnalyze = async () => {
-    if (!resumeText || !jobDescriptionText) return setError('Please provide both resume and job description.')
+    if ((!resumeText && batchResumes.length === 0) || !jobDescriptionText) return setError('Please provide resume(s) and job description.')
     setLoading(true)
     setError(null)
+    
     try {
-      const resp = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
-        resume_text: resumeText,
-        job_description_text: jobDescriptionText,
-        target_role: targetRole || undefined,
-        timeline_days: timelineDays || undefined
-      }, authHeaders())
-      setAnalysisResults(resp.data)
-      setGapAnalysis(resp.data.gap_analysis)
-      setLearningPath(resp.data.learning_path)
-      setReasoningTrace(resp.data.reasoning_trace)
-      setActiveTab('results')
+      if (auth.role === 'HR' && batchResumes.length > 0) {
+        const results = []
+        for (const res of batchResumes) {
+          try {
+            const resp = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
+              resume_text: res.text,
+              job_description_text: jobDescriptionText,
+              target_role: targetRole || undefined,
+              timeline_days: timelineDays || undefined
+            }, authHeaders())
+            results.push({ 
+              ...resp.data, 
+              candidate_name: res.name.replace(/\.[^/.]+$/, "") // Remove extension
+            })
+          } catch (e) {
+            console.error(`Error analyzing ${res.name}:`, e)
+          }
+        }
+        
+        if (results.length === 0) throw new Error("All analyses failed.")
+        
+        setBatchResults(results)
+        setAnalysisResults(results[0])
+        setGapAnalysis(results[0].gap_analysis)
+        setLearningPath(results[0].learning_path)
+        setReasoningTrace(results[0].reasoning_trace)
+        setSelectedCandidateIndex(0)
+        setActiveTab('results')
+      } else {
+        // Single Analysis Logic
+        const resp = await axios.post(`${API_BASE_URL}/onboarding/complete`, {
+          resume_text: resumeText,
+          job_description_text: jobDescriptionText,
+          target_role: targetRole || undefined,
+          timeline_days: timelineDays || undefined
+        }, authHeaders())
+        setAnalysisResults(resp.data)
+        setGapAnalysis(resp.data.gap_analysis)
+        setLearningPath(resp.data.learning_path)
+        setReasoningTrace(resp.data.reasoning_trace)
+        setBatchResults([{ ...resp.data, candidate_name: "Primary Candidate" }])
+        setActiveTab('results')
+      }
     } catch (err) {
       const detail = err?.response?.data?.detail
       setError(detail ? `Analysis error: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}` : 'Analysis failed. Make sure both servers are running.')
@@ -398,6 +434,16 @@ function App() {
                            marketBenchmark={marketBenchmark} 
                            completedSkillNames={completedSkillNames}
                            insightsSkills={insightsSkills}
+                           batchResults={batchResults}
+                           onSelectCandidate={(index) => {
+                              const selected = batchResults[index]
+                              setAnalysisResults(selected)
+                              setGapAnalysis(selected.gap_analysis)
+                              setLearningPath(selected.learning_path)
+                              setReasoningTrace(selected.reasoning_trace)
+                              setSelectedCandidateIndex(index)
+                           }}
+                           selectedIndex={selectedCandidateIndex}
                         />
                       </Suspense>
                    </motion.div>
@@ -410,6 +456,8 @@ function App() {
                         targetRole={targetRole} onTargetRoleChange={setTargetRole}
                         timelineDays={timelineDays} onTimelineChange={setTimelineDays}
                         onAnalyze={handleAnalyze} loading={loading}
+                        isHR={auth.role === 'HR' || auth.role === 'MANAGER'}
+                        onMultiResumesChange={setBatchResumes}
                        />
                     )}
 
