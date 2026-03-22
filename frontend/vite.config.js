@@ -12,5 +12,19 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
+  },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':   ['react', 'react-dom'],
+          'vendor-motion':  ['framer-motion'],
+          'vendor-charts':  ['recharts'],
+          'vendor-icons':   ['react-icons'],
+          'vendor-http':    ['axios'],
+        }
+      }
+    }
   }
 })

@@ -8,100 +8,130 @@ const RecruiterDashboard = ({ candidateData, learningPath, marketBenchmark, comp
   }
 
   return (
-    <div className="space-y-10">
-      {/* Header Profile Section */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-white/5 p-10 rounded-[3rem] border border-white/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-6">
-           <div className="flex items-center gap-2 px-4 py-2 bg-[#34d399]/10 border border-[#34d399]/20 rounded-full">
-              <FiShield className="text-[#34d399]" />
-              <span className="text-[10px] font-black text-[#34d399] uppercase tracking-widest">Verified Talent Hub</span>
-           </div>
-        </div>
-        
-        <div className="flex items-center gap-8">
-          <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-[#bc13fe] to-[#00f3ff] p-1 shadow-2xl">
-             <div className="w-full h-full bg-[#0a0a0c] rounded-[1.8rem] flex items-center justify-center">
-                <span className="text-3xl font-black text-white">JD</span>
-             </div>
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10 px-0">
+
+      {/* ── Header Profile Section ── */}
+      <div className="relative bg-white/5 p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl lg:rounded-[3rem] border border-white/10 overflow-hidden">
+        {/* Verified badge — top-right, always visible */}
+        <div className="absolute top-3 right-3 sm:top-6 sm:right-6">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#34d399]/10 border border-[#34d399]/20 rounded-full">
+            <FiShield className="text-[#34d399] text-xs sm:text-sm" />
+            <span className="text-[8px] sm:text-[10px] font-black text-[#34d399] uppercase tracking-widest hidden xs:inline">Verified Talent Hub</span>
           </div>
-          <div>
-            <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">Elite Candidate <span className="text-gray-600 ml-4 font-normal not-italic opacity-40">#CODE-4492</span></h2>
-            <div className="flex gap-4 mt-4">
-              <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-[#34d399]"></div>
-                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Open to roles</span>
+        </div>
+
+        {/* Avatar + info + button stacked on mobile, row on md+ */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-6 pt-7 sm:pt-0">
+          {/* Avatar + Text */}
+          <div className="flex items-center gap-4 sm:gap-6 lg:gap-8">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 shrink-0 rounded-xl sm:rounded-2xl lg:rounded-[2rem] bg-gradient-to-br from-[#bc13fe] to-[#00f3ff] p-0.5 shadow-2xl">
+              <div className="w-full h-full bg-[#0a0a0c] rounded-xl sm:rounded-2xl lg:rounded-[1.8rem] flex items-center justify-center">
+                <span className="text-lg sm:text-2xl lg:text-3xl font-black text-white">JD</span>
               </div>
-              <div className="flex items-center gap-2">
-                 <FiTarget className="text-[#00f3ff]" />
-                 <span className="text-[10px] font-black text-white uppercase tracking-widest">{candidateData?.target_role || 'Senior Engineer'}</span>
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-xl lg:text-3xl font-black text-white tracking-tighter uppercase italic leading-tight truncate">
+                Elite Candidate
+                <span className="text-gray-600 ml-2 sm:ml-4 font-normal not-italic opacity-40 text-sm sm:text-base lg:text-xl">#CODE-4492</span>
+              </h2>
+              <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-4">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#34d399]"></div>
+                  <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest">Open to roles</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <FiTarget className="text-[#00f3ff] text-xs" />
+                  <span className="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-widest truncate max-w-[140px] sm:max-w-none">
+                    {candidateData?.target_role || 'Senior Engineer'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <button onClick={handleExport} className="px-8 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all flex items-center gap-3 print:hidden">
-           <FiShare2 /> Export Talent Report
-        </button>
+          {/* Export button — full width on mobile */}
+          <button
+            onClick={handleExport}
+            className="w-full sm:w-auto px-6 py-3 sm:py-4 bg-white text-black text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl sm:rounded-2xl hover:scale-105 transition-all flex items-center justify-center gap-2 print:hidden shrink-0"
+          >
+            <FiShare2 /> Export Talent Report
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Readiness Metric */}
-        <div className="glass-card p-8 border-none bg-gradient-to-br from-[#00f3ff]/10 to-transparent rounded-3xl col-span-1">
-          <h3 className="text-[10px] font-black text-[#00f3ff] uppercase tracking-widest mb-6">Market Readiness Index</h3>
-          <div className="flex items-baseline gap-2">
-             <span className="text-6xl font-black text-white">
-                {Math.min(99, (marketBenchmark?.user_percentile || 65) + (completedSkillNames?.size || 0) * 4)}%
-             </span>
-             <span className="text-xs font-black text-[#34d399]">+{(completedSkillNames?.size || 0) * 1.5}% High</span>
+      {/* ── Metrics Row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        {/* Market Readiness */}
+        <div className="glass-card p-5 sm:p-6 lg:p-8 border-none bg-gradient-to-br from-[#00f3ff]/10 to-transparent rounded-2xl sm:rounded-3xl lg:col-span-1">
+          <h3 className="text-[9px] sm:text-[10px] font-black text-[#00f3ff] uppercase tracking-widest mb-4 sm:mb-6">Market Readiness Index</h3>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-white">
+              {Math.min(99, (marketBenchmark?.user_percentile || 65) + (completedSkillNames?.size || 0) * 4)}%
+            </span>
+            <span className="text-xs font-black text-[#34d399]">+{(completedSkillNames?.size || 0) * 1.5}% High</span>
           </div>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-4 leading-relaxed">Top 6% against 2,400+ technical candidates verified in the last 30 days.</p>
+          <p className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-3 sm:mt-4 leading-relaxed">
+            Top 6% against 2,400+ technical candidates verified in the last 30 days.
+          </p>
         </div>
 
-        {/* Growth Velocity */}
-        <div className="glass-card p-8 border-none bg-gradient-to-br from-[#bc13fe]/10 to-transparent rounded-3xl col-span-2">
-           <div className="flex justify-between items-center mb-8">
-              <h3 className="text-[10px] font-black text-[#bc13fe] uppercase tracking-widest">Mastery Velocity</h3>
-              <FiActivity className="text-[#bc13fe]" />
-           </div>
-           
-           <div className="h-24 flex items-end gap-2">
-              {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
-                <div key={i} className="flex-1 bg-white/5 rounded-t-lg relative group">
-                   <motion.div 
-                     initial={{ height: 0 }}
-                     animate={{ height: `${h}%` }}
-                     className="absolute bottom-0 w-full bg-gradient-to-t from-[#bc13fe] to-[#bc13fe]/40 rounded-t-lg"
-                   />
-                </div>
-              ))}
-           </div>
-           <div className="flex justify-between mt-4 text-[8px] font-black text-gray-500 uppercase tracking-widest">
-              <span>Day 1</span>
-              <span>Onboarding Velocity (Past 7 Days)</span>
-              <span>Today</span>
-           </div>
+        {/* Mastery Velocity — spans 2 cols on lg */}
+        <div className="glass-card p-5 sm:p-6 lg:p-8 border-none bg-gradient-to-br from-[#bc13fe]/10 to-transparent rounded-2xl sm:rounded-3xl sm:col-span-1 lg:col-span-2">
+          <div className="flex justify-between items-center mb-5 sm:mb-8">
+            <h3 className="text-[9px] sm:text-[10px] font-black text-[#bc13fe] uppercase tracking-widest">Mastery Velocity</h3>
+            <FiActivity className="text-[#bc13fe]" />
+          </div>
+
+          <div className="h-20 sm:h-24 flex items-end gap-1.5 sm:gap-2">
+            {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
+              <div key={i} className="flex-1 bg-white/5 rounded-t-lg relative">
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${h}%` }}
+                  transition={{ delay: i * 0.06, duration: 0.5 }}
+                  className="absolute bottom-0 w-full bg-gradient-to-t from-[#bc13fe] to-[#bc13fe]/40 rounded-t-lg"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-3 sm:mt-4 text-[7px] sm:text-[8px] font-black text-gray-500 uppercase tracking-widest">
+            <span>Day 1</span>
+            <span className="hidden sm:inline">Onboarding Velocity (Past 7 Days)</span>
+            <span>Today</span>
+          </div>
         </div>
       </div>
 
-      <div className="glass-card p-8 border-none bg-white/[0.02] rounded-3xl">
-        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-8">Verified Technology Stack</h3>
-        <div className="flex flex-wrap gap-4">
-           {insightsSkills?.map((skill, idx) => (
-             <div key={idx} className={`px-6 py-4 bg-black/40 border ${completedSkillNames?.has(skill.name) ? 'border-[#34d399]/50 shadow-[0_0_15px_rgba(52,211,153,0.1)]' : 'border-white/5'} rounded-2xl flex items-center gap-4 hover:border-[#00f3ff]/30 transition-all cursor-default`}>
-                <div className={`w-2 h-2 rounded-full ${completedSkillNames?.has(skill.name) ? 'bg-[#34d399]' : 'bg-[#00f3ff]'}`}></div>
-                <div>
-                   <span className="text-xs font-black text-white uppercase tracking-tight">{skill.name}</span>
-                   <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[8px] font-bold text-gray-600 uppercase">Assessment: </span>
-                      <span className={`text-[8px] font-black ${completedSkillNames?.has(skill.name) ? 'text-[#34d399]' : 'text-[#00f3ff]'} uppercase`}>
-                         {completedSkillNames?.has(skill.name) ? 'Verified Platinum' : 'Verified Gold'}
-                      </span>
-                   </div>
+      {/* ── Verified Technology Stack ── */}
+      <div className="glass-card p-5 sm:p-6 lg:p-8 border-none bg-white/[0.02] rounded-2xl sm:rounded-3xl">
+        <h3 className="text-[9px] sm:text-[10px] font-black text-gray-500 uppercase tracking-widest mb-5 sm:mb-8">Verified Technology Stack</h3>
+        {insightsSkills && insightsSkills.length > 0 ? (
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {insightsSkills.map((skill, idx) => (
+              <div
+                key={idx}
+                className={`px-4 py-3 sm:px-5 sm:py-4 bg-black/40 border ${completedSkillNames?.has(skill.name)
+                  ? 'border-[#34d399]/50 shadow-[0_0_15px_rgba(52,211,153,0.1)]'
+                  : 'border-white/5'
+                } rounded-xl sm:rounded-2xl flex items-center gap-3 hover:border-[#00f3ff]/30 transition-all cursor-default`}
+              >
+                <div className={`w-2 h-2 rounded-full shrink-0 ${completedSkillNames?.has(skill.name) ? 'bg-[#34d399]' : 'bg-[#00f3ff]'}`}></div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] sm:text-xs font-black text-white uppercase tracking-tight block truncate">{skill.name}</span>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-[7px] sm:text-[8px] font-bold text-gray-600 uppercase">Assessment: </span>
+                    <span className={`text-[7px] sm:text-[8px] font-black ${completedSkillNames?.has(skill.name) ? 'text-[#34d399]' : 'text-[#00f3ff]'} uppercase`}>
+                      {completedSkillNames?.has(skill.name) ? 'Verified Platinum' : 'Verified Gold'}
+                    </span>
+                  </div>
                 </div>
-                <FiArrowUpRight className="text-gray-700 ml-4" />
-             </div>
-           ))}
-        </div>
+                <FiArrowUpRight className="text-gray-700 shrink-0 text-xs" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[10px] text-gray-600 uppercase tracking-widest text-center py-6">Run analysis to see verified skills</p>
+        )}
       </div>
     </div>
   )

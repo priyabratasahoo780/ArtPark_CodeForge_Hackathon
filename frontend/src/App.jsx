@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react'
 import { 
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
   FiMap, FiMessageSquare, FiLogOut, FiAward,
@@ -8,43 +8,52 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
-// Components
-import UploadSection from './components/UploadSection'
-import GapAnalysis from './components/GapAnalysis'
-import LearningPath from './components/LearningPath'
-import SkillsAnalysis from './components/SkillsAnalysis'
-import ResumeFeedback from './components/ResumeFeedback'
-import VoiceExplain from './components/VoiceExplain'
-import TimeSavedAnalytics from './components/TimeSavedAnalytics'
+// ─── Eager (first-paint critical) ────────────────────────────────────
 import Login from './components/Login'
-import NeuralRoadmap from './components/NeuralRoadmap'
-import AchievementSystem from './components/AchievementSystem'
-import ActivityFeed from './components/ActivityFeed'
-import CareerPredictor from './components/CareerPredictor'
-import InterviewModal from './components/InterviewModal'
-import CollaborativeCanvas from './components/CollaborativeCanvas'
-import EliteAnalytics from './components/EliteAnalytics'
-import CodingSandbox from './components/CodingSandbox'
-import FlashcardDeck from './components/FlashcardDeck'
-import GlobalTrendMap from './components/GlobalTrendMap'
-import RecruiterDashboard from './components/RecruiterDashboard'
-import HelpCenter from './components/HelpCenter'
-import SettingsModal from './components/SettingsModal'
-import FlowTimer from './components/FlowTimer'
-import TechnicalPortfolio from './components/TechnicalPortfolio'
-import FutureMap from './components/FutureMap'
-import SystemStatus from './components/SystemStatus'
-import SalaryPredictor from './components/SalaryPredictor'
-import JobMatcher from './components/JobMatcher'
-import DailyStreak from './components/DailyStreak'
-import ResumeScoreRadar from './components/ResumeScoreRadar'
-import UIVision from './components/UIVision'
-import SkillGalaxy from './components/SkillGalaxy'
-import PitchGenerator from './components/PitchGenerator'
-import CodeRadar from './components/CodeRadar'
-import SquadHub from './components/SquadHub'
-import SystemGuardian from './components/SystemGuardian'
-import ExecutivePacket from './components/ExecutivePacket'
+import UploadSection from './components/UploadSection'
+
+// ─── Lazy (loaded only when the user navigates to them) ──────────────
+const GapAnalysis         = lazy(() => import('./components/GapAnalysis'))
+const LearningPath        = lazy(() => import('./components/LearningPath'))
+const SkillsAnalysis      = lazy(() => import('./components/SkillsAnalysis'))
+const ResumeFeedback      = lazy(() => import('./components/ResumeFeedback'))
+const VoiceExplain        = lazy(() => import('./components/VoiceExplain'))
+const TimeSavedAnalytics  = lazy(() => import('./components/TimeSavedAnalytics'))
+const NeuralRoadmap       = lazy(() => import('./components/NeuralRoadmap'))
+const AchievementSystem   = lazy(() => import('./components/AchievementSystem'))
+const ActivityFeed        = lazy(() => import('./components/ActivityFeed'))
+const CareerPredictor     = lazy(() => import('./components/CareerPredictor'))
+const InterviewModal      = lazy(() => import('./components/InterviewModal'))
+const CollaborativeCanvas = lazy(() => import('./components/CollaborativeCanvas'))
+const EliteAnalytics      = lazy(() => import('./components/EliteAnalytics'))
+const CodingSandbox       = lazy(() => import('./components/CodingSandbox'))
+const FlashcardDeck       = lazy(() => import('./components/FlashcardDeck'))
+const GlobalTrendMap      = lazy(() => import('./components/GlobalTrendMap'))
+const RecruiterDashboard  = lazy(() => import('./components/RecruiterDashboard'))
+const HelpCenter          = lazy(() => import('./components/HelpCenter'))
+const SettingsModal       = lazy(() => import('./components/SettingsModal'))
+const FlowTimer           = lazy(() => import('./components/FlowTimer'))
+const TechnicalPortfolio  = lazy(() => import('./components/TechnicalPortfolio'))
+const FutureMap           = lazy(() => import('./components/FutureMap'))
+const SystemStatus        = lazy(() => import('./components/SystemStatus'))
+const SalaryPredictor     = lazy(() => import('./components/SalaryPredictor'))
+const JobMatcher          = lazy(() => import('./components/JobMatcher'))
+const DailyStreak         = lazy(() => import('./components/DailyStreak'))
+const ResumeScoreRadar    = lazy(() => import('./components/ResumeScoreRadar'))
+const UIVision            = lazy(() => import('./components/UIVision'))
+const SkillGalaxy         = lazy(() => import('./components/SkillGalaxy'))
+const PitchGenerator      = lazy(() => import('./components/PitchGenerator'))
+const CodeRadar           = lazy(() => import('./components/CodeRadar'))
+const SquadHub            = lazy(() => import('./components/SquadHub'))
+const SystemGuardian      = lazy(() => import('./components/SystemGuardian'))
+const ExecutivePacket     = lazy(() => import('./components/ExecutivePacket'))
+
+// ─── Lightweight Suspense fallback ───────────────────────────────────
+const TabFallback = () => (
+  <div className="flex items-center justify-center py-32">
+    <div className="w-10 h-10 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+  </div>
+)
 
 const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
@@ -375,13 +384,15 @@ function App() {
              <AnimatePresence mode="wait">
                 {viewMode === 'recruiter' ? (
                    <motion.div key="recruiter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                      <RecruiterDashboard 
-                         candidateData={analysisResults} 
-                         learningPath={learningPath} 
-                         marketBenchmark={marketBenchmark} 
-                         completedSkillNames={completedSkillNames}
-                         insightsSkills={insightsSkills}
-                      />
+                      <Suspense fallback={<TabFallback />}>
+                        <RecruiterDashboard 
+                           candidateData={analysisResults} 
+                           learningPath={learningPath} 
+                           marketBenchmark={marketBenchmark} 
+                           completedSkillNames={completedSkillNames}
+                           insightsSkills={insightsSkills}
+                        />
+                      </Suspense>
                    </motion.div>
                 ) : (
                   <>
@@ -396,59 +407,70 @@ function App() {
                     )}
 
                     {activeTab === 'results' && analysisResults && (
-                      <div className="space-y-10">
-                        <AchievementSystem completedCount={completedSkillNames.size} />
-                        <EliteAnalytics decayData={decayData} loadStats={loadStats} marketBenchmark={marketBenchmark} />
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                           <CareerPredictor roadmapData={learningPath} targetRole={targetRole || analysisResults.target_role} auth={auth} />
-                           <div className="glass-card p-8 border-none flex flex-col justify-between transition-all duration-1000" style={{ backgroundColor: `${theme.primary}05` }}>
-                              <div>
-                                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast style={{ color: theme.primary }} /> Onboarding Podcast</h3>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">{audioBriefingUrl ? 'Audio generated successfully' : 'Generate an AI summary of your progress'}</p>
-                                {audioBriefingUrl && <audio controls src={audioBriefingUrl} className="mt-8 w-full h-8" />}
-                              </div>
-                              <button onClick={generateBriefing} disabled={isBriefingGenerating} className="mt-8 w-full py-4 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-1000" style={{ backgroundColor: theme.primary }}>
-                                {isBriefingGenerating ? <FiRefreshCw className="animate-spin" /> : <FiMic />} {isBriefingGenerating ? 'Generating...' : 'Start Podcast'}
-                              </button>
-                           </div>
+                      <Suspense fallback={<TabFallback />}>
+                        <div className="space-y-10">
+                          <AchievementSystem completedCount={completedSkillNames.size} />
+                          <EliteAnalytics decayData={decayData} loadStats={loadStats} marketBenchmark={marketBenchmark} />
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                             <CareerPredictor roadmapData={learningPath} targetRole={targetRole || analysisResults.target_role} auth={auth} />
+                             <div className="glass-card p-8 border-none flex flex-col justify-between transition-all duration-1000" style={{ backgroundColor: `${theme.primary}05` }}>
+                                <div>
+                                  <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-2"><FiCast style={{ color: theme.primary }} /> Onboarding Podcast</h3>
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">{audioBriefingUrl ? 'Audio generated successfully' : 'Generate an AI summary of your progress'}</p>
+                                  {audioBriefingUrl && <audio controls src={audioBriefingUrl} className="mt-8 w-full h-8" />}
+                                </div>
+                                <button onClick={generateBriefing} disabled={isBriefingGenerating} className="mt-8 w-full py-4 rounded-2xl text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-1000" style={{ backgroundColor: theme.primary }}>
+                                  {isBriefingGenerating ? <FiRefreshCw className="animate-spin" /> : <FiMic />} {isBriefingGenerating ? 'Generating...' : 'Start Podcast'}
+                                </button>
+                             </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <VoiceExplain reasoningTrace={reasoningTrace} gapStats={gapAnalysis?.statistics} auth={auth} />
+                             <div className="glass-card p-8 border-none bg-[#00f3ff]/5 rounded-3xl flex flex-col justify-between">
+                               <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2"><FiMic className="text-[#00f3ff]" /> Technical Interview</h3>
+                               <button onClick={() => setIsInterviewModalOpen(true)} className="mt-8 py-4 rounded-2xl bg-[#00f3ff] text-black text-[10px] font-black uppercase tracking-widest">Begin Session</button>
+                             </div>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                           <VoiceExplain reasoningTrace={reasoningTrace} gapStats={gapAnalysis?.statistics} auth={auth} />
-                           <div className="glass-card p-8 border-none bg-[#00f3ff]/5 rounded-3xl flex flex-col justify-between">
-                             <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2"><FiMic className="text-[#00f3ff]" /> Technical Interview</h3>
-                             <button onClick={() => setIsInterviewModalOpen(true)} className="mt-8 py-4 rounded-2xl bg-[#00f3ff] text-black text-[10px] font-black uppercase tracking-widest">Begin Session</button>
-                           </div>
-                        </div>
-                      </div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'path' && learningPath && (
+                      <Suspense fallback={<TabFallback />}>
                        <div>
                          <div className="flex justify-end mb-6">
                             <button onClick={() => setPathViewMode(pathViewMode === 'neural' ? 'list' : 'neural')} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400">Toggle View ({pathViewMode})</button>
                          </div>
                          {pathViewMode === 'neural' ? <NeuralRoadmap data={learningPath?.modules} completedSkillNames={completedSkillNames} decayData={decayData} /> : <LearningPath data={learningPath} onToggleSkill={handleToggleSkill} completedSkillNames={completedSkillNames} />}
                        </div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'sandbox' && (
+                      <Suspense fallback={<TabFallback />}>
                        <div className="space-y-8">
                           <div className="flex justify-end pr-4">
                              <FlowTimer />
                           </div>
                           <CodingSandbox activeSkill={activeSandboxSkill} auth={auth} />
                        </div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'recall' && (
+                      <Suspense fallback={<TabFallback />}>
                        <FlashcardDeck masteredSkills={Array.from(new Set([...(analysisResults?.skills_analysis?.resume_skills?.map(s => s.name) || []), ...completedSkillNames]))} auth={auth} />
+                      </Suspense>
                     )}
 
                     {activeTab === 'ecosystem' && (
+                      <Suspense fallback={<TabFallback />}>
                        <GlobalTrendMap />
+                      </Suspense>
                     )}
 
                     {activeTab === 'insights' && (
+                      <Suspense fallback={<TabFallback />}>
                        <div className="space-y-10">
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                              <DailyStreak completedCount={completedSkillNames.size} />
@@ -457,49 +479,62 @@ function App() {
                            <SalaryPredictor role={targetRole || analysisResults?.target_role} skills={insightsSkills} />
                            <JobMatcher skills={insightsSkills} />
                         </div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'portfolio' && (
+                      <Suspense fallback={<TabFallback />}>
                        <TechnicalPortfolio 
                         user_name={analysisResults?.candidate_name || "Developer"} 
                         mastered_skills={Array.from(new Set([...(analysisResults?.skills_analysis?.resume_skills?.map(s => s.name) || []), ...completedSkillNames]))} 
                         target_role={targetRole || analysisResults?.target_role} 
                        />
+                      </Suspense>
                     )}
 
                     {activeTab === 'future' && (
+                      <Suspense fallback={<TabFallback />}>
                        <FutureMap activeRole={targetRole || analysisResults?.target_role} />
+                      </Suspense>
                     )}
 
                     {activeTab === 'alpha' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                          <UIVision />
-                          <PitchGenerator masteredSkills={Array.from(completedSkillNames)} />
-                        </div>
-                        <SkillGalaxy masteredSkills={Array.from(completedSkillNames)} />
-                        <CodeRadar />
-                      </motion.div>
+                      <Suspense fallback={<TabFallback />}>
+                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
+                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                           <UIVision />
+                           <PitchGenerator masteredSkills={Array.from(completedSkillNames)} />
+                         </div>
+                         <SkillGalaxy masteredSkills={Array.from(completedSkillNames)} />
+                         <CodeRadar />
+                       </motion.div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'elite' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                          <SquadHub masteredSkills={Array.from(completedSkillNames)} />
-                          <ExecutivePacket resumeData={resumeText} masteredSkills={Array.from(completedSkillNames)} gapStats={gapAnalysis?.statistics} />
-                        </div>
-                        <SystemGuardian />
-                      </motion.div>
+                      <Suspense fallback={<TabFallback />}>
+                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pb-20">
+                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                           <SquadHub masteredSkills={Array.from(completedSkillNames)} />
+                           <ExecutivePacket resumeData={resumeText} masteredSkills={Array.from(completedSkillNames)} gapStats={gapAnalysis?.statistics} />
+                         </div>
+                         <SystemGuardian />
+                       </motion.div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'settings' && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
-                        <HelpCenter onClose={() => setActiveTab('results')} />
-                      </motion.div>
+                      <Suspense fallback={<TabFallback />}>
+                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-20">
+                         <HelpCenter onClose={() => setActiveTab('results')} />
+                       </motion.div>
+                      </Suspense>
                     )}
 
                     {activeTab === 'status' && (
+                      <Suspense fallback={<TabFallback />}>
                        <SystemStatus />
+                      </Suspense>
                     )}
                   </>
                 )}
@@ -509,13 +544,19 @@ function App() {
 
         <AnimatePresence>
           {isInterviewModalOpen && (
-            <InterviewModal masteredSkills={Array.from(completedSkillNames)} auth={auth} onClose={() => setIsInterviewModalOpen(false)} />
+            <Suspense fallback={null}>
+              <InterviewModal masteredSkills={Array.from(completedSkillNames)} auth={auth} onClose={() => setIsInterviewModalOpen(false)} />
+            </Suspense>
           )}
           {isHelpOpen && (
-            <HelpCenter onClose={() => setIsHelpOpen(false)} />
+            <Suspense fallback={null}>
+              <HelpCenter onClose={() => setIsHelpOpen(false)} />
+            </Suspense>
           )}
           {isSettingsOpen && (
-            <SettingsModal settings={settings} setSettings={setSettings} onClose={() => setIsSettingsOpen(false)} />
+            <Suspense fallback={null}>
+              <SettingsModal settings={settings} setSettings={setSettings} onClose={() => setIsSettingsOpen(false)} />
+            </Suspense>
           )}
         </AnimatePresence>
       </div>
