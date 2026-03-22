@@ -23,15 +23,23 @@
 
 ---
 
-## 🔗 Live Localhost Links
+## 🚀 Live Production Links
+
+| Service | Environment | URL |
+|---|---|---|
+| 🌐 **Frontend App** | **Vercel** | [https://art-park-code-forge-hackathon-nine.vercel.app/](https://art-park-code-forge-hackathon-nine.vercel.app/) |
+| ⚡ **Backend API** | **Render** | [https://artpark-codeforge-hackathon.onrender.com](https://artpark-codeforge-hackathon.onrender.com) |
+| 🩺 **Health Check** | **Render** | [https://artpark-codeforge-hackathon.onrender.com/health](https://artpark-codeforge-hackathon.onrender.com/health) |
+
+---
+
+## 🔗 Local Development Links
 
 | Service | URL | Description |
 |---|---|---|
 | 🖥️ **Frontend App** | [http://localhost:3000](http://localhost:3000) | Main React UI |
 | ⚙️ **Backend API** | [http://localhost:8000](http://localhost:8000) | FastAPI server |
 | 📚 **Swagger Docs** | [http://localhost:8000/docs](http://localhost:8000/docs) | Interactive API Explorer |
-| 🔁 **ReDoc** | [http://localhost:8000/redoc](http://localhost:8000/redoc) | Alternative API Docs |
-| ❤️ **Health Check** | [http://localhost:8000/health](http://localhost:8000/health) | Server health status |
 
 ---
 
