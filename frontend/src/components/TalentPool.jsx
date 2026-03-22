@@ -96,11 +96,14 @@ const TalentPool = ({ batchResults = [], onRemoveCandidate }) => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                        {selectedCandidate.gap_analysis?.identified_skills?.length > 0 ? (
-                         selectedCandidate.gap_analysis.identified_skills.map((skill, i) => (
-                           <span key={i} className="px-3 py-1.5 bg-green-500/10 text-green-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-green-500/20">
-                             {skill}
-                           </span>
-                         ))
+                         selectedCandidate.gap_analysis.identified_skills.map((skill, i) => {
+                           const label = typeof skill === 'string' ? skill : (skill?.name || JSON.stringify(skill))
+                           return (
+                             <span key={i} className="px-3 py-1.5 bg-green-500/10 text-green-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-green-500/20">
+                               {label}
+                             </span>
+                           )
+                         })
                        ) : (
                          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest italic">No clear identification</span>
                        )}
@@ -114,11 +117,14 @@ const TalentPool = ({ batchResults = [], onRemoveCandidate }) => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                        {selectedCandidate.gap_analysis?.missing_skills?.length > 0 ? (
-                         selectedCandidate.gap_analysis.missing_skills.map((skill, i) => (
-                           <span key={i} className="px-3 py-1.5 bg-red-500/10 text-red-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-red-500/20">
-                             {skill}
-                           </span>
-                         ))
+                         selectedCandidate.gap_analysis.missing_skills.map((skill, i) => {
+                           const label = typeof skill === 'string' ? skill : (skill?.name || JSON.stringify(skill))
+                           return (
+                             <span key={i} className="px-3 py-1.5 bg-red-500/10 text-red-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-red-500/20">
+                               {label}
+                             </span>
+                           )
+                         })
                        ) : (
                          <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest italic">No gaps detected</span>
                        )}
