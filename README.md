@@ -10,6 +10,7 @@
 [![Render Deployment](https://img.shields.io/badge/Live-Backend-blue?style=for-the-badge&logo=render&logoColor=white)](https://artpark-codeforge-hackathon.onrender.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![Gemini](https://img.shields.io/badge/Gemini%202.0%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 
 <br/>
 
@@ -23,6 +24,22 @@
 ### 🏆 IISc × ArtPark CodeForge Hackathon 2026
 
 </div>
+
+---
+
+## 🛑 The Problem
+
+Most career platforms offer generic advice.
+- **Resumes** are often misaligned with modern **Job Descriptions (JDs)**.
+- **Learning paths** lack structure, leading to "tutorial hell."
+- **Skill gaps** are invisible until you fail an interview.
+
+## ✅ The Solution: CodeForge AI
+
+CodeForge AI provides a **precision instrument** for career growth:
+1.  **Semantic Gap Analysis**: LLM-powered comparison that understands *concepts*, not just keywords.
+2.  **Topological Roadmaps**: A Directed Acyclic Graph (DAG) ensure you learn prerequisites first.
+3.  **Real-time Readiness Score**: A dynamic metric that updates as you master new skills.
 
 ---
 
@@ -58,19 +75,18 @@
 
 ---
 
-## 🤖 The AI Engine (Gemini 2.0 Flash)
+## ⚙️ Technical Deep Dive
 
-CodeForge AI doesn't just "guess." It uses recursive LLM analysis to parse the deep semantics of resumes.
+### 🔬 The DAG Algorithm
+We store skills as nodes in a **Directed Acyclic Graph (DAG)**. When a gap is identified:
+- The engine performs a **Topological Sort** (Kahn's Algorithm) on the required skills.
+- It recursively discovers and injects missing prerequisites into your roadmap.
+- This ensures a logically sound learning sequence (e.g., *Variables* → *Functions* → *APIs*).
 
-```mermaid
-graph TD
-    A[Raw Resume] --> B(Gemini Skill Extractor)
-    C[Job Description] --> D(Gemini JD Extractor)
-    B & D --> E{Gap Analyzer}
-    E -->|Missing Nodes| F[Prerequisite Resolver]
-    F --> G[DAG Roadmap Generator]
-    G --> H((Neural Path))
-```
+### 📈 Readiness Logic
+Your **Readiness Score** is calculated using a weighted formula:
+$$Score = \frac{K + (0.5 \times P)}{T} \times 100$$
+*(K=Known, P=Partial, T=Total Required)*
 
 ---
 
@@ -107,22 +123,20 @@ ArtPark_CodeForge_Hackathon/
 
 ---
 
+## 🔮 Future Roadmap
+
+- [ ] **Mobile Neural Hub**: Native iOS/Android app for on-the-go learning.
+- [ ] **GitHub Integration**: Automatically sync roadmap progress with your GitHub contributions.
+- [ ] **Multi-Model Support**: Expand beyond Gemini to support Claude and GPT-4o.
+- [ ] **Enterprise HR Portal**: Collaborative hiring dashboards for technical teams.
+
+---
+
 ## 🛠️ Quick Start (Developer Mode)
 
-### 1. Clone & Prep
-```bash
-git clone https://github.com/priyabratasahoo780/Resume-generater.git
-cd ArtPark_CodeForge_Hackathon
-```
-
-### 2. Backend Setup
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
+1. **Clone**: `git clone https://github.com/priyabratasahoo780/Resume-generater.git`
+2. **Backend**: `pip install -r requirements.txt` & `uvicorn app.main:app`
+3. **Frontend**: `npm install` & `npm run dev`
 
 ---
 
