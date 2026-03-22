@@ -186,6 +186,13 @@ function App() {
     if (auth.token) {
       localStorage.setItem('token', auth.token)
       localStorage.setItem('role', auth.role)
+      
+      // Sync viewMode with user role
+      if (auth.role === 'HR' || auth.role === 'MANAGER') {
+        setViewMode('recruiter')
+      } else {
+        setViewMode('candidate')
+      }
     }
   }, [auth])
 
@@ -347,7 +354,7 @@ function App() {
            <div className="hidden md:flex flex-col gap-2 p-4 border-t border-white/10">
               <button onClick={() => setIsHelpOpen(true)} className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all flex items-center gap-3 w-full font-black text-[10px] uppercase tracking-widest"><FiHelpCircle /> Help Center</button>
               <button onClick={() => setIsSettingsOpen(true)} className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all flex items-center gap-3 w-full font-black text-[10px] uppercase tracking-widest"><FiSettings /> Settings</button>
-              {analysisResults && (
+              {analysisResults && (auth.role === 'HR' || auth.role === 'MANAGER') && (
                  <button 
                   onClick={() => setViewMode(prev => prev === 'candidate' ? 'recruiter' : 'candidate')}
                   className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all w-full flex items-center justify-center gap-2 ${viewMode === 'recruiter' ? 'bg-white text-black' : 'bg-white/5 text-white border border-white/10'}`}
