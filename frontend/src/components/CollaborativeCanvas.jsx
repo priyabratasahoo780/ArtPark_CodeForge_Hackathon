@@ -12,7 +12,7 @@ const CollaborativeCanvas = ({ sessionId, auth }) => {
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `ws://localhost:8000/ws/progress/${sessionId}`
+    const wsUrl = `wss://artpark-codeforge-hackathon.onrender.com/ws/progress/${sessionId}`
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 

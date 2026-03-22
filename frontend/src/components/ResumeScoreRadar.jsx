@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiTarget, FiZap, FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 const ResumeScoreRadar = ({ skills, gapStats }) => {
   const [data, setData] = useState(null)

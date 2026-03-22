@@ -46,7 +46,7 @@ import SquadHub from './components/SquadHub'
 import SystemGuardian from './components/SystemGuardian'
 import ExecutivePacket from './components/ExecutivePacket'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 const NavTab = ({ active, onClick, icon, label, color = '#bc13fe' }) => (
   <button

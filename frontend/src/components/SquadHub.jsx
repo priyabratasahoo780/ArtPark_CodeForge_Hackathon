@@ -11,7 +11,7 @@ const SquadHub = ({ masteredSkills }) => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8000/squad/stats?skills=${masteredSkills.join(',')}`, {
+        const response = await axios.get(`https://artpark-codeforge-hackathon.onrender.com/squad/stats?skills=${masteredSkills.join(',')}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats(response.data);

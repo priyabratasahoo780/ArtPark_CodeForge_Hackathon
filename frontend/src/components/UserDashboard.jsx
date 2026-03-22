@@ -10,7 +10,7 @@ import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
 
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const [loading, setLoading] = useState(false)
@@ -88,7 +88,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const handleDownloadResume = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch('http://localhost:8000/resume/generate', {
+      const response = await fetch('https://artpark-codeforge-hackathon.onrender.com/resume/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

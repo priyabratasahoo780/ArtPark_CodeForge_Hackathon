@@ -3,7 +3,7 @@ import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiUsers, FiPlus, FiTrash2, FiZap, FiAward, FiChevronDown, FiAlertCircle } from 'react-icons/fi'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 const TIER_CONFIG = {
   'Strong Fit 🟢':      { color: '#00f3ff', label: 'Strong' },

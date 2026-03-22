@@ -3,7 +3,7 @@ import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiMail as MailIcon, FiLock as LockIcon, FiUser as UserIcon, FiBriefcase as WorkIcon, FiZap as ZapIcon, FiAlertCircle as AlertIcon } from 'react-icons/fi'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 const Login = ({ onLogin }) => {
   const [isRegistering, setIsRegistering] = useState(false)
