@@ -593,6 +593,66 @@ async def health_check():
     }
 
 
+@app.post("/extract/text", tags=["Parsing"])
+async def extract_text_from_file(file: UploadFile = File(...)):
+    """
+    Extract plain text from an uploaded file.
+    Supports: PDF (via PyPDF2), TXT, DOCX.
+
+    Returns: {"text": "extracted plain text content"}
+    """
+    filename = file.filename or ""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    content = await file.read()
+
+    try:
+        if ext == "pdf":
+            import io as _io
+            try:
+                import PyPDF2
+                reader = PyPDF2.PdfReader(_io.BytesIO(content))
+                pages = []
+                for page in reader.pages:
+                    text = page.extract_text()
+                    if text:
+                        pages.append(text)
+                extracted = "\n".join(pages).strip()
+            except Exception as pdf_err:
+                logger.warning(f"PyPDF2 failed ({pdf_err}), trying pdfminer fallback...")
+                # Graceful fallback: decode readable chars
+                extracted = content.decode("latin-1", errors="replace")
+                # Strip non-printable runs that are clearly binary
+                import re as _re
+                extracted = _re.sub(r'[^\x20-\x7e\n\r\t]', ' ', extracted)
+                extracted = _re.sub(r' {3,}', ' ', extracted).strip()
+            if not extracted:
+                raise HTTPException(status_code=422, detail="Could not extract readable text from PDF. The file may be scanned/image-based.")
+        elif ext == "txt":
+            extracted = content.decode("utf-8", errors="replace")
+        elif ext in ("docx", "doc"):
+            try:
+                import docx as _docx
+                import io as _io
+                doc = _docx.Document(_io.BytesIO(content))
+                extracted = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+            except ImportError:
+                raise HTTPException(status_code=415, detail="python-docx not installed. Please upload a PDF or TXT file.")
+        else:
+            # Attempt to read as plain text for unknown types
+            extracted = content.decode("utf-8", errors="replace")
+
+        if not extracted or len(extracted.strip()) < 10:
+            raise HTTPException(status_code=422, detail="File appears to be empty or could not be read.")
+
+        return {"text": extracted, "filename": filename, "chars": len(extracted)}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Text extraction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Text extraction failed: {str(e)}")
+
+
 @app.post("/extract/resume", response_model=ResumeAnalysis, tags=["Parsing"])
 async def extract_resume_skills(request: Resume):
     """

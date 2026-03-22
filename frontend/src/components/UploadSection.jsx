@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
-import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget, FiAlertCircle } from 'react-icons/fi'
+import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget, FiAlertCircle, FiLoader, FiCheckCircle } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import axios from 'axios'
+
+const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
 
 export default function UploadSection({
   resumeText,
@@ -15,6 +18,12 @@ export default function UploadSection({
   loading
 }) {
   const [attempted, setAttempted] = useState(false)
+  const [resumeUploading, setResumeUploading] = useState(false)
+  const [jobUploading, setJobUploading] = useState(false)
+  const [resumeFileName, setResumeFileName] = useState(null)
+  const [jobFileName, setJobFileName] = useState(null)
+  const [resumeUploadError, setResumeUploadError] = useState(null)
+  const [jobUploadError, setJobUploadError] = useState(null)
 
   const hasResume = resumeText && resumeText.trim().length > 0
   const hasJob = jobDescriptionText && jobDescriptionText.trim().length > 0
@@ -27,32 +36,44 @@ export default function UploadSection({
     setAttempted(false)
     onAnalyze()
   }
+
+  const extractTextFromFile = async (file, setUploading, setFileName, setError, onTextChange) => {
+    setUploading(true)
+    setError(null)
+    setFileName(file.name)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const resp = await axios.post(`${API_BASE_URL}/extract/text`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000,
+      })
+      const text = resp.data?.text || ''
+      if (text.trim()) {
+        onTextChange(text)
+        setAttempted(false)
+      } else {
+        setError('No readable text found in file.')
+      }
+    } catch (err) {
+      const detail = err?.response?.data?.detail
+      setError(detail || 'Failed to extract text. Try uploading a TXT file or paste the text manually.')
+      setFileName(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleResumeFileUpload = (e) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const text = event.target?.result
-        if (typeof text === 'string') {
-          onResumeChange(text)
-        }
-      }
-      reader.readAsText(file)
-    }
+    if (file) extractTextFromFile(file, setResumeUploading, setResumeFileName, setResumeUploadError, onResumeChange)
+    e.target.value = ''
   }
 
   const handleJobFileUpload = (e) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const text = event.target?.result
-        if (typeof text === 'string') {
-          onJobDescriptionChange(text)
-        }
-      }
-      reader.readAsText(file)
-    }
+    if (file) extractTextFromFile(file, setJobUploading, setJobFileName, setJobUploadError, onJobDescriptionChange)
+    e.target.value = ''
   }
 
   return (
@@ -71,25 +92,41 @@ export default function UploadSection({
           
           <div className="mb-4">
             <div className="mb-4">
-              <label className="flex items-center justify-center w-full p-6 border-2 border-dashed border-white/10 rounded-2xl hover:border-[#bc13fe]/50 cursor-pointer transition-all bg-white/[0.02] hover:bg-[#bc13fe]/5">
-                <div className="flex flex-col items-center justify-center">
-                  <FiUpload className="w-8 h-8 text-[#bc13fe] mb-2" />
-                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Inject Resume Data</span>
-                  <span className="text-[9px] text-[#bc13fe]/60 font-medium mt-1">PDF • DOCX • TXT</span>
+              <label className={`flex items-center justify-center w-full p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${resumeUploading ? 'border-[#bc13fe]/70 bg-[#bc13fe]/10' : 'border-white/10 hover:border-[#bc13fe]/50 bg-white/[0.02] hover:bg-[#bc13fe]/5'}`}>
+                <div className="flex flex-col items-center justify-center gap-1">
+                  {resumeUploading ? (
+                    <FiLoader className="w-8 h-8 text-[#bc13fe] animate-spin" />
+                  ) : resumeFileName && hasResume ? (
+                    <FiCheckCircle className="w-8 h-8 text-green-400" />
+                  ) : (
+                    <FiUpload className="w-8 h-8 text-[#bc13fe] mb-1" />
+                  )}
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                    {resumeUploading ? 'Extracting...' : resumeFileName ? resumeFileName : 'Inject Resume Data'}
+                  </span>
+                  <span className="text-[9px] text-[#bc13fe]/60 font-medium">PDF • TXT</span>
                 </div>
                 <input
                   type="file"
                   className="hidden"
                   onChange={handleResumeFileUpload}
-                  accept=".txt,.pdf,.docx"
+                  accept=".txt,.pdf"
+                  disabled={resumeUploading}
                 />
               </label>
+              <AnimatePresence>
+                {resumeUploadError && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1 text-[9px] font-black text-red-400 uppercase tracking-widest mt-1 ml-1">
+                    <FiAlertCircle /> {resumeUploadError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Manual Data Entry</p>
             <textarea
               value={resumeText}
-              onChange={(e) => { onResumeChange(e.target.value); if (e.target.value.trim()) setAttempted(false) }}
+              onChange={(e) => { onResumeChange(e.target.value); if (e.target.value.trim()) { setAttempted(false); setResumeFileName(null) } }}
               placeholder="Paste raw resume text for neural analysis..."
               className={`w-full h-48 p-4 bg-[#0a0a0c] border rounded-2xl focus:ring-1 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner ${
                 attempted && !hasResume
@@ -129,25 +166,41 @@ export default function UploadSection({
           
           <div className="mb-4">
             <div className="mb-4">
-              <label className="flex items-center justify-center w-full p-6 border-2 border-dashed border-white/10 rounded-2xl hover:border-[#00f3ff]/50 cursor-pointer transition-all bg-white/[0.02] hover:bg-[#00f3ff]/5">
-                <div className="flex flex-col items-center justify-center">
-                  <FiUpload className="w-8 h-8 text-[#00f3ff] mb-2" />
-                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Import Job Metrics</span>
-                  <span className="text-[9px] text-[#00f3ff]/60 font-medium mt-1">PDF • DOCX • TXT</span>
+              <label className={`flex items-center justify-center w-full p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${jobUploading ? 'border-[#00f3ff]/70 bg-[#00f3ff]/10' : 'border-white/10 hover:border-[#00f3ff]/50 bg-white/[0.02] hover:bg-[#00f3ff]/5'}`}>
+                <div className="flex flex-col items-center justify-center gap-1">
+                  {jobUploading ? (
+                    <FiLoader className="w-8 h-8 text-[#00f3ff] animate-spin" />
+                  ) : jobFileName && hasJob ? (
+                    <FiCheckCircle className="w-8 h-8 text-green-400" />
+                  ) : (
+                    <FiUpload className="w-8 h-8 text-[#00f3ff] mb-1" />
+                  )}
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                    {jobUploading ? 'Extracting...' : jobFileName ? jobFileName : 'Import Job Metrics'}
+                  </span>
+                  <span className="text-[9px] text-[#00f3ff]/60 font-medium">PDF • TXT</span>
                 </div>
                 <input
                   type="file"
                   className="hidden"
                   onChange={handleJobFileUpload}
-                  accept=".txt,.pdf,.docx"
+                  accept=".txt,.pdf"
+                  disabled={jobUploading}
                 />
               </label>
+              <AnimatePresence>
+                {jobUploadError && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1 text-[9px] font-black text-red-400 uppercase tracking-widest mt-1 ml-1">
+                    <FiAlertCircle /> {jobUploadError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Specification Matrix</p>
             <textarea
               value={jobDescriptionText}
-              onChange={(e) => { onJobDescriptionChange(e.target.value); if (e.target.value.trim()) setAttempted(false) }}
+              onChange={(e) => { onJobDescriptionChange(e.target.value); if (e.target.value.trim()) { setAttempted(false); setJobFileName(null) } }}
               placeholder="Paste requirements to generate adaptation path..."
               className={`w-full h-48 p-4 bg-[#0a0a0c] border rounded-2xl focus:ring-1 focus:outline-none resize-none text-sm text-gray-300 font-medium placeholder:text-gray-700 transition-all shadow-inner ${
                 attempted && !hasJob
@@ -263,13 +316,13 @@ export default function UploadSection({
         <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">Baseline Templates</h3>
         <div className="flex flex-wrap justify-center gap-6">
           <button
-            onClick={() => onResumeChange(`JOHN DOE\nFull-Stack Dev\nSkills: React, Node, Python`)}
+            onClick={() => { onResumeChange(`JOHN DOE\nFull-Stack Dev\nSkills: React, Node, Python`); setResumeFileName(null) }}
             className="text-[10px] font-black text-[#bc13fe] hover:text-white uppercase tracking-widest border-b border-[#bc13fe]/30 hover:border-white transition-all pb-1"
           >
             Load Tech Resume
           </button>
           <button
-            onClick={() => onJobDescriptionChange(`ROLE: FULL STACK\nREQ: Node, React, AWS`)}
+            onClick={() => { onJobDescriptionChange(`ROLE: FULL STACK\nREQ: Node, React, AWS`); setJobFileName(null) }}
             className="text-[10px] font-black text-[#00f3ff] hover:text-white uppercase tracking-widest border-b border-[#00f3ff]/30 hover:border-white transition-all pb-1"
           >
             Load Standard JD
