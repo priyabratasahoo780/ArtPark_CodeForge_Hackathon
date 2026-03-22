@@ -4,7 +4,7 @@
 
 ### **Adaptive Career Intelligence & Neural Roadmap Engine**
 
-![CodeForge Hero Mockup](file:///C:/Users/priyabrata/.gemini/antigravity/brain/17d3861b-5e32-41e6-b2aa-9caf1805763f/codeforge_hero_mockup_1774154575068.png)
+![CodeForge Hero Mockup](./docs/images/hero.png)
 
 [![Vercel Deployment](https://img.shields.io/badge/Live-Frontend-success?style=for-the-badge&logo=vercel&logoColor=white)](https://art-park-code-forge-hackathon-nine.vercel.app/)
 [![Render Deployment](https://img.shields.io/badge/Live-Backend-blue?style=for-the-badge&logo=render&logoColor=white)](https://artpark-codeforge-hackathon.onrender.com)
@@ -54,7 +54,7 @@
 
 ## 📊 Sample Dashboard & Results
 
-![Dashboard Screenshot](file:///C:/Users/priyabrata/.gemini/antigravity/brain/17d3861b-5e32-41e6-b2aa-9caf1805763f/media__1774154715414.png)
+![Dashboard Screenshot](./docs/images/dashboard.png)
 
 ---
 
