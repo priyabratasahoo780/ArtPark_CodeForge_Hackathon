@@ -3,7 +3,7 @@ import {
   FiUpload, FiZap, FiTarget, FiActivity, FiAlertCircle, 
   FiMap, FiMessageSquare, FiLogOut, FiAward,
   FiRefreshCw, FiClock, FiTrendingUp, FiMic, FiCast, FiFeather, FiPlay,
-  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser, FiSettings, FiHelpCircle, FiShield
+  FiCode, FiBookOpen, FiGlobe, FiEye, FiUser, FiSettings, FiHelpCircle, FiShield, FiUsers
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
