@@ -83,6 +83,23 @@ We store skills as nodes in a **Directed Acyclic Graph (DAG)**. When a gap is id
 - It recursively discovers and injects missing prerequisites into your roadmap.
 - This ensures a logically sound learning sequence (e.g., *Variables* → *Functions* → *APIs*).
 
+#### 🧬 Logic Flow Diagram
+```mermaid
+graph TD
+    A[Raw Resume] --> B(Gemini Skill Extractor)
+    C[Job Description] --> D(Gemini JD Extractor)
+    B & D --> E{Gap Analyzer}
+    E -->|Missing Nodes| F[Prerequisite Resolver]
+    F --> G[DAG Roadmap Generator]
+    G --> H((Neural Path))
+```
+
+#### 🖼️ Architecture Screenshots
+<div align="center">
+  <img src="./docs/images/architecture_full.png" width="45%" />
+  <img src="./docs/images/architecture_detail.png" width="45%" />
+</div>
+
 ### 📈 Readiness Logic
 Your **Readiness Score** is calculated using a weighted formula:
 $$Score = \frac{K + (0.5 \times P)}{T} \times 100$$
