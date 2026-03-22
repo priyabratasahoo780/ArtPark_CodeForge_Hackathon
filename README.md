@@ -52,6 +52,12 @@
 
 ---
 
+## 📊 Sample Dashboard & Results
+
+![Dashboard Screenshot](file:///C:/Users/priyabrata/.gemini/antigravity/brain/17d3861b-5e32-41e6-b2aa-9caf1805763f/media__1774154715414.png)
+
+---
+
 ## 🤖 The AI Engine (Gemini 2.0 Flash)
 
 CodeForge AI doesn't just "guess." It uses recursive LLM analysis to parse the deep semantics of resumes.
@@ -68,21 +74,36 @@ graph TD
 
 ---
 
-## 📂 Architecture & Design
+## 📂 Complete Folder Structure
 
-### 🏗️ Backend Module Hierarchy
-- **`app/main.py`**: The central nervous system (40+ endpoints).
-- **`services/`**: Atomic business units:
-  - `skill_extractor.py`: Gemini-powered entity extraction.
-  - `learning_path_generator.py`: DAG-based pathing.
-  - `burnout_detector.py`: Real-time user fatigue analytics.
-- **`datasets/`**: Curated knowledge graph with 150+ skill nodes.
-
-### 🎨 Frontend Components (46 Atomic Units)
-Responsive glassmorphism dashboard built with:
-- **Framer Motion**: For fluid, neural-like transitions.
-- **SVG Graphics**: Dynamic rendering of the Skill DAG.
-- **Axios + WebSockets**: Real-time progress synchronization.
+```
+ArtPark_CodeForge_Hackathon/
+│
+├── README.md                          # This file
+├── backend/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI app backbone
+│   │   ├── models/                    # Pydantic schemas
+│   │   ├── routes/                    # Modular API routing
+│   │   ├── services/                  # Core AI & Business Logic
+│   │   │   ├── skill_extractor.py     # Gemini Skill Extraction
+│   │   │   ├── gap_analyzer.py        # Gap Scoring (Fuzzy Match)
+│   │   │   └── learning_path_generator.py # DAG-powered Pathing
+│   │   └── datasets/                  # Curated Skill Knowledge Base
+│   ├── requirements.txt               # Backend Dependencies
+│   └── .env                           # API Keys (Gitignored)
+│
+└── frontend/
+    ├── src/
+    │   ├── App.jsx                    # Core State & Logic
+    │   ├── components/                # 46+ Atomic UI Units
+    │   │   ├── NeuralRoadmap.jsx      # SVG Graph Rendering
+    │   │   ├── GapAnalysis.jsx        # Data Viz Layout
+    │   │   └── CodingSandbox.jsx      # Pair Programmer Hook
+    │   └── assets/                    # Design Tokens
+    ├── package.json                   # UI Dependencies
+    └── vite.config.js                 # Dev Server Config
+```
 
 ---
 
@@ -98,17 +119,9 @@ cd ArtPark_CodeForge_Hackathon
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # venv\Scripts\activate on Windows
+venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-echo GEMINI_API_KEY=your_key > .env
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 ---
