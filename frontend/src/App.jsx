@@ -47,6 +47,7 @@ const CodeRadar           = lazy(() => import('./components/CodeRadar'))
 const SquadHub            = lazy(() => import('./components/SquadHub'))
 const SystemGuardian      = lazy(() => import('./components/SystemGuardian'))
 const ExecutivePacket     = lazy(() => import('./components/ExecutivePacket'))
+const TalentPool          = lazy(() => import('./components/TalentPool'))
 
 // ─── Lightweight Suspense fallback ───────────────────────────────────
 const TabFallback = () => (
@@ -385,6 +386,13 @@ function App() {
                    <NavTab active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<FiActivity />} label="Health" color="#34d399" />
                  </>
                )}
+
+                {analysisResults && viewMode === 'recruiter' && (auth.role === 'HR' || auth.role === 'MANAGER') && (
+                  <>
+                    <NavTab active={activeTab === 'recruiter'} onClick={() => setActiveTab('recruiter')} icon={<FiTrendingUp />} label="Leaderboard" color="#00f3ff" />
+                    <NavTab active={activeTab === 'talent'} onClick={() => setActiveTab('talent')} icon={<FiUsers />} label="Talent Pool" color="#bc13fe" />
+                  </>
+                )}
            </div>
 
            <div className="hidden md:flex flex-col gap-2 p-4 border-t border-white/10">
@@ -428,25 +436,29 @@ function App() {
                 {viewMode === 'recruiter' ? (
                    <motion.div key="recruiter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                       <Suspense fallback={<TabFallback />}>
-                        <RecruiterDashboard 
-                           candidateData={analysisResults} 
-                           learningPath={learningPath} 
-                           marketBenchmark={marketBenchmark} 
-                           completedSkillNames={completedSkillNames}
-                           insightsSkills={insightsSkills}
-                           batchResults={batchResults}
-                           onSelectCandidate={(index) => {
-                              const selected = batchResults[index]
-                              setAnalysisResults(selected)
-                              setGapAnalysis(selected.gap_analysis)
-                              setLearningPath(selected.learning_path)
-                              setReasoningTrace(selected.reasoning_trace)
-                              setSelectedCandidateIndex(index)
-                           }}
-                           selectedIndex={selectedCandidateIndex}
-                        />
-                      </Suspense>
-                   </motion.div>
+                         {activeTab === 'talent' ? (
+                           <TalentPool batchResults={batchResults} />
+                         ) : (
+                           <RecruiterDashboard 
+                              candidateData={analysisResults} 
+                              learningPath={learningPath} 
+                              marketBenchmark={marketBenchmark} 
+                              completedSkillNames={completedSkillNames}
+                              insightsSkills={insightsSkills}
+                              batchResults={batchResults}
+                              onSelectCandidate={(index) => {
+                                 const selected = batchResults[index]
+                                 setAnalysisResults(selected)
+                                 setGapAnalysis(selected.gap_analysis)
+                                 setLearningPath(selected.learning_path)
+                                 setReasoningTrace(selected.reasoning_trace)
+                                 setSelectedCandidateIndex(index)
+                              }}
+                              selectedIndex={selectedCandidateIndex}
+                           />
+                         )}
+                       </Suspense>
+                    </motion.div>
                 ) : (
                   <>
                     {activeTab === 'upload' && (
