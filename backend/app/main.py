@@ -971,11 +971,11 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
                 'resume_skills': resume_skills_full,
                 'job_requirements': effective_required_skills,
                 'role_track': {
-                    'matched_role': role_match['role'],
-                    'confidence': role_match['confidence'],
+                    'matched_role': role_match.get('role', ''),
+                    'confidence': role_match.get('confidence', 0.0),
                     'typical_stack': role_match.get('typical_stack', ''),
-                    'skills_added_from_role': hybrid_result['added_from_role'],
-                    'mode': hybrid_result['source'],
+                    'skills_added_from_role': hybrid_result.get('added_from_role', []),
+                    'mode': hybrid_result.get('source', 'jd'),
                 }
             },
             detected_domain=domain_result,
@@ -984,15 +984,16 @@ async def complete_onboarding_analysis(request: OnboardingRequest, current_user=
             reasoning_trace=reasoning_trace,
             resume_feedback=resume_feedback,
             efficiency_metrics=efficiency_metrics,
-            learning_style=learning_style,
+            learning_style=learning_style if isinstance(learning_style, str) else str(learning_style),
             burnout_status=burnout_status,
-            career_paths=career_predictions['next_roles'],
-            market_insights=market_insights,
+            career_paths=career_predictions.get('next_roles', []) if isinstance(career_predictions, dict) else [],
+            market_insights=market_insights if isinstance(market_insights, dict) else {},
             goal=learning_path.get('goal'),
-            efficiency_score=efficiency_result['efficiency_score'],
+            efficiency_score=efficiency_result.get('efficiency_score', 0) if isinstance(efficiency_result, dict) else 0,
             doubt_status=doubt_status,
-            decayed_skills=decayed_skills
+            decayed_skills=decayed_skills if isinstance(decayed_skills, list) else []
         )
+
     except HTTPException:
         raise
     except Exception as e:
