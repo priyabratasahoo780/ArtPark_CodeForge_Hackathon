@@ -1,9 +1,11 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
 
 from app.models.user import UserCreate, UserLogin, UserResponse, Token
 from app.services.auth_service import auth_service, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.services.supabase_service import supabase_service
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login/token")
@@ -69,3 +71,42 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     
     return {"access_token": access_token, "token_type": "bearer", "role": user.role}
+
+
+# ==================== Forgot Password ====================
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    new_password: str
+
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    """
+    Reset password for a registered user.
+    Verifies the email exists, then updates the hashed password in Supabase.
+    No email link flow — direct reset suitable for demo/hackathon context.
+    """
+    if len(request.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 6 characters"
+        )
+
+    user = auth_service.get_user_by_email(request.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with that email address"
+        )
+
+    hashed = auth_service.get_password_hash(request.new_password)
+    success = supabase_service.update_user_password(request.email, hashed)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password reset failed. Please try again."
+        )
+
+    return {"message": "Password reset successful. You can now log in with your new password."}

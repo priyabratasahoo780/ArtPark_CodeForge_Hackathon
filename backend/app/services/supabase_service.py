@@ -89,6 +89,14 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error saving learning path: {str(e)}")
 
+    def update_user_password(self, email: str, hashed_password: str) -> bool:
+        try:
+            response = self.client.table("users").update({"hashed_password": hashed_password}).eq("email", email.lower()).execute()
+            return bool(response.data)
+        except Exception as e:
+            logger.error(f"Error updating user password: {str(e)}")
+            return False
+
     def create_notification(self, message: str, user_id: Optional[str] = None):
         try:
             # Resolve user email if user_id provided
