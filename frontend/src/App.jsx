@@ -451,13 +451,20 @@ function App() {
                   <>
                     {activeTab === 'upload' && (
                        <UploadSection 
-                        resumeText={resumeText} onResumeChange={setResumeText} 
-                        jobDescriptionText={jobDescriptionText} onJobDescriptionChange={setJobDescriptionText} 
-                        targetRole={targetRole} onTargetRoleChange={setTargetRole}
-                        timelineDays={timelineDays} onTimelineChange={setTimelineDays}
-                        onAnalyze={handleAnalyze} loading={loading}
+                        resumeText={resumeText} 
+                        jobDescriptionText={jobDescriptionText} 
+                        onResumeChange={setResumeText}
+                        onJobDescriptionChange={setJobDescriptionText}
+                        targetRole={targetRole}
+                        onTargetRoleChange={setTargetRole}
+                        timelineDays={timelineDays}
+                        onTimelineChange={setTimelineDays}
+                        onAnalyze={handleAnalyze} 
+                        loading={loading}
                         isHR={auth.role === 'HR' || auth.role === 'MANAGER'}
-                        onMultiResumesChange={setBatchResumes}
+                        batchResumes={batchResumes}
+                        onMultiResumesChange={(newResumes) => setBatchResumes(prev => [...prev, ...newResumes])}
+                        onRemoveResume={(name) => setBatchResumes(prev => prev.filter(r => r.name !== name))}
                        />
                     )}
 

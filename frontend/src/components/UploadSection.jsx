@@ -17,7 +17,9 @@ export default function UploadSection({
   onAnalyze,
   loading,
   isHR = false,
-  onMultiResumesChange
+  onMultiResumesChange,
+  batchResumes = [],
+  onRemoveResume
 }) {
   const [attempted, setAttempted] = useState(false)
   const [resumeUploading, setResumeUploading] = useState(false)
@@ -27,7 +29,7 @@ export default function UploadSection({
   const [resumeUploadError, setResumeUploadError] = useState(null)
   const [jobUploadError, setJobUploadError] = useState(null)
 
-  const hasResume = resumeText && resumeText.trim().length > 0
+  const hasResume = isHR ? (batchResumes.length > 0 || (resumeText && resumeText.trim().length > 0)) : (resumeText && resumeText.trim().length > 0)
   const hasJob = jobDescriptionText && jobDescriptionText.trim().length > 0
 
   const handleClick = () => {
@@ -132,13 +134,13 @@ export default function UploadSection({
                 <div className="flex flex-col items-center justify-center gap-1">
                   {resumeUploading ? (
                     <FiLoader className="w-8 h-8 text-[#bc13fe] animate-spin" />
-                  ) : resumeFileName && hasResume ? (
+                  ) : (resumeFileName || batchResumes.length > 0) && hasResume ? (
                     <FiCheckCircle className="w-8 h-8 text-green-400" />
                   ) : (
                     <FiUpload className="w-8 h-8 text-[#bc13fe] mb-1" />
                   )}
                   <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                    {resumeUploading ? 'Extracting...' : resumeFileName ? resumeFileName : 'Inject Resume Data'}
+                    {resumeUploading ? 'Extracting...' : (resumeFileName && !isHR) ? resumeFileName : isHR && batchResumes.length > 0 ? `${batchResumes.length} Resumes Ready` : 'Inject Resume Data'}
                   </span>
                   <span className="text-[9px] text-[#bc13fe]/60 font-medium">PDF • TXT</span>
                 </div>
@@ -159,6 +161,37 @@ export default function UploadSection({
                 )}
               </AnimatePresence>
             </div>
+
+            {/* ── Multi-Resume List (HR Only) ── */}
+            {isHR && batchResumes.length > 0 && (
+              <div className="mb-6 space-y-2 max-h-40 overflow-y-auto no-scrollbar p-2 bg-black/20 rounded-xl border border-white/5">
+                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Processed Resumes ({batchResumes.length})</p>
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {batchResumes.map((res, idx) => (
+                      <motion.div 
+                        key={res.name + idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FiFileText className="text-[#bc13fe] shrink-0" />
+                          <span className="text-[10px] font-bold text-gray-300 truncate tracking-tight">{res.name}</span>
+                        </div>
+                        <button 
+                          onClick={() => onRemoveResume(res.name)}
+                          className="text-[9px] font-black text-gray-600 hover:text-red-400 uppercase tracking-widest transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          Remove
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
 
             <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 ml-1">Manual Data Entry</p>
             <textarea
@@ -186,7 +219,7 @@ export default function UploadSection({
           </div>
 
           <div className="text-right text-[10px] font-black text-[#bc13fe] uppercase tracking-widest opacity-40">
-            {resumeText.length} Bytes Detected
+            {isHR ? `${batchResumes.length} Files` : `${resumeText.length} Bytes`} Detected
           </div>
         </motion.div>
 
