@@ -1,7 +1,9 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+import logging
 
 from app.models.user import UserCreate, UserLogin, UserResponse, Token
 from app.services.auth_service import auth_service, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -9,22 +11,35 @@ from app.services.supabase_service import supabase_service
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login/token")
+logger = logging.getLogger(__name__)
 
-@router.post("/register", response_model=Token)
-async def register(user: UserCreate):
+@router.post("/register")
+async def register(request: Request, user: UserCreate):
     """
     Register a new user (HR or USER).
     Returns a JWT access token immediately after registration.
     """
-    db_user = auth_service.register_user(user)
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth_service.create_access_token(
-        data={"sub": db_user.email, "role": db_user.role}, 
-        expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer", "role": db_user.role}
+    try:
+        logger.info(f"Registering user: {user.email}")
+        db_user = auth_service.register_user(user)
+        
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = auth_service.create_access_token(
+            data={"sub": db_user.email, "role": db_user.role}, 
+            expires_delta=access_token_expires
+        )
+        
+        return {"access_token": access_token, "token_type": "bearer", "role": db_user.role}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"REGISTRATION ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}"
+        )
 
 
 @router.post("/login", response_model=Token)

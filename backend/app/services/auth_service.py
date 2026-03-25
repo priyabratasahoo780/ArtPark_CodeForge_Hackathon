@@ -14,11 +14,8 @@ SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "super_secret_key_change_me_in_pro
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
-# Use bcrypt if available, fall back to pbkdf2_sha256
-try:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-except Exception:
-    pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# Use pbkdf2_sha256 for maximum compatibility across environments
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login/token", auto_error=False)
 

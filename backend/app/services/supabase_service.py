@@ -19,12 +19,26 @@ class SupabaseService:
             return None
 
     def create_user(self, email: str, role: str = "USER", hashed_password: Optional[str] = None) -> Dict:
+        logger.info(f"Supabase: Creating user {email} with role {role}")
         try:
             data = {"email": email.lower(), "role": role, "hashed_password": hashed_password}
             response = self.client.table("users").insert(data).execute()
-            return response.data[0] if response.data else {}
+            
+            # In some versions of supabase-py, errors are raised, in others they are in response.error
+            if hasattr(response, 'error') and response.error:
+                 logger.error(f"Supabase Insert Error: {response.error}")
+                 raise Exception(f"Supabase Error: {response.error}")
+            
+            if not response.data:
+                logger.error(f"Supabase Insert yielded no data for {email}")
+                raise Exception("Registration failed: No data returned from database")
+                
+            logger.info(f"Supabase: User created successfully: {email}")
+            return response.data[0]
         except Exception as e:
-            logger.error(f"Error creating user: {str(e)}")
+            logger.error(f"Supabase Create User Exception: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
             raise e
 
     def save_resume(self, user_id: str, resume_text: str) -> Dict:
