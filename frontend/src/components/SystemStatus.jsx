@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiActivity, FiServer, FiShield, FiCheckCircle, FiClock, FiCpu } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://artpark-codeforge-hackathon.onrender.com'
 
 const SystemStatus = () => {
   const [report, setReport] = useState(null)

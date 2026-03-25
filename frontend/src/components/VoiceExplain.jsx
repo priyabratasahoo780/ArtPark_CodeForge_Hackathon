@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiMic, FiSquare, FiChevronDown, FiCloud, FiActivity } from 'react-icons/fi'
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://artpark-codeforge-hackathon.onrender.com'
 
 export default function VoiceExplain({ reasoningTrace, gapStats, auth }) {
   const [mode, setMode] = useState('idle') // idle | speaking | loading | playing | error

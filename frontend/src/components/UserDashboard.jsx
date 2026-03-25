@@ -10,7 +10,7 @@ import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
 
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://artpark-codeforge-hackathon.onrender.com'
 
 const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const [loading, setLoading] = useState(false)

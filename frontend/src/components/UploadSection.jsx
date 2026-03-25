@@ -3,7 +3,7 @@ import { FiUpload, FiFileText, FiBriefcase, FiZap, FiTarget, FiAlertCircle, FiLo
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://artpark-codeforge-hackathon.onrender.com'
 
 export default function UploadSection({
   resumeText,

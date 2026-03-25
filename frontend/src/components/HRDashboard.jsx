@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiUsers, FiBarChart2, FiClock, FiCheckCircle, FiPlus, FiTrash2, FiSearch } from 'react-icons/fi'
 import AnalyticsPanel from './AnalyticsPanel'
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : 'https://artpark-codeforge-hackathon.onrender.com'
 
 const HRDashboard = ({ auth }) => {
   const [metrics, setMetrics] = useState(null)
