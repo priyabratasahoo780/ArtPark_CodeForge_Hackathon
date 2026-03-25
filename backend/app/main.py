@@ -138,53 +138,77 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         manager.disconnect(websocket, session_id)
 
 # ==================== Initialize Services (must be before route handlers) ====================
-skill_extractor = SkillExtractor()
-gap_analyzer = SkillGapAnalyzer()
-learning_path_generator = LearningPathGenerator()
-dependency_resolver = DependencyResolver()
-voice_explainer = VoiceExplainer("app/datasets/translations.json")
-time_analytics = TimeAnalytics()
-feedback_generator = ResumeFeedbackGenerator()
-domain_classifier = DomainClassifier()
-learning_style_analyzer = LearningStyleAnalyzer()
-burnout_detector = BurnoutDetector()
-career_path_predictor = CareerPathPredictor()
-market_trend_analyzer = MarketTrendAnalyzer()
-learning_efficiency_calculator = LearningEfficiencyCalculator()
-doubt_detector = DoubtDetector()
-skill_decay_detector = SkillDecayDetector()
-resume_updater = ResumeUpdater()
-lms_integrator = LMSIntegrator()
-interview_simulator = InterviewSimulator()
-career_predictor = CareerPredictor()
-audio_briefing = AudioBriefingGenerator("app/datasets/translations.json")
-decay_service = DecayService()
-benchmarking_service = BenchmarkingService()
-pair_programmer = PairProgrammerService()
-flashcard_generator = FlashcardGenerator()
-ecosystem_service = EcosystemService()
-portfolio_service = PortfolioService()
-future_projections = FutureProjectionService()
-validation_service = ValidationService()
-salary_predictor = SalaryPredictorService()
-job_matcher = JobMatcherService()
-streak_service = StreakService()
-resume_scorer = ResumeScoreService()
-role_matcher = RoleMatcher()
+# ==================== Lazy Service Initialization ====================
+class LazyProxy:
+    def __init__(self, factory):
+        self._factory = factory
+        self._instance = None
 
-vision_service = VisionService()
-galaxy_service = SkillGalaxyService()
-pitch_service = PitchGeneratorService()
-code_radar = CodeRadarService()
-system_service = SystemService()
-squad_service = SquadService()
-packet_service = PacketService()
+    def _get_instance(self):
+        if self._instance is None:
+            self._instance = self._factory()
+        return self._instance
 
-resume_benchmarker = ResumeBenchmarker(
-    skill_extractor=skill_extractor,
-    gap_analyzer=gap_analyzer,
-    role_matcher=role_matcher,
-)
+    def __getattr__(self, name):
+        return getattr(self._get_instance(), name)
+
+    def __getitem__(self, key):
+        return self._get_instance()[key]
+
+    def __iter__(self):
+        return iter(self._get_instance())
+
+    def __len__(self):
+        return len(self._get_instance())
+
+# Initialize Services Lazily to speed up cold starts
+skill_extractor = LazyProxy(lambda: SkillExtractor())
+gap_analyzer = LazyProxy(lambda: SkillGapAnalyzer())
+learning_path_generator = LazyProxy(lambda: LearningPathGenerator())
+dependency_resolver = LazyProxy(lambda: DependencyResolver())
+voice_explainer = LazyProxy(lambda: VoiceExplainer("app/datasets/translations.json"))
+time_analytics = LazyProxy(lambda: TimeAnalytics())
+feedback_generator = LazyProxy(lambda: ResumeFeedbackGenerator())
+domain_classifier = LazyProxy(lambda: DomainClassifier())
+learning_style_analyzer = LazyProxy(lambda: LearningStyleAnalyzer())
+burnout_detector = LazyProxy(lambda: BurnoutDetector())
+career_path_predictor = LazyProxy(lambda: CareerPathPredictor())
+market_trend_analyzer = LazyProxy(lambda: MarketTrendAnalyzer())
+learning_efficiency_calculator = LazyProxy(lambda: LearningEfficiencyCalculator())
+doubt_detector = LazyProxy(lambda: DoubtDetector())
+skill_decay_detector = LazyProxy(lambda: SkillDecayDetector())
+resume_updater = LazyProxy(lambda: ResumeUpdater())
+lms_integrator = LazyProxy(lambda: LMSIntegrator())
+interview_simulator = LazyProxy(lambda: InterviewSimulator())
+career_predictor = LazyProxy(lambda: CareerPredictor())
+audio_briefing = LazyProxy(lambda: AudioBriefingGenerator("app/datasets/translations.json"))
+decay_service = LazyProxy(lambda: DecayService())
+benchmarking_service = LazyProxy(lambda: BenchmarkingService())
+pair_programmer = LazyProxy(lambda: PairProgrammerService())
+flashcard_generator = LazyProxy(lambda: FlashcardGenerator())
+ecosystem_service = LazyProxy(lambda: EcosystemService())
+portfolio_service = LazyProxy(lambda: PortfolioService())
+future_projections = LazyProxy(lambda: FutureProjectionService())
+validation_service = LazyProxy(lambda: ValidationService())
+salary_predictor = LazyProxy(lambda: SalaryPredictorService())
+job_matcher = LazyProxy(lambda: JobMatcherService())
+streak_service = LazyProxy(lambda: StreakService())
+resume_scorer = LazyProxy(lambda: ResumeScoreService())
+role_matcher = LazyProxy(lambda: RoleMatcher())
+
+vision_service = LazyProxy(lambda: VisionService())
+galaxy_service = LazyProxy(lambda: SkillGalaxyService())
+pitch_service = LazyProxy(lambda: PitchGeneratorService())
+code_radar = LazyProxy(lambda: CodeRadarService())
+system_service = LazyProxy(lambda: SystemService())
+squad_service = LazyProxy(lambda: SquadService())
+packet_service = LazyProxy(lambda: PacketService())
+
+resume_benchmarker = LazyProxy(lambda: ResumeBenchmarker(
+    skill_extractor=skill_extractor._get_instance(),
+    gap_analyzer=gap_analyzer._get_instance(),
+    role_matcher=role_matcher._get_instance(),
+))
 
 # ==================== Pydantic Models ====================
 

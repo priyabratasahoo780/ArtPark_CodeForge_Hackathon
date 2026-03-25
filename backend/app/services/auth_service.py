@@ -17,7 +17,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Use bcrypt if available, fall back to pbkdf2_sha256
 try:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    pwd_context.hash("test")  # Verify bcrypt works
 except Exception:
     pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 

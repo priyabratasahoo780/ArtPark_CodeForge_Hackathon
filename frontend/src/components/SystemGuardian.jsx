@@ -11,7 +11,7 @@ const SystemGuardian = () => {
     const fetchHealth = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('https://artpark-codeforge-hackathon.onrender.com/system/health', {
+        const response = await axios.get('http://localhost:8000/system/health', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHealth(response.data);

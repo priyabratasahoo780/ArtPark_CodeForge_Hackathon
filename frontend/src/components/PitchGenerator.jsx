@@ -13,7 +13,7 @@ const PitchGenerator = ({ masteredSkills }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://artpark-codeforge-hackathon.onrender.com/pitch/generate', {
+      const response = await axios.post('http://localhost:8000/pitch/generate', {
         skills: masteredSkills,
         job_target: target
       }, {

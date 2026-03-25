@@ -12,7 +12,7 @@ const CodeRadar = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://artpark-codeforge-hackathon.onrender.com/code/analyze', {
+      const response = await axios.post('http://localhost:8000/code/analyze', {
         code: code,
         language: "python"
       }, {

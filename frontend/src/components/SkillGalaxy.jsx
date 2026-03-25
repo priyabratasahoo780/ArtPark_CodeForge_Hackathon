@@ -10,7 +10,7 @@ const SkillGalaxy = ({ masteredSkills }) => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`https://artpark-codeforge-hackathon.onrender.com/galaxy/data?skills=${masteredSkills.join(',')}`, {
+        const response = await axios.get(`http://localhost:8000/galaxy/data?skills=${masteredSkills.join(',')}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setData(response.data);

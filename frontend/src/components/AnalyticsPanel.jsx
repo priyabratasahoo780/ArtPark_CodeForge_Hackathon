@@ -7,7 +7,7 @@ import { FiTrendingUp, FiPieChart, FiBarChart2, FiClock, FiActivity, FiZap } fro
 import axios from 'axios'
 import { motion } from 'framer-motion'
 
-const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
+const API_BASE_URL = 'http://localhost:8000'
 
 export default function AnalyticsPanel({ auth }) {
   const [data, setData] = useState(null)

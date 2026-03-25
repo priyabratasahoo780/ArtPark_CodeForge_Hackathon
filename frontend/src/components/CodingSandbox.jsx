@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiCode, FiZap, FiPlay, FiCheckCircle, FiInfo, FiChevronRight } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
+const API_BASE_URL = 'http://localhost:8000'
 
 const CodingSandbox = ({ activeSkill, auth }) => {
   const [code, setCode] = useState(`// Master ${activeSkill || 'the concepts'}\n\nfunction solution() {\n  // Your implementation here\n  \n}`)

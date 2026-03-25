@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiDollarSign, FiTrendingUp, FiTarget, FiInfo } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
+const API_BASE_URL = 'http://localhost:8000'
 
 const SalaryPredictor = ({ role, skills }) => {
   const [data, setData] = useState(null)

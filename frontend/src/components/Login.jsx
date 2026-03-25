@@ -3,7 +3,7 @@ import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiMail as MailIcon, FiLock as LockIcon, FiUser as UserIcon, FiBriefcase as WorkIcon, FiZap as ZapIcon, FiAlertCircle as AlertIcon, FiCheckCircle as CheckIcon, FiArrowLeft as BackIcon, FiShield as ShieldIcon } from 'react-icons/fi'
 
-const API_BASE_URL = 'https://artpark-codeforge-hackathon.onrender.com'
+const API_BASE_URL = 'http://localhost:8000'
 
 const Login = ({ onLogin }) => {
   const [mode, setMode] = useState('login') // 'login' | 'register' | 'forgot'
@@ -374,7 +374,10 @@ const Login = ({ onLogin }) => {
                     className="w-full mt-6 bg-gradient-to-r from-[#bc13fe] to-[#8a2be2] hover:from-[#d034ff] hover:to-[#9c3df3] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(188,19,254,0.3)] transition-all uppercase tracking-widest text-xs disabled:opacity-50 flex justify-center items-center"
                   >
                     {loading ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span className="text-[8px] font-bold animate-pulse">Establishing Secure Neural Link...</span>
+                      </div>
                     ) : (
                       isRegistering ? 'Initialize Override' : 'Access Terminal'
                     )}
