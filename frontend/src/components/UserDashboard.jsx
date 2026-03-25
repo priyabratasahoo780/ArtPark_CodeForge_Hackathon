@@ -10,7 +10,7 @@ import MarketInsights from './MarketInsights'
 import SkillHeatmap from './SkillHeatmap'
 
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const [loading, setLoading] = useState(false)
@@ -88,7 +88,7 @@ const UserDashboard = ({ auth, analysisResults, onUpdateResults }) => {
   const handleDownloadResume = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch('http://localhost:8000/resume/generate', {
+      const response = await fetch('http://127.0.0.1:8000/resume/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

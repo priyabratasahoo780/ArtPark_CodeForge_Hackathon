@@ -12,7 +12,7 @@ const CodeRadar = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:8000/code/analyze', {
+      const response = await axios.post('http://127.0.0.1:8000/code/analyze', {
         code: code,
         language: "python"
       }, {

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiZap, FiAward, FiCalendar, FiStar, FiFlag, FiTrendingUp } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const DailyStreak = ({ completedCount }) => {
   const [data, setData] = useState(null)

@@ -56,7 +56,7 @@ const TabFallback = () => (
   </div>
 )
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const NavTab = ({ active, onClick, icon, label, color = '#bc13fe' }) => (
   <button

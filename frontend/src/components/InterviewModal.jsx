@@ -17,7 +17,7 @@ export default function InterviewModal({ masteredSkills, auth, onClose }) {
       const config = {
         headers: { Authorization: `Bearer ${auth.token}` }
       }
-      const response = await axios.post('http://localhost:8000/interview/start', {
+      const response = await axios.post('http://127.0.0.1:8000/interview/start', {
         mastered_skills: masteredSkills
       }, config)
       setQuestions(response.data.questions || [])
@@ -35,7 +35,7 @@ export default function InterviewModal({ masteredSkills, auth, onClose }) {
       const config = {
         headers: { Authorization: `Bearer ${auth.token}` }
       }
-      const response = await axios.post('http://localhost:8000/interview/grade', {
+      const response = await axios.post('http://127.0.0.1:8000/interview/grade', {
         question: questions[activeQuestionIdx].text,
         answer: answer
       }, config)

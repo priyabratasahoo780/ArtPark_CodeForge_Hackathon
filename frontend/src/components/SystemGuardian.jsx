@@ -11,7 +11,7 @@ const SystemGuardian = () => {
     const fetchHealth = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8000/system/health', {
+        const response = await axios.get('http://127.0.0.1:8000/system/health', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHealth(response.data);

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { FiActivity, FiServer, FiShield, FiCheckCircle, FiClock, FiCpu } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const SystemStatus = () => {
   const [report, setReport] = useState(null)

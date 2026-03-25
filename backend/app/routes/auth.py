@@ -48,8 +48,25 @@ async def login(credentials: UserLogin):
     Standard JSON login endpoint matching the prompt constraints.
     Returns { token, role }
     """
+    import time
+    t0 = time.time()
     user = auth_service.get_user_by_email(credentials.email)
-    if not user or not auth_service.verify_password(credentials.password, user.hashed_password):
+    t1 = time.time()
+    print(f"get_user_by_email took: {t1 - t0:.2f}s")
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    t2 = time.time()
+    is_valid = auth_service.verify_password(credentials.password, user.hashed_password)
+    t3 = time.time()
+    print(f"verify_password took: {t3 - t2:.2f}s")
+    
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -61,6 +78,8 @@ async def login(credentials: UserLogin):
         data={"sub": user.email, "role": user.role}, 
         expires_delta=access_token_expires
     )
+    t4 = time.time()
+    print(f"create_access_token took: {t4 - t3:.2f}s")
     
     return {"access_token": access_token, "token_type": "bearer", "role": user.role}
 

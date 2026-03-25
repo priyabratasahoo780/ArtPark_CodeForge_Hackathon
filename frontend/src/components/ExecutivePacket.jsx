@@ -11,7 +11,7 @@ const ExecutivePacket = ({ resumeData, masteredSkills, gapStats }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:8000/packet/generate', {
+      const response = await axios.post('http://127.0.0.1:8000/packet/generate', {
         resume: resumeData,
         skills: masteredSkills,
         gap_stats: gapStats

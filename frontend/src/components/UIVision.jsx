@@ -19,7 +19,7 @@ const UIVision = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:8000/vision/process', 
+      const response = await axios.post('http://127.0.0.1:8000/vision/process', 
         { image_data: "base64_placeholder" },
         { headers: { Authorization: `Bearer ${token}` } }
       );

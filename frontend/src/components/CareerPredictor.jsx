@@ -13,7 +13,7 @@ export default function CareerPredictor({ roadmapData, targetRole, auth }) {
       const config = {
         headers: { Authorization: `Bearer ${auth.token}` }
       }
-      const response = await axios.post('http://localhost:8000/career/predict', {
+      const response = await axios.post('http://127.0.0.1:8000/career/predict', {
         roadmap_data: roadmapData,
         target_role: targetRole
       }, config)

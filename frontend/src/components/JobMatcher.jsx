@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiBriefcase, FiMapPin, FiExternalLink, FiSearch, FiCheckCircle, FiXCircle } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const JobMatcher = ({ skills }) => {
   const [data, setData] = useState(null)

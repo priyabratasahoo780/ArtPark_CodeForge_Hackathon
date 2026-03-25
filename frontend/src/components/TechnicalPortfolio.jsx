@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiAward, FiCode, FiZap, FiExternalLink, FiDownload, FiShield, FiTrendingUp } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://127.0.0.1:8000'
 
 const TechnicalPortfolio = ({ user_name, mastered_skills, target_role }) => {
   const [portfolio, setPortfolio] = useState(null)

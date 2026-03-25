@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FiX, FiSend, FiCpu, FiExternalLink, FiHelpCircle } from 'react-icons/fi'
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 export default function DoubtModal({ skillName, isOpen, onClose }) {
   const [question, setQuestion] = useState('')
